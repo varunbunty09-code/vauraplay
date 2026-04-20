@@ -119,13 +119,8 @@ const Watch = () => {
     <div className="watch-page">
       <div className="player-header">
         <button className="back-btn" onClick={() => navigate(-1)}>
-          <ArrowLeft size={24} /> Back
+          <ArrowLeft size={22} />
         </button>
-        <div className="playing-info">
-            <h3 className="title-text">{contentTitle}</h3>
-            {type === 'tv' && <span className="episode-text">S{season} : E{episode}</span>}
-        </div>
-        <div className="header-right"></div>
       </div>
 
       <div className="player-container">
@@ -166,62 +161,28 @@ const Watch = () => {
         }
         
         .player-header {
-          height: 60px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 2rem;
-          color: white;
-          z-index: 10;
-          background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
           position: absolute;
           top: 0;
           left: 0;
-          right: 0;
+          z-index: 10;
+          padding: 1rem 1.5rem;
         }
         
         .back-btn {
           background: none;
           border: none;
-          color: white;
+          color: rgba(255,255,255,0.7);
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          justify-content: center;
           cursor: pointer;
-          font-weight: 600;
-          font-size: 0.95rem;
           transition: 0.2s;
-          z-index: 20;
+          padding: 0;
         }
         
         .back-btn:hover {
-          color: var(--primary);
-        }
-        
-        .playing-info {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-        
-        .title-text {
-          font-size: 1.1rem;
-          font-weight: 600;
           color: white;
-          margin: 0;
         }
-        
-        .episode-text {
-          font-size: 0.8rem;
-          color: var(--primary);
-          font-weight: 500;
-          margin-top: 2px;
-        }
-
-        .header-right { width: 80px; }
         
         .player-container {
           flex: 1;
