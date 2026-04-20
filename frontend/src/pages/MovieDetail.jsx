@@ -53,11 +53,14 @@ const MovieDetail = () => {
   };
 
   const toggleWatchlist = async () => {
+    // Optimistic Update
+    const previousState = inWatchlist;
+    setInWatchlist(!previousState);
+
     try {
-      if (inWatchlist) {
+      if (previousState) {
         const { data } = await axios.get(`${API_URL}/watchlist/check/${id}/movie`);
         await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
-        setInWatchlist(false);
         toast.success('Removed from watchlist');
       } else {
         await axios.post(`${API_URL}/watchlist`, {
@@ -65,11 +68,12 @@ const MovieDetail = () => {
           posterPath: movie.poster_path, backdropPath: movie.backdrop_path,
           overview: movie.overview, voteAverage: movie.vote_average
         });
-        setInWatchlist(true);
         toast.success('Added to watchlist');
       }
     } catch (err) {
-      toast.error('Watchlist error');
+      // Rollback on error
+      setInWatchlist(previousState);
+      toast.error('Watchlist Error');
     }
   };
 

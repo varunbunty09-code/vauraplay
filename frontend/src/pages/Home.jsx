@@ -18,7 +18,6 @@ const Home = () => {
   const [heroMovie, setHeroMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [heroInWatchlist, setHeroInWatchlist] = useState(false);
-  const [addingHero, setAddingHero] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,13 +56,16 @@ const Home = () => {
   }, []);
 
   const toggleHeroWatchlist = async () => {
-    if (!heroMovie || addingHero) return;
-    setAddingHero(true);
+    if (!heroMovie) return;
+    
+    // Optimistic Update
+    const previousState = heroInWatchlist;
+    setHeroInWatchlist(!previousState);
+    
     try {
-      if (heroInWatchlist) {
+      if (previousState) {
         const { data } = await axios.get(`${API_URL}/watchlist/check/${heroMovie.id}/movie`);
         await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
-        setHeroInWatchlist(false);
         toast.success('Removed from watchlist');
       } else {
         await axios.post(`${API_URL}/watchlist`, {
@@ -74,13 +76,12 @@ const Home = () => {
           overview: heroMovie.overview,
           voteAverage: heroMovie.vote_average
         });
-        setHeroInWatchlist(true);
         toast.success('Added to watchlist');
       }
     } catch (err) {
-      toast.error('Watchlist error');
-    } finally {
-      setAddingHero(false);
+      // Rollback on error
+      setHeroInWatchlist(previousState);
+      toast.error('Watchlist Error');
     }
   };
 
@@ -135,7 +136,6 @@ const Home = () => {
               <button
                 className={`btn-outline add-list ${heroInWatchlist ? 'added' : ''}`}
                 onClick={toggleHeroWatchlist}
-                disabled={addingHero}
               >
                 <AnimatePresence mode="wait">
                   {heroInWatchlist ? (

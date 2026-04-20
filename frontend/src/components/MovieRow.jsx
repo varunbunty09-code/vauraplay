@@ -11,7 +11,6 @@ const MovieCard = ({ item, type }) => {
   const navigate = useNavigate();
   const [inWatchlist, setInWatchlist] = useState(false);
   const [checked, setChecked] = useState(false);
-  const [busy, setBusy] = useState(false);
 
   const mediaType = item.media_type || type;
   const title = item.title || item.name;
@@ -29,13 +28,15 @@ const MovieCard = ({ item, type }) => {
   const toggleWatchlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (busy) return;
-    setBusy(true);
+    
+    // Optimistic Update
+    const previousState = inWatchlist;
+    setInWatchlist(!previousState);
+
     try {
-      if (inWatchlist) {
+      if (previousState) {
         const { data } = await axios.get(`${API_URL}/watchlist/check/${item.id}/${mediaType}`);
         await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
-        setInWatchlist(false);
         toast.success('Removed from watchlist');
       } else {
         await axios.post(`${API_URL}/watchlist`, {
@@ -45,13 +46,12 @@ const MovieCard = ({ item, type }) => {
           overview: item.overview,
           voteAverage: item.vote_average
         });
-        setInWatchlist(true);
         toast.success('Added to watchlist');
       }
     } catch (err) {
-      toast.error('Watchlist error');
-    } finally {
-      setBusy(false);
+      // Rollback on error
+      setInWatchlist(previousState);
+      toast.error('Watchlist Error');
     }
   };
 
