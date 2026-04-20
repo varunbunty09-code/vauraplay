@@ -28,6 +28,7 @@ const TVDetail = () => {
     const [selectedLang, setSelectedLang] = useState('en');
     const [contentRating, setContentRating] = useState('');
     const [inWatchlist, setInWatchlist] = useState(false);
+    const [recommendations, setRecommendations] = useState([]);
     const [showRating, setShowRating] = useState(false);
     const [userRating, setUserRating] = useState(null);
     const [ratingFeedback, setRatingFeedback] = useState('');
@@ -57,6 +58,10 @@ const TVDetail = () => {
                     const { data: wlData } = await axios.get(`${API_URL}/watchlist/check/${data.id}/tv`);
                     setInWatchlist(wlData.inWatchlist);
                 } catch (e) {}
+
+                // Fetch Recommendations
+                const recs = await tmdbService.getSimilar(id, 'tv');
+                setRecommendations(recs);
             } catch (err) {
                 toast.error('Failed to load series details');
             } finally {
@@ -147,9 +152,7 @@ const TVDetail = () => {
                 <div className="backdrop-wrapper">
                     <img src={`https://image.tmdb.org/t/p/original${show.backdrop_path}`} alt={show.name} />
                     <div className="detail-gradient"></div>
-                </div>
-
-                <div className="container detail-content">
+                </div>                <div className="container detail-content">
                     <div className="detail-main-split">
                         <div className="detail-left-content">
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -325,6 +328,12 @@ const TVDetail = () => {
                 )}
             </div>
 
+            {recommendations.length > 0 && (
+                <div className="container similar-section">
+                    <MovieRow title="More Like This" movies={recommendations} type="tv" />
+                </div>
+            )}
+
             <AnimatePresence>
               {showShare && (
                 <div className="share-modal-overlay" onClick={() => setShowShare(false)}>
@@ -428,7 +437,7 @@ const TVDetail = () => {
 
             <style>{`
                 .tv .detail-hero { height: auto; min-height: 85vh; display: flex; align-items: flex-end; padding: 6rem 0; position: relative; }
-                .backdrop-wrapper { position: absolute; inset: 0; z-index: 0; }
+                .backdrop-wrapper { position: absolute; inset: 0; z-index: 0; }set: 0; z-index: 0; }
                 .backdrop-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
                 .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0c 18%, transparent 95%), linear-gradient(to right, #0a0a0c 15%, transparent 85%); }
                 .detail-content { position: relative; z-index: 10; }

@@ -136,7 +136,7 @@ const MovieDetail = () => {
 
                 <h1 className="movie-hero-title">{movie.title}</h1>
                 
-                <p className="overview-premium">"{movie.tagline}"</p>
+                {movie.tagline && <p className="overview-premium">"{movie.tagline}"</p>}
                 <p className="overview-main">{movie.overview}</p>
 
                 {/* Language Selector */}
@@ -346,10 +346,10 @@ const MovieDetail = () => {
 
       <style>{`
         .detail-page { padding-bottom: 5rem; }
-        .detail-hero { height: 80vh; position: relative; display: flex; align-items: flex-end; padding-bottom: 4rem; }
+        .detail-hero { height: auto; min-height: 85vh; display: flex; align-items: flex-end; padding: 6rem 0; position: relative; }
         .backdrop-wrapper { position: absolute; inset: 0; z-index: 0; }
         .backdrop-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0c 5%, transparent 60%), linear-gradient(to right, #0a0a0c 10%, transparent 80%); }
+        .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0c 18%, transparent 95%), linear-gradient(to right, #0a0a0c 15%, transparent 85%); }
         .detail-content { position: relative; z-index: 10; display: flex; gap: 3rem; align-items: flex-end; }
         .detail-poster { width: 300px; aspect-ratio: 2/3; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid var(--border-light); }
         .detail-poster img { width: 100%; height: 100%; object-fit: cover; }
