@@ -180,3 +180,16 @@ exports.deleteAccount = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// @desc    Get activity logs
+// @route   GET /api/users/activity
+exports.getActivity = async (req, res) => {
+  try {
+    const activity = await ActivityLog.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .limit(50);
+    res.json({ activity });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};

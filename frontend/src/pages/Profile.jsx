@@ -1,23 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Camera, Lock, Bell, Palette, Settings, History, Trash2, LogOut, Loader2, Bookmark, ShieldCheck, Mail, X, Check, Dices, Sparkles } from 'lucide-react';
+import { User, Camera, Lock, Bell, Palette, Settings, History, Trash2, LogOut, Loader2, Bookmark, ShieldCheck, Mail, X, Check, Dices, Sparkles, PlayCircle } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const Profile = () => {
   const { user, setUser, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('general');
   const [watchlist, setWatchlist] = useState([]);
+  const [activityLogs, setActivityLogs] = useState([]);
   
   // OTP States
   const [showOtpModal, setShowOtpModal] = useState(false);
-  const [otpPurpose, setOtpPurpose] = useState(''); // 'email' or 'delete'
+  const [otpPurpose, setOtpPurpose] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [deleteReason, setDeleteReason] = useState('');
@@ -45,18 +48,51 @@ const Profile = () => {
   });
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab && ['general', 'watchlist', 'activity', 'preferences', 'security'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [location]);
+
+  useEffect(() => {
     if (activeTab === 'watchlist') fetchWatchlist();
+    if (activeTab === 'activity') fetchActivityLogs();
   }, [activeTab]);
 
   const fetchWatchlist = async () => {
     setLoading(true);
     try {
       const { data } = await axios.get(`${API_URL}/watchlist`);
-      setWatchlist(data);
+      setWatchlist(data.watchlist || []);
     } catch (err) {
       toast.error('Failed to load watchlist');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchActivityLogs = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.get(`${API_URL}/users/activity`);
+      setActivityLogs(data.activity || []);
+    } catch (err) {
+      toast.error('Failed to load activity logs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeFromWatchlist = async (e, itemId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await axios.delete(`${API_URL}/watchlist/${itemId}`);
+      setWatchlist(prev => prev.filter(item => item._id !== itemId));
+      toast.success('Removed from watchlist');
+    } catch (err) {
+      toast.error('Failed to remove item');
     }
   };
 
@@ -224,6 +260,9 @@ const Profile = () => {
             <button className={activeTab === 'watchlist' ? 'active' : ''} onClick={() => setActiveTab('watchlist')}>
               <Bookmark size={18} /> Watchlist
             </button>
+            <button className={activeTab === 'activity' ? 'active' : ''} onClick={() => setActiveTab('activity')}>
+              <History size={18} /> Activity
+            </button>
             <button className={activeTab === 'preferences' ? 'active' : ''} onClick={() => setActiveTab('preferences')}>
               <Palette size={18} /> Preferences
             </button>
@@ -269,13 +308,19 @@ const Profile = () => {
                  {loading && watchlist.length === 0 ? <Loader2 className="spin" /> : (
                    <div className="watchlist-grid">
                       {watchlist.length > 0 ? watchlist.map(item => (
-                        <Link to={`/${item.mediaType}/${item.tmdbId}`} key={item._id} className="watch-card glass">
-                           <img src={`https://image.tmdb.org/t/p/w300${item.posterPath}`} alt={item.title} />
+                        <div key={item._id} className="watch-card glass" onClick={() => navigate(`/${item.mediaType}/${item.tmdbId}`)} style={{cursor:'pointer'}}>
+                           <div className="watch-card-thumb">
+                             <img src={`https://image.tmdb.org/t/p/w300${item.posterPath}`} alt={item.title} />
+                             <div className="watch-card-overlay">
+                               <button className="wc-play" onClick={(e) => { e.stopPropagation(); navigate(`/watch/${item.mediaType}/${item.tmdbId}`); }}><PlayCircle size={36} /></button>
+                               <button className="wc-remove" onClick={(e) => removeFromWatchlist(e, item._id)}><Trash2 size={18} /></button>
+                             </div>
+                           </div>
                            <div className="watch-card-info">
                              <h4>{item.title}</h4>
                              <span className="media-type">{item.mediaType}</span>
                            </div>
-                        </Link>
+                        </div>
                       )) : (
                         <div className="empty-state">
                           <Bookmark size={48} />
@@ -283,6 +328,31 @@ const Profile = () => {
                           <Link to="/browse" className="btn-primary">Browse Content</Link>
                         </div>
                       )}
+                   </div>
+                 )}
+               </motion.section>
+             )}
+
+             {activeTab === 'activity' && (
+               <motion.section key="activity" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                 <h2>Activity Log</h2>
+                 {loading && activityLogs.length === 0 ? <Loader2 className="spin" /> : (
+                   <div className="activity-list">
+                     {activityLogs.length > 0 ? activityLogs.map((log, i) => (
+                       <div key={i} className="activity-item glass">
+                         <History size={18} />
+                         <div className="activity-info">
+                           <p className="activity-action">{log.action}</p>
+                           <p className="activity-detail">{log.details || ''}</p>
+                           <span className="activity-time">{new Date(log.createdAt).toLocaleString()}</span>
+                         </div>
+                       </div>
+                     )) : (
+                       <div className="empty-state">
+                         <History size={48} />
+                         <p>No activity yet.</p>
+                       </div>
+                     )}
                    </div>
                  )}
                </motion.section>
@@ -580,6 +650,39 @@ const Profile = () => {
         .avatar-preview-area { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
         .avatar-preview-img { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); background: rgba(255,255,255,0.05); }
         .use-avatar-btn { padding: 0.7rem 2rem; font-size: 0.9rem; }
+
+        /* Watchlist hover overlay */
+        .watch-card-thumb { position: relative; overflow: hidden; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+        .watch-card-thumb img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+        .watch-card-overlay {
+          position: absolute; inset: 0;
+          background: rgba(0,0,0,0.65);
+          display: flex; align-items: center; justify-content: center; gap: 1rem;
+          opacity: 0; transition: opacity 0.3s ease;
+        }
+        .watch-card:hover .watch-card-overlay { opacity: 1; }
+        .wc-play { background: none; border: none; color: white; cursor: pointer; transition: 0.2s; }
+        .wc-play:hover { color: var(--primary); transform: scale(1.15); }
+        .wc-remove {
+          background: rgba(255,255,255,0.1); border: none; color: white;
+          width: 36px; height: 36px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; transition: 0.2s;
+        }
+        .wc-remove:hover { background: var(--accent); }
+
+        /* Activity tab */
+        .activity-list { display: flex; flex-direction: column; gap: 1rem; }
+        .activity-item {
+          display: flex; align-items: flex-start; gap: 1rem;
+          padding: 1rem 1.2rem; border-radius: var(--radius-md);
+          border: 1px solid var(--border-light);
+        }
+        .activity-item svg { color: var(--primary); flex-shrink: 0; margin-top: 3px; }
+        .activity-info { flex: 1; }
+        .activity-action { font-weight: 600; color: white; margin-bottom: 0.2rem; }
+        .activity-detail { font-size: 0.85rem; color: var(--text-dim); }
+        .activity-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; display: block; }
 
         @media (max-width: 900px) {
           .profile-layout { grid-template-columns: 1fr; }

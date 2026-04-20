@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import tmdbService from '../services/tmdbService';
 import MovieRow from '../components/MovieRow';
+import MovieCard from '../components/MovieCard';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MovieRowSkeleton, GridSkeleton } from '../components/skeleton/MovieSkeleton';
@@ -139,20 +140,7 @@ const Browse = () => {
                             </h3>
                             <div className="results-grid">
                                 {items.map(item => (
-                                    <div key={item.id} className="grid-card-wrapper">
-                                        {/* We reuse the movie-card styling from MovieRow by adding a local definition or a component */}
-                                        <div className="movie-card grid-version">
-                                            <Link to={`/${item.media_type || type}/${item.id}`}>
-                                                <div className="card-image">
-                                                    <img src={item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Image'} alt={item.title || item.name} loading="lazy" />
-                                                    <div className="card-overlay">
-                                                        <div className="rating">★ {item.vote_average?.toFixed(1)}</div>
-                                                    </div>
-                                                </div>
-                                                <p className="movie-title">{item.title || item.name}</p>
-                                            </Link>
-                                        </div>
-                                    </div>
+                                    <MovieCard key={item.id} item={item} type={type} />
                                 ))}
                             </div>
                         </div>
@@ -280,21 +268,41 @@ const Browse = () => {
                 .results-title { margin-bottom: 2rem; font-size: 1.5rem; color: var(--text-main); }
                 .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2rem; }
                 
-                .movie-card.grid-version { width: 100%; transition: 0.3s; }
-                .movie-card.grid-version:hover { transform: scale(1.05); z-index: 10; }
-                .movie-card.grid-version .card-image { height: 300px; border-radius: 12px; overflow: hidden; position: relative; background: var(--bg-card); }
-                .movie-card.grid-version .card-image img { width: 100%; height: 100%; object-fit: cover; }
-                .movie-card.grid-version .card-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); opacity: 0; transition: 0.3s; display: flex; align-items: flex-end; padding: 1rem; }
-                .movie-card.grid-version:hover .card-overlay { opacity: 1; }
-                .movie-card.grid-version .rating { color: white; font-weight: 700; font-size: 0.8rem; }
-                .movie-card.grid-version .movie-title { margin-top: 0.8rem; font-size: 0.9rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .browse-movie-card { cursor: pointer; }
+                .browse-movie-card a { text-decoration: none; color: inherit; }
+                .browse-card-image { position: relative; width: 100%; height: 300px; border-radius: var(--radius-md); overflow: hidden; background: var(--bg-card); }
+                .browse-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+                .browse-card-overlay {
+                  position: absolute; inset: 0;
+                  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 40%, transparent 100%);
+                  opacity: 0; transition: opacity 0.3s ease;
+                  display: flex; flex-direction: column; justify-content: space-between; padding: 0.8rem;
+                }
+                .browse-movie-card:hover .browse-card-overlay { opacity: 1; }
+                .browse-overlay-top { display: flex; justify-content: flex-end; }
+                .browse-rating { font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 0.3rem; color: white; background: rgba(0,0,0,0.5); padding: 0.25rem 0.6rem; border-radius: 20px; }
+                .browse-overlay-actions { display: flex; gap: 0.5rem; justify-content: center; }
+                .browse-action-btn {
+                  width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.5);
+                  background: rgba(0,0,0,0.6); color: white; cursor: pointer;
+                  display: flex; align-items: center; justify-content: center;
+                  transition: all 0.25s ease; backdrop-filter: blur(4px);
+                }
+                .browse-action-btn span { display: flex; align-items: center; justify-content: center; }
+                .browse-action-btn:hover { transform: scale(1.15); }
+                .browse-play-btn:hover { background: var(--primary); border-color: var(--primary); color: black; }
+                .browse-wl-btn.in-list { border-color: var(--primary); color: var(--primary); background: rgba(13,202,240,0.2); }
+                .browse-wl-btn:hover { border-color: var(--primary); }
+                .browse-card-title { margin-top: 0.8rem; font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-dim); }
 
                 .loader-container { height: 400px; }
                 .no-results { padding: 5rem 0; }
                 
                 @media (max-width: 768px) {
                     .results-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
-                    .movie-card.grid-version .card-image { height: 210px; }
+                    .browse-card-image { height: 210px; }
+                    .browse-card-overlay { opacity: 1; }
+                    .browse-action-btn { width: 30px; height: 30px; }
                 }
                 
                 @media (max-width: 900px) {

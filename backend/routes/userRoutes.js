@@ -8,6 +8,7 @@ const {
   markNotificationRead,
   markAllNotificationsRead,
   deleteAccount,
+  getActivity,
 } = require('../controllers/userController');
 const { protect } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
@@ -19,5 +20,6 @@ router.get('/notifications', protect, getNotifications);
 router.put('/notifications/read-all', protect, markAllNotificationsRead);
 router.put('/notifications/:id/read', protect, markNotificationRead);
 router.delete('/account', protect, deleteAccount);
+router.get('/activity', protect, getActivity);
 
 module.exports = router;

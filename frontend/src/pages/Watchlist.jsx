@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import MovieRow from '../components/MovieRow';
 import { motion } from 'framer-motion';
 import { Bookmark, PlayCircle, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { GridSkeleton } from '../components/skeleton/MovieSkeleton';
 
@@ -12,6 +11,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const Watchlist = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchWatchlist = async () => {
     try {
@@ -28,7 +28,8 @@ const Watchlist = () => {
     fetchWatchlist();
   }, []);
 
-  const removeItem = async (itemId) => {
+  const removeItem = async (e, itemId) => {
+    e.stopPropagation();
     try {
       await axios.delete(`${API_URL}/watchlist/${itemId}`);
       setItems(items.filter(item => item._id !== itemId));
@@ -36,6 +37,11 @@ const Watchlist = () => {
     } catch (err) {
       toast.error('Failed to remove item');
     }
+  };
+
+  const handlePlay = (e, item) => {
+    e.stopPropagation();
+    navigate(`/watch/${item.mediaType}/${item.tmdbId}`);
   };
 
   if (loading) return (
@@ -67,16 +73,18 @@ const Watchlist = () => {
                initial={{ opacity: 0, scale: 0.9 }}
                animate={{ opacity: 1, scale: 1 }}
                whileHover={{ y: -5 }}
+               onClick={() => navigate(`/${item.mediaType}/${item.tmdbId}`)}
+               style={{ cursor: 'pointer' }}
              >
                 <div className="card-thumb">
                    <img src={`https://image.tmdb.org/t/p/w500${item.posterPath}`} alt={item.title} />
                    <div className="card-actions">
-                      <Link to={`/watch/${item.mediaType}/${item.tmdbId}`} className="play-btn"><PlayCircle size={40} /></Link>
-                      <button className="del-btn" onClick={() => removeItem(item._id)}><Trash2 size={20} /></button>
+                      <button className="play-btn" onClick={(e) => handlePlay(e, item)}><PlayCircle size={40} /></button>
+                      <button className="del-btn" onClick={(e) => removeItem(e, item._id)}><Trash2 size={20} /></button>
                    </div>
                 </div>
                 <div className="card-info">
-                   <Link to={`/${item.mediaType}/${item.tmdbId}`}><h4>{item.title}</h4></Link>
+                   <h4>{item.title}</h4>
                    <span>{item.mediaType.toUpperCase()}</span>
                 </div>
              </motion.div>
@@ -129,7 +137,7 @@ const Watchlist = () => {
         
         .watchlist-card:hover .card-actions { opacity: 1; }
         
-        .play-btn { color: white; transition: var(--transition-fast); }
+        .play-btn { background: none; border: none; color: white; cursor: pointer; transition: var(--transition-fast); }
         .play-btn:hover { color: var(--primary); transform: scale(1.1); }
         
         .del-btn {
@@ -149,8 +157,7 @@ const Watchlist = () => {
         .del-btn:hover { background: var(--accent); }
         
         .card-info { padding: 1rem; }
-        .card-info h4 { margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem; }
-        .card-info h4 a { text-decoration: none; color: white; }
+        .card-info h4 { margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem; color: white; }
         .card-info span { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
       `}</style>
     </div>

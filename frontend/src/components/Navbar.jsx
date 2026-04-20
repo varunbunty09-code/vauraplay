@@ -3,7 +3,10 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Search, Bell, User, Play, LogOut, Menu, X, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 import Logo from './Logo';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -14,14 +17,41 @@ const Navbar = () => {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
 
-  const notifications = [
-    { id: 1, title: 'Welcome to VauraPlay!', message: 'Start exploring over 75,000+ movies.', time: '2m ago', unread: true },
-    { id: 2, title: 'New Movie Added', message: 'Michael (2025) is now available to stream.', time: '1h ago', unread: true },
-    { id: 3, title: 'Admin Message', message: 'The server will undergo maintenance at midnight.', time: '3h ago', unread: false }
-  ];
+  // Fetch notifications
+  useEffect(() => {
+    if (!user) return;
+    const fetchNotifications = async () => {
+      try {
+        const { data } = await axios.get(`${API_URL}/users/notifications`);
+        setNotifications(data.notifications || []);
+        setUnreadCount((data.notifications || []).filter(n => !n.read).length);
+      } catch (e) {}
+    };
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const handleMarkAllRead = async () => {
+    try {
+      await axios.put(`${API_URL}/users/notifications/read-all`);
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (e) {}
+  };
+
+  const markAsRead = async (id) => {
+    try {
+      await axios.put(`${API_URL}/users/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (e) {}
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -99,7 +129,7 @@ const Navbar = () => {
               <div className="notification-container" ref={notificationRef}>
                 <button className="icon-btn" onClick={() => setNotificationsOpen(!notificationsOpen)}>
                   <Bell size={20} />
-                  <span className="badge-count">2</span>
+                  {unreadCount > 0 && <span className="badge-count">{unreadCount}</span>}
                 </button>
 
                 <AnimatePresence>
@@ -112,22 +142,26 @@ const Navbar = () => {
                     >
                       <div className="dropdown-header">
                         <h3>Notifications</h3>
-                        <button className="text-btn">Mark all read</button>
+                        <button className="text-btn" onClick={handleMarkAllRead}>Mark all read</button>
                       </div>
                       <div className="notification-list">
-                        {notifications.map(notif => (
-                          <div key={notif.id} className={`notification-item ${notif.unread ? 'unread' : ''}`}>
-                            <div className="notif-content">
-                              <p className="notif-title">{notif.title}</p>
-                              <p className="notif-msg">{notif.message}</p>
-                              <p className="notif-time">{notif.time}</p>
+                        {notifications.length > 0 ? (
+                          notifications.map(notif => (
+                            <div key={notif._id} className={`notification-item ${!notif.read ? 'unread' : ''}`} onClick={() => markAsRead(notif._id)}>
+                              <div className="notif-content">
+                                <p className="notif-title">{notif.title}</p>
+                                <p className="notif-msg">{notif.message}</p>
+                                <p className="notif-time">{new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                              </div>
+                              {!notif.read && <span className="unread-dot"></span>}
                             </div>
-                            {notif.unread && <span className="unread-dot"></span>}
-                          </div>
-                        ))}
+                          ))
+                        ) : (
+                          <div className="empty-notif">No new notifications</div>
+                        )}
                       </div>
                       <div className="dropdown-footer">
-                        <Link to="/help" onClick={() => setNotificationsOpen(false)}>View all activity</Link>
+                        <Link to="/profile?tab=activity" onClick={() => setNotificationsOpen(false)}>View all activity</Link>
                       </div>
                     </motion.div>
                   )}
@@ -152,9 +186,9 @@ const Navbar = () => {
                         <p className="email">{user?.email}</p>
                       </div>
                       <ul>
-                        <li onClick={() => setProfileMenuOpen(false)}><Link to="/profile"><User size={16} /> Profile</Link></li>
+                        <li onClick={() => { navigate('/profile'); setProfileMenuOpen(false); }}><User size={16} /> Profile</li>
                         {user?.role === 'admin' && (
-                          <li onClick={() => setProfileMenuOpen(false)}><Link to="/admin"><LayoutDashboard size={16} /> Admin Panel</Link></li>
+                          <li onClick={() => { navigate('/admin'); setProfileMenuOpen(false); }}><LayoutDashboard size={16} /> Admin Panel</li>
                         )}
                         <li className="divider"></li>
                         <li onClick={handleLogout} className="logout"><LogOut size={16} /> Sign Out</li>
@@ -422,6 +456,14 @@ const Navbar = () => {
           color: var(--primary);
           font-size: 0.85rem;
           font-weight: 600;
+        }
+
+        .empty-notif {
+          padding: 3rem 1rem;
+          text-align: center;
+          color: var(--text-dim);
+          font-size: 0.9rem;
+          font-style: italic;
         }
         
         .profile-dropdown .dropdown-header {

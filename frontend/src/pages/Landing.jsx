@@ -33,6 +33,7 @@ const Landing = () => {
             <div className="hero-btns">
               <Link to="/signup" state={{ from: location.state?.from }} className="btn-primary">Get Started Free <ArrowRight size={18} /></Link>
               <button onClick={() => setShowDemo(true)} className="btn-outline">Watch Demo</button>
+              <Link to="/login" className="btn-outline">Sign In</Link>
             </div>
             
             <div className="hero-stats">
@@ -93,7 +94,10 @@ const Landing = () => {
               <h2>Ready to dive in?</h2>
               <p>Join thousands of users who have already upgraded their streaming experience.</p>
             </div>
-            <Link to="/signup" state={{ from: location.state?.from }} className="btn-primary">Create Your Account <ArrowRight size={18} /></Link>
+            <div className="promo-btns">
+              <Link to="/signup" state={{ from: location.state?.from }} className="btn-primary">Create Your Account <ArrowRight size={18} /></Link>
+              <Link to="/login" className="btn-outline">Sign In</Link>
+            </div>
           </div>
         </div>
       </section>
