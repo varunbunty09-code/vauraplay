@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import tmdbService from '../services/tmdbService';
-import { Play, Plus, Star, Clock, Calendar, Bookmark, Share2, MessageCircle, Copy, X, ExternalLink } from 'lucide-react';
+import { Play, Plus, Star, Clock, Calendar, Bookmark, Share2, MessageCircle, Copy, X, ExternalLink, Check, ThumbsUp, ThumbsDown, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MovieRow from '../components/MovieRow';
 import { DetailSkeleton } from '../components/skeleton/MovieSkeleton';
@@ -24,6 +24,9 @@ const MovieDetail = () => {
   const [selectedCast, setSelectedCast] = useState(null);
   const [castDetails, setCastDetails] = useState(null);
   const [castLoading, setCastLoading] = useState(false);
+  const [showRating, setShowRating] = useState(false);
+  const [userRating, setUserRating] = useState(null); // 'loved', 'liked', 'disliked'
+  const [ratingFeedback, setRatingFeedback] = useState('');
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -91,6 +94,14 @@ const MovieDetail = () => {
     toast.success('Link copied to clipboard!');
   };
 
+  const handleRate = (rating) => {
+    setUserRating(rating);
+    if (rating === 'loved') setRatingFeedback("Great choice! We'll recommend more like this.");
+    else if (rating === 'liked') setRatingFeedback("Thanks! We'll fine-tune your recommendations.");
+    else setRatingFeedback("Got it — we'll show fewer titles like this.");
+    setTimeout(() => { setShowRating(false); setRatingFeedback(''); }, 2500);
+  };
+
   const shareLinks = {
     whatsapp: `https://wa.me/?text=${encodeURIComponent('Check out this movie on VauraPlay: ' + window.location.href)}`,
     twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ' + (movie?.title || 'this') + ' on @VauraPlay')}&url=${encodeURIComponent(window.location.href)}`,
@@ -129,9 +140,43 @@ const MovieDetail = () => {
               <p className="overview">{movie.overview}</p>
               <div className="detail-actions">
                 <Link to={`/watch/movie/${movie.id}`} className="btn-primary"><Play size={20} fill="currentColor" /> Play Now</Link>
-                <button className={`btn-outline ${inWatchlist ? 'active' : ''}`} onClick={toggleWatchlist}>
-                  <Bookmark size={20} fill={inWatchlist ? 'var(--primary)' : 'none'} /> {inWatchlist ? 'In Library' : 'Add to List'}
-                </button>
+                <motion.button
+                  className={`btn-outline watchlist-toggle ${inWatchlist ? 'active' : ''}`}
+                  onClick={toggleWatchlist}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <AnimatePresence mode="wait">
+                    {inWatchlist ? (
+                      <motion.span key="in" className="wl-inner" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }}>
+                        <Check size={20} /> In Library
+                      </motion.span>
+                    ) : (
+                      <motion.span key="out" className="wl-inner" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }}>
+                        <Bookmark size={20} /> Add to List
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+                <div className="rating-wrapper">
+                  <button className={`btn-outline rate-btn ${userRating ? 'rated' : ''}`} onClick={() => setShowRating(!showRating)}>
+                    {userRating === 'loved' ? <Heart size={20} fill="#f43f5e" color="#f43f5e" /> : userRating === 'liked' ? <ThumbsUp size={20} color="var(--primary)" /> : userRating === 'disliked' ? <ThumbsDown size={20} color="var(--text-muted)" /> : <ThumbsUp size={20} />}
+                  </button>
+                  <AnimatePresence>
+                    {showRating && (
+                      <motion.div className="rating-panel glass" initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.9 }}>
+                        {ratingFeedback ? (
+                          <motion.p className="rating-feedback" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{ratingFeedback}</motion.p>
+                        ) : (
+                          <>
+                            <button className={`emoji-btn ${userRating === 'loved' ? 'selected' : ''}`} onClick={() => handleRate('loved')} title="Loved it"><span className="emoji">❤️</span><span className="emoji-label">Loved</span></button>
+                            <button className={`emoji-btn ${userRating === 'liked' ? 'selected' : ''}`} onClick={() => handleRate('liked')} title="Liked it"><span className="emoji">👍</span><span className="emoji-label">Good</span></button>
+                            <button className={`emoji-btn ${userRating === 'disliked' ? 'selected' : ''}`} onClick={() => handleRate('disliked')} title="Not for me"><span className="emoji">👎</span><span className="emoji-label">Not for me</span></button>
+                          </>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
                 <button className="btn-outline" onClick={() => setShowShare(true)}><Share2 size={20} /></button>
               </div>
             </motion.div>
@@ -255,7 +300,20 @@ const MovieDetail = () => {
         .genres { display: flex; gap: 0.8rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
         .genre-tag { font-size: 0.8rem; padding: 0.3rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); border-radius: 20px; color: var(--text-dim); }
         .overview { max-width: 700px; margin-bottom: 2rem; font-size: 1.1rem; color: var(--text-dim); line-height: 1.7; }
-        .detail-actions { display: flex; gap: 1rem; }
+        .detail-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .watchlist-toggle { overflow: hidden; min-width: 150px; position: relative; }
+        .watchlist-toggle.active { border-color: var(--primary); color: var(--primary); }
+        .wl-inner { display: flex; align-items: center; gap: 0.5rem; }
+        .rating-wrapper { position: relative; }
+        .rate-btn { width: 48px; padding: 0; justify-content: center; }
+        .rate-btn.rated { border-color: var(--primary); }
+        .rating-panel { position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; padding: 0.8rem 1rem; border-radius: 16px; white-space: nowrap; z-index: 100; }
+        .emoji-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: 0.5rem 0.8rem; border-radius: 12px; transition: all 0.2s ease; }
+        .emoji-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.15); }
+        .emoji-btn.selected { background: rgba(13,202,240,0.15); }
+        .emoji { font-size: 1.5rem; }
+        .emoji-label { font-size: 0.65rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .rating-feedback { font-size: 0.85rem; color: var(--primary); font-weight: 600; padding: 0.3rem 0.5rem; }
         .extra-info { margin-top: 4rem; }
         .cast-section { margin-bottom: 4rem; }
         .cast-section h3 { margin-bottom: 2rem; }
