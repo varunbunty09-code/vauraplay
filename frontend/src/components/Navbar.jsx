@@ -90,6 +90,39 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            className="mobile-overlay"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          >
+            <div className="mobile-header">
+              <Link to="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
+                <Play fill="var(--primary)" size={24} />
+                <span className="logo-text">VAURA<span>PLAY</span></span>
+              </Link>
+              <button className="close-btn" onClick={() => setMobileMenuOpen(false)}>
+                <X size={28} />
+              </button>
+            </div>
+            
+            <ul className="mobile-links">
+              <li><Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link></li>
+              <li><Link to="/browse?type=movie" onClick={() => setMobileMenuOpen(false)}>Movies</Link></li>
+              <li><Link to="/browse?type=tv" onClick={() => setMobileMenuOpen(false)}>TV Shows</Link></li>
+              <li><Link to="/watchlist" onClick={() => setMobileMenuOpen(false)}>My List</Link></li>
+              <li className="mobile-divider"></li>
+              <li><Link to="/profile" onClick={() => setMobileMenuOpen(false)}>Profile Settings</Link></li>
+              <li onClick={handleLogout} className="logout-mobile">Sign Out</li>
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <style>{`
         .navbar {
           position: fixed;
@@ -105,7 +138,8 @@ const Navbar = () => {
         
         .navbar.scrolled {
           height: 70px;
-          background: rgba(10, 10, 12, 0.85);
+          background: rgba(10, 10, 12, 0.95);
+          backdrop-filter: blur(20px);
           box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
         }
         
@@ -286,15 +320,69 @@ const Navbar = () => {
           background: none;
           border: none;
           color: white;
+          padding: 0.5rem;
+          cursor: pointer;
+        }
+        
+        /* Mobile Overlay Styles */
+        .mobile-overlay {
+          position: fixed;
+          inset: 0;
+          background: var(--bg-main);
+          z-index: 2000;
+          padding: 2rem;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .mobile-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 3rem;
+        }
+        
+        .close-btn {
+          background: none;
+          border: none;
+          color: white;
+          cursor: pointer;
+        }
+        
+        .mobile-links {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+        }
+        
+        .mobile-links a, .logout-mobile {
+          text-decoration: none;
+          color: white;
+          font-size: 1.5rem;
+          font-weight: 700;
+        }
+        
+        .mobile-divider {
+          height: 1px;
+          background: var(--border-light);
+          margin: 1rem 0;
+        }
+        
+        .logout-mobile {
+          color: var(--accent);
         }
         
         @media (max-width: 900px) {
-          .nav-links, .search-bar {
+          .nav-links, .search-bar, .icon-btn, .profile-menu-container {
             display: none;
           }
           .mobile-toggle {
             display: block;
           }
+           .nav-right {
+             gap: 0.5rem;
+           }
         }
       `}</style>
     </nav>

@@ -99,10 +99,19 @@ body {
 }
 
 /* Typography */
+/* Typography Responsive */
 h1 { font-size: 3.5rem; font-weight: 800; letter-spacing: -2px; line-height: 1.1; }
 h2 { font-size: 2.5rem; font-weight: 700; letter-spacing: -1px; }
 h3 { font-size: 1.5rem; font-weight: 600; }
 p { font-size: 1rem; color: var(--text-dim); line-height: 1.6; }
+
+@media (max-width: 768px) {
+  h1 { font-size: 2.2rem; letter-spacing: -1px; }
+  h2 { font-size: 1.8rem; letter-spacing: -0.5px; }
+  h3 { font-size: 1.25rem; }
+  p { font-size: 0.9rem; }
+  .container { padding: 0 1.25rem; }
+}
 
 /* Buttons */
 .btn-primary {
@@ -117,6 +126,7 @@ p { font-size: 1rem; color: var(--text-dim); line-height: 1.6; }
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 1rem;
 }
 
 .btn-primary:hover {
@@ -133,9 +143,102 @@ p { font-size: 1rem; color: var(--text-dim); line-height: 1.6; }
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-fast);
+  font-size: 1rem;
 }
 
 .btn-outline:hover {
   background: var(--border-light);
   border-color: var(--text-main);
 }
+
+@media (max-width: 480px) {
+  .btn-primary, .btn-outline {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Utilities */
+.hide-mobile {
+  @media (max-width: 768px) { display: none !important; }
+}
+
+.show-mobile {
+  display: none;
+  @media (max-width: 768px) { display: block !important; }
+}
+
+.mobile-stack {
+  @media (max-width: 768px) {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* Auth Pages (Global) */
+.auth-page {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 450px;
+}
+
+.auth-card {
+  padding: 2.5rem;
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 480px) {
+  .auth-card { padding: 1.5rem; }
+  .auth-header h2 { font-size: 1.6rem; }
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-light);
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  transition: var(--transition-fast);
+}
+
+.form-group input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+

@@ -1,11 +1,12 @@
-# 🎬 VauraPlay — Premium Streaming Platform
+# 🎬 VauraPlay — Premium Full-Stack Streaming Ecosystem
 
-VauraPlay is a full-stack, production-ready movie and TV streaming platform. It features a cinematic glassmorphic UI, secure OTP-based authentication, and seamless Vidking player integration.
-
-🌐 **Live**: [vauraplay.vercel.app](https://vauraplay.vercel.app)  
-🔗 **API**: [vauraplay.onrender.com](https://vauraplay.onrender.com/api/health)
+VauraPlay is a high-performance, production-ready streaming platform designed for a cinematic user experience. Built with the **MERN stack**, it features a stunning glassmorphic UI, enterprise-grade security with OTP authentication, and industry-standard media integration.
 
 ---
+
+## 🚀 Experience the Future of Streaming
+VauraPlay isn't just a movie site; it's a complete ecosystem featuring real-time metadata syncing with TMDB, advanced "Continue Watching" logic, and a robust administration backend.
+
 
 ## ✨ Features
 
