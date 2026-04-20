@@ -118,7 +118,7 @@ const Watch = () => {
   return (
     <div className="watch-page">
       <div className="player-header">
-        <button className="back-btn" onClick={() => navigate(-1)}>
+        <button className="back-btn" onClick={() => navigate(`/${type}/${id}`)}>
           <ArrowLeft size={22} />
         </button>
       </div>
