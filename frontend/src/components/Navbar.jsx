@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Search, Bell, User, Play, LogOut, Menu, X, LayoutDashboard } from 'lucide-react';
@@ -68,7 +68,7 @@ const Navbar = () => {
             <span className="logo-icon"><Play fill="var(--primary)" size={24} /></span>
             <span className="logo-text">VAURA<span>PLAY</span></span>
           </Link>
-          
+
           <ul className="nav-links">
             <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link></li>
             <li><Link to="/browse?type=movie" className={location.pathname === '/browse' ? 'active' : ''}>Movies</Link></li>
@@ -80,9 +80,9 @@ const Navbar = () => {
         <div className="nav-right">
           <div className="search-bar glass">
             <Search size={18} />
-            <input 
-              type="text" 
-              placeholder="Search movies, TV shows..." 
+            <input
+              type="text"
+              placeholder="Search movies, TV shows..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchCommit}
@@ -97,7 +97,7 @@ const Navbar = () => {
 
             <AnimatePresence>
               {notificationsOpen && (
-                <motion.div 
+                <motion.div
                   className="notification-dropdown glass"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -126,15 +126,15 @@ const Navbar = () => {
               )}
             </AnimatePresence>
           </div>
-          
+
           <div className="profile-menu-container" ref={profileRef}>
             <button className="profile-btn" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
               <img src={user?.avatar?.url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'} alt="Avatar" />
             </button>
-            
+
             <AnimatePresence>
               {profileMenuOpen && (
-                <motion.div 
+                <motion.div
                   className="profile-dropdown glass"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -156,7 +156,7 @@ const Navbar = () => {
               )}
             </AnimatePresence>
           </div>
-          
+
           <button className="mobile-toggle" onClick={() => setMobileMenuOpen(true)}>
             <Menu size={24} />
           </button>
@@ -166,7 +166,7 @@ const Navbar = () => {
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div 
+          <motion.div
             className="mobile-overlay"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
@@ -182,7 +182,7 @@ const Navbar = () => {
                 <X size={28} />
               </button>
             </div>
-            
+
             <ul className="mobile-links">
               <li><Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link></li>
               <li><Link to="/browse?type=movie" onClick={() => setMobileMenuOpen(false)}>Movies</Link></li>
