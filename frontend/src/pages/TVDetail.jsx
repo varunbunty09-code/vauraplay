@@ -445,7 +445,7 @@ const TVDetail = () => {
                 .rating-pill { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 1rem; border-radius: 20px; color: var(--primary); font-weight: 800; background: rgba(13, 202, 240, 0.15); border: 1.5px solid rgba(13, 202, 240, 0.3); box-shadow: 0 0 15px rgba(13, 202, 240, 0.1); }
                 .age-pill { padding: 0.4rem 1rem; border-radius: 6px; font-weight: 800; font-size: 0.85rem; border: 1.5px solid var(--border-light); background: rgba(255,255,255,0.05); color: white; text-transform: uppercase; }
                 .overview { max-width: 750px; line-height: 1.8; font-size: 1.15rem; color: var(--text-dim); margin-bottom: 2.5rem; }
-                .detail-actions { display: flex; gap: 1.2rem; }
+                .detail-actions { display: flex; gap: 1.2rem; align-items: center; }
 
                 .share-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
                 .share-modal { width: 100%; max-width: 480px; padding: 3rem; border-radius: 24px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.1); }
