@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Play, Shield, Zap, Palette, ArrowRight, Star } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Shield, Zap, Palette, ArrowRight, Star, X } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 
 const Landing = () => {
+  const [showDemo, setShowDemo] = useState(false);
+
   return (
     <div className="landing-page">
       <Helmet>
@@ -29,7 +31,7 @@ const Landing = () => {
             </p>
             <div className="hero-btns">
               <Link to="/signup" className="btn-primary">Get Started Free <ArrowRight size={18} /></Link>
-              <Link to="/login" className="btn-outline">Watch Demo</Link>
+              <button onClick={() => setShowDemo(true)} className="btn-outline">Watch Demo</button>
             </div>
             
             <div className="hero-stats">
@@ -95,9 +97,47 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Demo Modal */}
+      <AnimatePresence>
+        {showDemo && (
+          <motion.div 
+            className="demo-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDemo(false)}
+          >
+            <motion.div 
+              className="demo-modal"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button className="close-demo" onClick={() => setShowDemo(false)}><X size={24} /></button>
+              <div className="video-container">
+                <iframe 
+                  src="https://www.youtube.com/embed/PjGkVCAo8Fw?autoplay=1" 
+                  title="VauraPlay Demo"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <div className="demo-info">
+                <h3>VauraPlay Platform Showcase</h3>
+                <p>Discover how VauraPlay empowers creators to build the next generation of streaming websites.</p>
+                <Link to="/signup" className="btn-primary" onClick={() => setShowDemo(false)}>Join Now</Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <style>{`
         .landing-page {
           padding-top: 0;
+          position: relative;
         }
         
         .hero {
@@ -224,6 +264,75 @@ const Landing = () => {
           margin-bottom: 0.5rem;
         }
 
+        /* Demo Modal Styles */
+        .demo-modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.85);
+          backdrop-filter: blur(10px);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+
+        .demo-modal {
+          background: var(--bg-card);
+          width: 100%;
+          max-width: 900px;
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          position: relative;
+          border: 1px solid var(--border-light);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-container {
+          width: 100%;
+          aspect-ratio: 16/9;
+          background: #000;
+        }
+
+        .video-container iframe {
+          width: 100%;
+          height: 100%;
+        }
+
+        .demo-info {
+          padding: 2.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 2rem;
+        }
+
+        .demo-info h3 { margin-bottom: 0.5rem; }
+        .demo-info p { color: var(--text-dim); font-size: 0.9rem; }
+
+        .close-demo {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: rgba(0,0,0,0.5);
+          border: none;
+          color: white;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 10;
+          transition: var(--transition-fast);
+        }
+
+        .close-demo:hover {
+          background: var(--accent);
+          transform: scale(1.1);
+        }
+
         @media (max-width: 768px) {
           .hero-content { margin-left: 0; padding: 0 1.5rem; }
           .hero-title { font-size: 2.5rem; }
@@ -231,6 +340,8 @@ const Landing = () => {
           .hero-btns { flex-direction: column; }
           .promo-card { flex-direction: column; text-align: center; padding: 2rem; }
           .promo-text h2 { font-size: 2rem; }
+          .demo-info { flex-direction: column; text-align: center; padding: 1.5rem; }
+          .demo-modal { max-height: 90vh; overflow-y: auto; }
         }
       `}</style>
     </div>
