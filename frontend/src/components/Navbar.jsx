@@ -424,14 +424,22 @@ const Navbar = () => {
           font-weight: 600;
         }
         
+        .profile-dropdown .dropdown-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.2rem;
+        }
+
         .dropdown-header .username {
           font-weight: 700;
           color: white;
+          font-size: 1rem;
         }
         
         .dropdown-header .email {
           font-size: 0.75rem;
           color: var(--text-muted);
+          word-break: break-all;
         }
         
         .profile-dropdown ul {
