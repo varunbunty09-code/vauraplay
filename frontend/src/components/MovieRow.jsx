@@ -80,13 +80,15 @@ const MovieRow = ({ title, items, type = 'movie' }) => {
         
         .movie-card {
           flex: 0 0 200px;
+          width: 200px;
           cursor: pointer;
+          transition: transform 0.3s ease;
         }
         
         .card-image {
           position: relative;
           width: 100%;
-          aspect-ratio: 2/3;
+          height: 300px;
           border-radius: var(--radius-md);
           overflow: hidden;
           background: var(--bg-card);
@@ -96,6 +98,7 @@ const MovieRow = ({ title, items, type = 'movie' }) => {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          display: block;
         }
         
         .card-overlay {
@@ -119,6 +122,7 @@ const MovieRow = ({ title, items, type = 'movie' }) => {
           display: flex;
           align-items: center;
           gap: 0.3rem;
+          color: white;
         }
         
         .movie-title {
@@ -129,6 +133,7 @@ const MovieRow = ({ title, items, type = 'movie' }) => {
           overflow: hidden;
           text-overflow: ellipsis;
           color: var(--text-dim);
+          text-align: left;
         }
         
         .row-arrow {
@@ -162,7 +167,8 @@ const MovieRow = ({ title, items, type = 'movie' }) => {
         .right { right: -20px; }
         
         @media (max-width: 768px) {
-          .movie-card { flex: 0 0 140px; }
+          .movie-card { flex: 0 0 140px; width: 140px; }
+          .card-image { height: 210px; }
           .row-arrow { display: none; }
         }
       `}</style>

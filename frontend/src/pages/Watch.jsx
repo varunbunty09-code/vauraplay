@@ -17,8 +17,22 @@ const Watch = () => {
   const episode = searchParams.get('e') || 1;
   
   const [playerUrl, setPlayerUrl] = useState('');
+  const [contentTitle, setContentTitle] = useState('');
   const [isReady, setIsReady] = useState(false);
   const lastSaveRef = useRef(0); // Throttle progress saves
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        const { data } = await axios.get(`https://api.themoviedb.org/3/${type}/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`);
+        setContentTitle(data.title || data.name);
+      } catch (err) {
+        console.error('Failed to fetch title');
+      }
+    };
+    fetchDetails();
+  }, [type, id]);
+
 
   // Throttled save: only save every 30 seconds
   const saveProgress = useCallback(async (progressData) => {
@@ -108,9 +122,10 @@ const Watch = () => {
           <ArrowLeft size={24} /> Back
         </button>
         <div className="playing-info">
-            <h3>{type === 'movie' ? 'Watching Movie' : `S${season} : E${episode}`}</h3>
+            <h3 className="title-text">{contentTitle}</h3>
+            {type === 'tv' && <span className="episode-text">S{season} : E{episode}</span>}
         </div>
-        <div style={{ width: '80px' }}></div>
+        <div className="header-right"></div>
       </div>
 
       <div className="player-container">
@@ -183,11 +198,30 @@ const Watch = () => {
           color: var(--primary);
         }
         
-        .playing-info h3 {
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: rgba(255,255,255,0.7);
+        .playing-info {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
         }
+        
+        .title-text {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: white;
+          margin: 0;
+        }
+        
+        .episode-text {
+          font-size: 0.8rem;
+          color: var(--primary);
+          font-weight: 500;
+          margin-top: 2px;
+        }
+
+        .header-right { width: 80px; }
         
         .player-container {
           flex: 1;

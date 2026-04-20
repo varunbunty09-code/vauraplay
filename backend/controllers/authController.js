@@ -5,6 +5,33 @@ const ActivityLog = require('../models/ActivityLog');
 const sendEmail = require('../utils/sendEmail');
 const { otpEmail, welcomeEmail, loginNotificationEmail, forgotPasswordEmail, emailChangeOtpEmail, deleteAccountOtpEmail, accountDeletedEmail } = require('../utils/emailTemplates');
 
+const getDeviceInfo = (userAgent) => {
+  if (!userAgent) return 'Unknown Device';
+  
+  let os = 'Unknown OS';
+  if (userAgent.includes('Windows')) os = 'Windows';
+  else if (userAgent.includes('Macintosh')) os = 'macOS';
+  else if (userAgent.includes('Android')) os = 'Android';
+  else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
+  else if (userAgent.includes('Linux')) os = 'Linux';
+
+  let browser = 'Unknown Browser';
+  if (userAgent.includes('Chrome')) browser = 'Chrome';
+  else if (userAgent.includes('Firefox')) browser = 'Firefox';
+  else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
+  else if (userAgent.includes('Edge')) browser = 'Edge';
+  else if (userAgent.includes('MSIE') || userAgent.includes('Trident')) browser = 'Internet Explorer';
+
+  return `${browser} on ${os}`;
+};
+
+const getClientIp = (req) => {
+  const xForwardedFor = req.headers['x-forwarded-for'];
+  if (xForwardedFor) return xForwardedFor.split(',')[0].trim();
+  return req.ip === '::1' ? '127.0.0.1' : req.ip;
+};
+
+
 // @desc    Register user (Step 1: send OTP)
 // @route   POST /api/auth/signup
 exports.signup = async (req, res) => {
@@ -35,7 +62,7 @@ exports.signup = async (req, res) => {
       user: user._id,
       action: 'signup',
       details: 'User registered, OTP sent',
-      ip: req.ip,
+      ip: getClientIp(req),
       userAgent: req.headers['user-agent'],
     });
 
@@ -86,7 +113,7 @@ exports.verifySignup = async (req, res) => {
       user: user._id,
       action: 'account_verified',
       details: 'Account verified via OTP',
-      ip: req.ip,
+      ip: getClientIp(req),
       userAgent: req.headers['user-agent'],
     });
 
@@ -154,7 +181,7 @@ exports.login = async (req, res) => {
       user: user._id,
       action: 'otp_request',
       details: 'Login OTP requested',
-      ip: req.ip,
+      ip: getClientIp(req),
       userAgent: req.headers['user-agent'],
     });
 
@@ -197,12 +224,15 @@ exports.verifyLogin = async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
+    const ip = getClientIp(req);
+    const device = getDeviceInfo(req.headers['user-agent']);
+
     // Send login notification
     if (user.preferences.emailNotifications) {
       await sendEmail({
         to: user.email,
         subject: '🔔 VauraPlay - New Login Detected',
-        html: loginNotificationEmail(user.username, req.ip, req.headers['user-agent'], new Date()),
+        html: loginNotificationEmail(user.username, ip, device, new Date()),
       });
     }
 
@@ -218,7 +248,7 @@ exports.verifyLogin = async (req, res) => {
       user: user._id,
       action: 'login',
       details: 'Login successful',
-      ip: req.ip,
+      ip: getClientIp(req),
       userAgent: req.headers['user-agent'],
     });
 
@@ -266,7 +296,7 @@ exports.forgotPassword = async (req, res) => {
       user: user._id,
       action: 'password_reset',
       details: 'Password reset requested',
-      ip: req.ip,
+      ip: getClientIp(req),
       userAgent: req.headers['user-agent'],
     });
 

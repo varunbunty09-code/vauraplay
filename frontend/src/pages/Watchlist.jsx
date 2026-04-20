@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Bookmark, PlayCircle, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { GridSkeleton } from '../components/skeleton/MovieSkeleton';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -37,7 +38,11 @@ const Watchlist = () => {
     }
   };
 
-  if (loading) return <div className="loading-screen" style={{height:'100vh'}}></div>;
+  if (loading) return (
+    <div className="watchlist-page container">
+      <GridSkeleton />
+    </div>
+  );
 
   return (
     <div className="watchlist-page container">

@@ -4,6 +4,7 @@ import MovieRow from '../components/MovieRow';
 import { motion } from 'framer-motion';
 import { Play, Info, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { HeroSkeleton, MovieRowSkeleton } from '../components/skeleton/MovieSkeleton';
 
 const Home = () => {
   const [trending, setTrending] = useState([]);
@@ -41,8 +42,12 @@ const Home = () => {
   }, []);
 
   if (loading) return (
-    <div className="loading-screen flex-center" style={{ height: '100vh' }}>
-      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Play size={40} color="var(--primary)" /></motion.div>
+    <div className="home-page-loading">
+      <HeroSkeleton />
+      <div style={{ marginTop: '-150px', position: 'relative', zIndex: 20 }}>
+        <MovieRowSkeleton />
+        <MovieRowSkeleton />
+      </div>
     </div>
   );
 
