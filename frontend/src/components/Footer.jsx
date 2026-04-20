@@ -1,16 +1,14 @@
 import React from 'react';
 import { Play, Globe, MessageCircle, Heart, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Logo from './Logo';
 
 const Footer = () => {
    return (
       <footer className="main-footer">
          <div className="container footer-content">
             <div className="footer-brand">
-               <Link to="/" className="logo">
-                  <Play fill="var(--primary)" size={24} />
-                  <span className="logo-text">VAURA<span>PLAY</span></span>
-               </Link>
+               <Logo to="/" fontSize="1.8rem" />
                <p>The ultimate streaming companion powered by Vidking & TMDB.</p>
                <div className="social-links">
                   <a href="#"><Globe size={20} /></a>

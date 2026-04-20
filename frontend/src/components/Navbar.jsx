@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Search, Bell, User, Play, LogOut, Menu, X, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from './Logo';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -69,10 +70,7 @@ const Navbar = () => {
     <nav className={`navbar ${isScrolled ? 'scrolled glass' : ''}`}>
       <div className="container nav-content">
         <div className="nav-left">
-          <Link to="/" className="logo">
-            <span className="logo-icon"><Play fill="var(--primary)" size={24} /></span>
-            <span className="logo-text">VAURA<span>PLAY</span></span>
-          </Link>
+          <Logo />
 
           {user && (
             <ul className="nav-links">
@@ -192,10 +190,7 @@ const Navbar = () => {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
             <div className="mobile-header">
-              <Link to="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
-                <Play fill="var(--primary)" size={24} />
-                <span className="logo-text">VAURA<span>PLAY</span></span>
-              </Link>
+              <Logo to="/" onClick={() => setMobileMenuOpen(false)} />
               <button className="close-btn" onClick={() => setMobileMenuOpen(false)}>
                 <X size={28} />
               </button>

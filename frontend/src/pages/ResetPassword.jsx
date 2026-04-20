@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Lock, ArrowRight, Play, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import Logo from '../components/Logo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -46,10 +47,7 @@ const ResetPassword = () => {
                     animate={{ opacity: 1, scale: 1 }}
                 >
                     <div className="auth-header">
-                        <Link to="/" className="logo">
-                            <Play fill="var(--primary)" size={32} />
-                            <span>VAURA<span>PLAY</span></span>
-                        </Link>
+                        <Logo to="/" className="logo" />
                         <h2>Set New Password</h2>
                         <p>Your new password must be different from previous ones.</p>
                     </div>

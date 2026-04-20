@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, ArrowRight, ShieldCheck, Play, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Logo from '../components/Logo';
 
 const Login = () => {
   const { login, verifyLogin } = useAuth();
@@ -71,10 +72,7 @@ const Login = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="auth-header">
-          <Link to="/landing" className="logo">
-            <Play fill="var(--primary)" size={24} />
-            <span className="logo-text">VAURA<span>PLAY</span></span>
-          </Link>
+          <Logo to="/landing" className="logo" />
           <h2>{step === 1 ? 'Welcome Back' : 'Verify Identity'}</h2>
           <p>{step === 1 ? 'Please enter your login details' : 'Enter the 6-digit code sent to your mailbox'}</p>
         </div>

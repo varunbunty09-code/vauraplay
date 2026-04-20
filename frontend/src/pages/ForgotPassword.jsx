@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, ArrowRight, ShieldCheck, Play, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import Logo from '../components/Logo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -37,10 +38,7 @@ const ForgotPassword = () => {
                     animate={{ opacity: 1, y: 0 }}
                 >
                     <div className="auth-header">
-                        <Link to="/" className="logo">
-                            <Play fill="var(--primary)" size={32} />
-                            <span>VAURA<span>PLAY</span></span>
-                        </Link>
+                        <Logo to="/" className="logo" />
                         <h2>Reset Password</h2>
                         <p>No worries, we'll send you reset instructions.</p>
                     </div>

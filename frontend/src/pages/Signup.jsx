@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, ShieldCheck, Play, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Logo from '../components/Logo';
 
 const Signup = () => {
   const { signup, verifySignup } = useAuth();
@@ -67,10 +68,7 @@ const Signup = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="auth-header">
-          <Link to="/landing" className="logo">
-            <Play fill="var(--primary)" size={24} />
-            <span className="logo-text">VAURA<span>PLAY</span></span>
-          </Link>
+          <Logo to="/landing" className="logo" />
           <h2>{step === 1 ? 'Join the Future' : 'Verify Account'}</h2>
           <p>{step === 1 ? 'Create your premium account today' : 'Check your inbox for the code'}</p>
         </div>
