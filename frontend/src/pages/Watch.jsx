@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Maximize, Settings, SkipForward } from 'lucide-react';
+import { ArrowLeft, Play } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -19,10 +18,34 @@ const Watch = () => {
   
   const [playerUrl, setPlayerUrl] = useState('');
   const [isReady, setIsReady] = useState(false);
-  const playerRef = useRef(null);
+  const lastSaveRef = useRef(0); // Throttle progress saves
+
+  // Throttled save: only save every 30 seconds
+  const saveProgress = useCallback(async (progressData) => {
+    const now = Date.now();
+    if (now - lastSaveRef.current < 30000) return; // Skip if < 30s since last save
+    lastSaveRef.current = now;
+
+    try {
+      await axios.post(`${API_URL}/progress`, {
+        tmdbId: progressData.id || id,
+        mediaType: progressData.mediaType || type,
+        progress: progressData.progress,
+        currentTime: progressData.currentTime,
+        duration: progressData.duration,
+        season: parseInt(progressData.season || season),
+        episode: parseInt(progressData.episode || episode),
+        title: document.title || 'Streaming'
+      });
+    } catch (err) {
+      // Silently fail - don't interrupt playback
+    }
+  }, [id, type, season, episode]);
 
   useEffect(() => {
-    // Construct Vidking URL
+    // Construct Vidking embed URL per official docs:
+    // Movies:  /embed/movie/{tmdbId}
+    // TV:      /embed/tv/{tmdbId}/{season}/{episode}
     let url = '';
     if (type === 'movie') {
       url = `https://www.vidking.net/embed/movie/${id}`;
@@ -30,67 +53,71 @@ const Watch = () => {
       url = `https://www.vidking.net/embed/tv/${id}/${season}/${episode}`;
     }
 
-    // Add preferences
+    // URL Parameters per docs: color, autoPlay, nextEpisode, episodeSelector, progress
     const color = user?.preferences?.playerColor || '0dcaf0';
-    url += `?color=${color}&autoPlay=${user?.preferences?.autoPlay || true}&episodeSelector=true&nextEpisode=true`;
+    const params = new URLSearchParams({
+      color: color,
+      autoPlay: 'true',
+      nextEpisode: 'true',
+      episodeSelector: 'true',
+    });
+    url += `?${params.toString()}`;
     
     setPlayerUrl(url);
     setIsReady(true);
 
-    // Listen for progress events from Vidking
+    // Listen for Vidking postMessage progress events
+    // Event Data Structure (from docs):
+    // { type: "PLAYER_EVENT", data: { event, currentTime, duration, progress, id, mediaType, season, episode, timestamp } }
     const handleMessage = (event) => {
       try {
-        if (typeof event.data === 'string') {
-          const data = JSON.parse(event.data);
-          
-          if (data.type === 'PLAYER_EVENT' && data.data.event === 'timeupdate') {
-            saveProgress(data.data);
+        const raw = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        
+        if (raw.type === 'PLAYER_EVENT' && raw.data) {
+          const { event: playerEvent } = raw.data;
+
+          switch (playerEvent) {
+            case 'timeupdate':
+              saveProgress(raw.data);
+              break;
+            case 'ended':
+              // Save final progress at 100%
+              lastSaveRef.current = 0; // Force save
+              saveProgress({ ...raw.data, progress: 100 });
+              break;
+            case 'play':
+            case 'pause':
+            case 'seeked':
+              // Can be used for analytics
+              break;
           }
         }
       } catch (e) {
-        // Not a JSON message or unrelated
+        // Not a Vidking message, ignore
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [id, type, season, episode, user]);
-
-  const saveProgress = async (progressData) => {
-    // Only save progress every 30 seconds to avoid spamming the server
-    // (In a real app, we might throttle this)
-    try {
-      await axios.post(`${API_URL}/progress`, {
-        tmdbId: id,
-        mediaType: type,
-        progress: progressData.progress,
-        currentTime: progressData.currentTime,
-        duration: progressData.duration,
-        season: parseInt(season),
-        episode: parseInt(episode),
-        title: 'Streaming Now...' // Ideally fetch title first
-      });
-    } catch (err) {
-      console.error('Failed to save progress');
-    }
-  };
+  }, [id, type, season, episode, user, saveProgress]);
 
   return (
     <div className="watch-page">
-      <div className="player-header container">
+      <div className="player-header">
         <button className="back-btn" onClick={() => navigate(-1)}>
           <ArrowLeft size={24} /> Back
         </button>
-        <div className="playing-info text-center">
+        <div className="playing-info">
             <h3>{type === 'movie' ? 'Watching Movie' : `S${season} : E${episode}`}</h3>
         </div>
+        <div style={{ width: '80px' }}></div>
       </div>
 
       <div className="player-container">
         {!isReady ? (
           <div className="player-loader flex-center">
-             <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity }}>
-               <img src="/logo.svg" alt="Loading..." width={80} />
+             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}>
+               <Play size={50} color="var(--primary)" />
              </motion.div>
           </div>
         ) : (
@@ -98,16 +125,16 @@ const Watch = () => {
             className="iframe-wrapper"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.5 }}
           >
             <iframe
-              ref={playerRef}
               src={playerUrl}
               width="100%"
               height="100%"
               frameBorder="0"
               allowFullScreen
-              title="Vaura Player"
+              allow="autoplay; encrypted-media; fullscreen"
+              title="VauraPlay Player"
             ></iframe>
           </motion.div>
         )}
@@ -120,16 +147,22 @@ const Watch = () => {
           width: 100vw;
           display: flex;
           flex-direction: column;
+          overflow: hidden;
         }
         
         .player-header {
-          height: 70px;
+          height: 60px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 0 2rem;
           color: white;
           z-index: 10;
+          background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
         }
         
         .back-btn {
@@ -141,11 +174,19 @@ const Watch = () => {
           gap: 0.5rem;
           cursor: pointer;
           font-weight: 600;
-          transition: var(--transition-fast);
+          font-size: 0.95rem;
+          transition: 0.2s;
+          z-index: 20;
         }
         
         .back-btn:hover {
           color: var(--primary);
+        }
+        
+        .playing-info h3 {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: rgba(255,255,255,0.7);
         }
         
         .player-container {
@@ -157,6 +198,10 @@ const Watch = () => {
         .iframe-wrapper {
           width: 100%;
           height: 100%;
+        }
+        
+        .iframe-wrapper iframe {
+          border: none;
         }
         
         .player-loader {
