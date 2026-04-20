@@ -162,7 +162,7 @@ const Watch = () => {
         
         .player-header {
           position: absolute;
-          top: 30px;
+          top: 18px;
           left: 25px;
           z-index: 100;
         }
