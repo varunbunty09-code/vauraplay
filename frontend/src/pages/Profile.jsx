@@ -21,6 +21,7 @@ const Profile = () => {
   const [otpCode, setOtpCode] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [deleteReason, setDeleteReason] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [formData, setFormData] = useState({
     username: user?.username || '',
@@ -120,7 +121,12 @@ const Profile = () => {
     }
   };
 
-  const handleRequestDelete = async () => {
+  const handleRequestDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setShowDeleteConfirm(false);
     setLoading(true);
     try {
       await axios.post(`${API_URL}/auth/request-delete-account`, { reason: deleteReason });
@@ -343,7 +349,36 @@ const Profile = () => {
               />
               <div className="modal-actions">
                 <button className="btn-primary" onClick={handleOtpVerify} disabled={loading}>{loading ? 'Verifying...' : 'Verify & Confirm'}</button>
-                <button className="btn-text" onClick={() => setShowOtpModal(false)}>Cancel</button>
+                <button className="modal-cancel-btn" onClick={() => { setShowOtpModal(false); setOtpCode(''); }}>Cancel</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="otp-modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
+            <motion.div
+              className="confirm-modal glass"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="confirm-icon-wrap">
+                <Trash2 size={32} />
+              </div>
+              <h3>Delete Your Account?</h3>
+              <p>This action is <strong>permanent and irreversible</strong>. All your data, watchlist, and preferences will be erased forever.</p>
+              <div className="confirm-actions">
+                <button className="confirm-delete-btn" onClick={handleConfirmDelete}>
+                  <Trash2 size={16} /> Yes, Delete My Account
+                </button>
+                <button className="modal-cancel-btn" onClick={() => setShowDeleteConfirm(false)}>
+                  Keep My Account
+                </button>
               </div>
             </motion.div>
           </div>
@@ -424,6 +459,17 @@ const Profile = () => {
         .otp-modal { width: 100%; max-width: 400px; padding: 2.5rem; text-align: center; border-radius: 20px; }
         .otp-input-field { width: 100%; padding: 1.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--primary); border-radius: 12px; margin: 1.5rem 0; text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; color: white; }
         .modal-actions { display: flex; flex-direction: column; gap: 1rem; }
+        .modal-cancel-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border-light); color: var(--text-dim); padding: 0.9rem 1.5rem; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; transition: var(--transition-fast); font-size: 0.95rem; }
+        .modal-cancel-btn:hover { background: rgba(255,255,255,0.12); color: white; border-color: rgba(255,255,255,0.2); }
+
+        .confirm-modal { width: 100%; max-width: 440px; padding: 2.5rem; text-align: center; border-radius: 20px; }
+        .confirm-icon-wrap { width: 64px; height: 64px; border-radius: 50%; background: rgba(244, 63, 94, 0.15); color: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+        .confirm-modal h3 { margin-bottom: 0.8rem; font-size: 1.5rem; }
+        .confirm-modal p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 2rem; }
+        .confirm-modal p strong { color: var(--accent); }
+        .confirm-actions { display: flex; flex-direction: column; gap: 0.8rem; }
+        .confirm-delete-btn { background: var(--accent); color: white; border: none; padding: 1rem 1.5rem; border-radius: var(--radius-sm); font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.95rem; transition: var(--transition-fast); }
+        .confirm-delete-btn:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(244, 63, 94, 0.3); }
 
         @media (max-width: 900px) {
           .profile-layout { grid-template-columns: 1fr; }
