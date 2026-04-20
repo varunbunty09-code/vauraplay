@@ -11,6 +11,18 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,7 +34,15 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    setProfileMenuOpen(false);
     navigate('/landing');
+  };
+
+  const handleSearchCommit = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/browse?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
   };
 
   if (location.pathname === '/landing' || location.pathname === '/login' || location.pathname === '/signup') {
@@ -49,12 +69,18 @@ const Navbar = () => {
         <div className="nav-right">
           <div className="search-bar glass">
             <Search size={18} />
-            <input type="text" placeholder="Search movies, TV shows..." />
+            <input 
+              type="text" 
+              placeholder="Search movies, TV shows..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchCommit}
+            />
           </div>
 
           <button className="icon-btn"><Bell size={20} /></button>
           
-          <div className="profile-menu-container">
+          <div className="profile-menu-container" ref={profileRef}>
             <button className="profile-btn" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
               <img src={user?.avatar?.url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'} alt="Avatar" />
             </button>
@@ -68,13 +94,13 @@ const Navbar = () => {
                   exit={{ opacity: 0, y: 10 }}
                 >
                   <div className="dropdown-header">
-                    <p className="username">{user?.username}</p>
+                    <p className="username">{user?.username || 'User'}</p>
                     <p className="email">{user?.email}</p>
                   </div>
                   <ul>
-                    <li><Link to="/profile"><User size={16} /> Profile</Link></li>
+                    <li onClick={() => setProfileMenuOpen(false)}><Link to="/profile"><User size={16} /> Profile</Link></li>
                     {user?.role === 'admin' && (
-                      <li><Link to="/admin"><LayoutDashboard size={16} /> Admin Panel</Link></li>
+                      <li onClick={() => setProfileMenuOpen(false)}><Link to="/admin"><LayoutDashboard size={16} /> Admin Panel</Link></li>
                     )}
                     <li className="divider"></li>
                     <li onClick={handleLogout} className="logout"><LogOut size={16} /> Sign Out</li>

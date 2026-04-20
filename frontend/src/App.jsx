@@ -24,6 +24,9 @@ import Browse from './pages/Browse';
 import AdminDashboard from './pages/AdminDashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import HelpCenter from './pages/HelpCenter';
+import TermsOfUse from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 
 // Protected Route Component
@@ -53,6 +56,9 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/help" element={<HelpCenter />} />
+                <Route path="/terms" element={<TermsOfUse />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
                 
                 {/* Private Routes */}
                 <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />

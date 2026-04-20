@@ -29,14 +29,14 @@ const Footer = () => {
                      <li><Link to="/watchlist">My List</Link></li>
                   </ul>
                </div>
-               <div className="link-group">
-                  <h4>Support</h4>
-                  <ul>
-                     <li><a href="#">Help Center</a></li>
-                     <li><a href="#">Terms of Use</a></li>
-                     <li><a href="#">Privacy Policy</a></li>
-                  </ul>
-               </div>
+                <div className="link-group">
+                   <h4>Support</h4>
+                   <ul>
+                      <li><Link to="/help">Help Center</Link></li>
+                      <li><Link to="/terms">Terms of Use</Link></li>
+                      <li><Link to="/privacy">Privacy Policy</Link></li>
+                   </ul>
+                </div>
             </div>
          </div>
 

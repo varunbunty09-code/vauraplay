@@ -26,6 +26,16 @@ const tmdbService = {
   search: async (query, type = 'multi') => {
     const { data } = await axios.get(`${API_URL}/tmdb/search`, { params: { query, type } });
     return data.results;
+  },
+
+  getGenres: async (type = 'movie') => {
+    const { data } = await axios.get(`${API_URL}/tmdb/genres/${type}`);
+    return data.genres;
+  },
+
+  discover: async (type = 'movie', params = {}) => {
+    const { data } = await axios.get(`${API_URL}/tmdb/discover/${type}`, { params });
+    return data.results;
   }
 };
 

@@ -1,55 +1,273 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import tmdbService from '../services/tmdbService';
 import MovieRow from '../components/MovieRow';
-import { Search, Filter, SlidersHorizontal } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Search, SlidersHorizontal, X, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Browse = () => {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const type = searchParams.get('type') || 'movie';
+    const initialSearch = searchParams.get('search') || '';
     
     const [items, setItems] = useState([]);
+    const [genres, setGenres] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [localSearch, setLocalSearch] = useState(initialSearch);
+    const [selectedGenre, setSelectedGenre] = useState('');
+    const [showFilters, setShowFilters] = useState(false);
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            let data;
+            if (initialSearch) {
+                data = await tmdbService.search(initialSearch, type);
+            } else if (selectedGenre) {
+                data = await tmdbService.discover(type, { genre: selectedGenre });
+            } else {
+                data = await tmdbService.getPopular(type);
+            }
+            setItems(data || []);
+        } catch (err) {
+            console.error('Fetch failed');
+        } finally {
+            setLoading(false);
+        }
+    }, [type, initialSearch, selectedGenre]);
 
     useEffect(() => {
-        const fetchBrowseData = async () => {
-            setLoading(true);
-            try {
-                const data = await tmdbService.getPopular(type);
-                setItems(data);
-            } catch (err) {
-                console.error('Browse fetch failed');
-            } finally {
-                setLoading(false);
-            }
+        const fetchGenres = async () => {
+            const data = await tmdbService.getGenres(type);
+            setGenres(data || []);
         };
-        fetchBrowseData();
-    }, [type]);
+        fetchGenres();
+        fetchData();
+        setLocalSearch(initialSearch);
+    }, [type, fetchData, initialSearch]);
+
+    const handleSearch = (e) => {
+        if (e.key === 'Enter') {
+            setSearchParams({ type, search: localSearch });
+            setSelectedGenre('');
+        }
+    };
+
+    const clearSearch = () => {
+        setLocalSearch('');
+        setSearchParams({ type });
+    };
+
+    const handleGenreSelect = (genreId) => {
+        setSelectedGenre(genreId);
+        setSearchParams({ type }); // Clear search query when selecting genre
+        setShowFilters(false);
+    };
 
     return (
-        <div className="browse-page container">
-            <div className="browse-header flex-between" style={{ paddingTop: '120px', marginBottom: '3rem' }}>
-                <div>
-                   <h1 className="gradient-text" style={{ textTransform: 'capitalize' }}>Explore {type === 'tv' ? 'TV Shows' : 'Movies'}</h1>
-                   <p>Discover the latest and greatest content on VauraPlay.</p>
-                </div>
-                <div className="flex-center" style={{ gap: '1rem' }}>
-                   <div className="search-box glass" style={{ width: '300px' }}>
-                      <Search size={18} />
-                      <input type="text" placeholder={`Search ${type}...`} />
-                   </div>
-                   <button className="btn-outline"><SlidersHorizontal size={18} /> Filters</button>
-                </div>
-            </div>
+        <div className="browse-page">
+            <div className="container">
+                <header className="browse-header">
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                    >
+                        <h1 className="gradient-text">Explore {type === 'tv' ? 'TV Shows' : 'Movies'}</h1>
+                        <p>Discover the latest and greatest content on VauraPlay.</p>
+                    </motion.div>
 
-            <div className="browse-grid">
-               <MovieRow title="Popular Now" items={items} type={type} />
+                    <div className="browse-controls">
+                        <div className="search-box-large glass">
+                            <Search size={20} className="search-icon" />
+                            <input 
+                                type="text" 
+                                placeholder={`Search for a ${type === 'tv' ? 'show' : 'movie'}...`}
+                                value={localSearch}
+                                onChange={(e) => setLocalSearch(e.target.value)}
+                                onKeyDown={handleSearch}
+                            />
+                            {localSearch && <X size={18} className="clear-icon" onClick={clearSearch} />}
+                        </div>
+                        
+                        <div className="filter-wrapper">
+                            <button 
+                                className={`btn-filter glass ${selectedGenre ? 'active' : ''}`}
+                                onClick={() => setShowFilters(!showFilters)}
+                            >
+                                <SlidersHorizontal size={18} />
+                                <span>{selectedGenre ? genres.find(g => g.id == selectedGenre)?.name : 'Filters'}</span>
+                            </button>
+
+                            <AnimatePresence>
+                                {showFilters && (
+                                    <motion.div 
+                                        className="genre-dropdown glass"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                    >
+                                        <div className="genre-grid">
+                                            <button 
+                                                className={!selectedGenre ? 'active' : ''} 
+                                                onClick={() => handleGenreSelect('')}
+                                            >All Genres</button>
+                                            {genres.map(genre => (
+                                                <button 
+                                                    key={genre.id}
+                                                    className={selectedGenre == genre.id ? 'active' : ''}
+                                                    onClick={() => handleGenreSelect(genre.id)}
+                                                >
+                                                    {genre.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+                </header>
+
+                <div className="browse-results">
+                    {loading ? (
+                        <div className="loader-container flex-center">
+                            <Loader2 size={40} className="spin" color="var(--primary)" />
+                        </div>
+                    ) : items.length > 0 ? (
+                        <MovieRow 
+                            title={initialSearch ? `Results for "${initialSearch}"` : selectedGenre ? `${genres.find(g => g.id == selectedGenre)?.name} ${type === 'tv' ? 'Series' : 'Movies'}` : 'Popular Now'} 
+                            items={items} 
+                            type={type} 
+                        />
+                    ) : (
+                        <div className="no-results text-center">
+                            <h3>No results found</h3>
+                            <p>Try searching for something else or browse another category.</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <style>{`
-                .browse-page { padding-bottom: 5rem; }
-                .browse-grid { margin-top: 2rem; }
+                .browse-page {
+                    padding-top: 120px;
+                    padding-bottom: 5rem;
+                    min-height: 80vh;
+                }
+                
+                .browse-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-end;
+                    margin-bottom: 3rem;
+                    flex-wrap: wrap;
+                    gap: 2rem;
+                }
+                
+                .browse-controls {
+                    display: flex;
+                    gap: 1rem;
+                    align-items: center;
+                    flex: 1;
+                    justify-content: flex-end;
+                    min-width: 300px;
+                }
+                
+                .search-box-large {
+                    display: flex;
+                    align-items: center;
+                    padding: 0.8rem 1.5rem;
+                    border-radius: 30px;
+                    gap: 1rem;
+                    flex: 1;
+                    max-width: 500px;
+                    transition: var(--transition-fast);
+                }
+                
+                .search-box-large:focus-within {
+                    border-color: var(--primary);
+                    box-shadow: 0 0 20px var(--primary-glow);
+                }
+                
+                .search-box-large input {
+                    background: transparent;
+                    border: none;
+                    color: white;
+                    outline: none;
+                    width: 100%;
+                    font-size: 1rem;
+                }
+                
+                .search-icon { color: var(--text-muted); }
+                .clear-icon { color: var(--text-muted); cursor: pointer; }
+                .clear-icon:hover { color: white; }
+                
+                .filter-wrapper { position: relative; }
+                
+                .btn-filter {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.8rem;
+                    padding: 0.8rem 1.5rem;
+                    border-radius: 30px;
+                    color: white;
+                    border: 1px solid var(--border-light);
+                    background: transparent;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: var(--transition-fast);
+                }
+                
+                .btn-filter.active, .btn-filter:hover {
+                    border-color: var(--primary);
+                    color: var(--primary);
+                }
+                
+                .genre-dropdown {
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    margin-top: 1rem;
+                    padding: 1.5rem;
+                    width: 400px;
+                    z-index: 100;
+                    border-radius: var(--radius-md);
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+                }
+                
+                .genre-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 0.8rem;
+                }
+                
+                .genre-grid button {
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid transparent;
+                    padding: 0.6rem;
+                    border-radius: 8px;
+                    color: var(--text-dim);
+                    cursor: pointer;
+                    font-size: 0.85rem;
+                    text-align: left;
+                    transition: var(--transition-fast);
+                }
+                
+                .genre-grid button:hover, .genre-grid button.active {
+                    background: rgba(13, 202, 240, 0.1);
+                    color: var(--primary);
+                    border-color: var(--primary);
+                }
+                
+                .loader-container { height: 400px; }
+                .no-results { padding: 5rem 0; }
+                
+                @media (max-width: 900px) {
+                    .browse-header { flex-direction: column; align-items: flex-start; }
+                    .browse-controls { width: 100%; flex-wrap: wrap; }
+                    .search-box-large { max-width: none; width: 100%; }
+                    .genre-dropdown { width: 100vw; left: -1.25rem; right: -1.25rem; position: fixed; bottom: 0; top: auto; border-radius: 20px 20px 0 0; }
+                }
             `}</style>
         </div>
     );
