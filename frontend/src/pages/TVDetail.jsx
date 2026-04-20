@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import tmdbService from '../services/tmdbService';
-import { Play, Plus, Star, Calendar, Bookmark, List, Share2, MessageCircle, Copy, X } from 'lucide-react';
+import { Play, Plus, Star, Calendar, Bookmark, List, Share2, MessageCircle, Copy, X, ExternalLink } from 'lucide-react';
 
 const TwitterIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>;
 const FacebookIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>;
@@ -19,9 +19,13 @@ const TVDetail = () => {
     const [seasons, setSeasons] = useState([]);
     const [selectedSeason, setSelectedSeason] = useState(1);
     const [episodes, setEpisodes] = useState([]);
+    const [selectedCast, setSelectedCast] = useState(null);
+    const [castDetails, setCastDetails] = useState(null);
+    const [castLoading, setCastLoading] = useState(false);
     const [loading, setLoading] = useState(true);
     const [episodesLoading, setEpisodesLoading] = useState(false);
     const [showShare, setShowShare] = useState(false);
+    const [selectedLang, setSelectedLang] = useState('en');
     const [contentRating, setContentRating] = useState('');
     const [inWatchlist, setInWatchlist] = useState(false);
 
@@ -51,6 +55,8 @@ const TVDetail = () => {
         fetchShow();
         window.scrollTo(0, 0);
     }, [id]);
+
+    const matchPercentage = show ? Math.floor(show.vote_average * 8 + 20) : 0;
 
     useEffect(() => {
         const fetchEpisodes = async () => {
@@ -94,6 +100,23 @@ const TVDetail = () => {
         }
     };
 
+    const openCastModal = async (person) => {
+      setSelectedCast(person);
+      setCastLoading(true);
+      setCastDetails(null);
+      try {
+        const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY;
+        const { data } = await axios.get(`https://api.themoviedb.org/3/person/${person.id}?api_key=${TMDB_KEY}&append_to_response=tv_credits`);
+        setCastDetails(data);
+      } catch (err) {
+        toast.error('Failed to load actor details');
+      } finally {
+        setCastLoading(false);
+      }
+    };
+
+    const closeCastModal = () => { setSelectedCast(null); setCastDetails(null); };
+
     const copyToClipboard = () => {
       navigator.clipboard.writeText(window.location.href);
       toast.success('Link copied to clipboard!');
@@ -116,24 +139,89 @@ const TVDetail = () => {
                 </div>
 
                 <div className="container detail-content">
-                    <div className="detail-main">
-                        <h1>{show.name}</h1>
-                        <div className="detail-meta">
-                            <span className="rating-pill glass"><Star size={14} fill="var(--primary)" /> {show.vote_average.toFixed(1)}</span>
-                            {contentRating && <span className="age-pill glass">{contentRating}</span>}
-                            <span>{show.number_of_seasons} Seasons</span>
-                            <span>{show.first_air_date?.split('-')[0]}</span>
+                    <div className="detail-main-split">
+                        <div className="detail-left-content">
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                                <div className="detail-meta-premium">
+                                    <span className="match-tag">{matchPercentage}% match</span>
+                                    <span className="year-val">{show.first_air_date?.split('-')[0]}</span>
+                                    <span className="runtime-val">{show.number_of_seasons} Seasons</span>
+                                    <span className="hd-badge">HD</span>
+                                </div>
+
+                                <h1 className="movie-hero-title">{show.name}</h1>
+                                
+                                {show.tagline && <p className="overview-premium">"{show.tagline}"</p>}
+                                <p className="overview-main">{show.overview}</p>
+
+                                {/* Language Selector */}
+                                <div className="language-selector-netflix">
+                                    {show.spoken_languages?.map(lang => (
+                                        <button 
+                                            key={lang.iso_639_1} 
+                                            className={`lang-tab ${selectedLang === lang.iso_639_1 ? 'active' : ''}`}
+                                            onClick={() => setSelectedLang(lang.iso_639_1)}
+                                        >
+                                            {lang.english_name}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="detail-actions">
+                                    <Link to={`/watch/tv/${show.id}?s=${selectedSeason}&e=1&lang=${selectedLang}`} className="btn-primary">
+                                        <Play size={20} fill="currentColor" /> Watch Now
+                                    </Link>
+                                    <button className={`btn-outline watchlist-toggle ${inWatchlist ? 'in-list' : ''}`} onClick={toggleWatchlist}>
+                                        {inWatchlist ? <><Bookmark size={20} fill="var(--primary)" /> In My List</> : <><Plus size={20} /> Add to List</>}
+                                    </button>
+                                    <button className="btn-outline btn-icon" onClick={() => setShowShare(true)}>
+                                        <Share2 size={20} />
+                                    </button>
+                                </div>
+                            </motion.div>
                         </div>
-                        <p className="overview">{show.overview}</p>
-                        
-                        <div className="detail-actions">
-                            <Link to={`/watch/tv/${show.id}?s=1&e=1`} className="btn-primary"><Play size={20} fill="currentColor" /> Watch Now</Link>
-                            <button className={`btn-outline ${inWatchlist ? 'in-list' : ''}`} onClick={toggleWatchlist}>
-                                {inWatchlist ? <><Bookmark size={20} fill="var(--primary)" /> In My List</> : <><Plus size={20} /> Add to List</>}
-                            </button>
-                            <button className="btn-outline" onClick={() => setShowShare(true)}><Share2 size={20} /></button>
+
+                        <div className="detail-right-sidebar">
+                            <div className="sidebar-group">
+                                <span className="label">Cast:</span>
+                                <p className="sidebar-val">
+                                    {show.credits?.cast?.slice(0, 5).map(c => c.name).join(', ')}
+                                    {show.credits?.cast?.length > 5 && '...'}
+                                </p>
+                            </div>
+                            <div className="sidebar-group">
+                                <span className="label">Genres:</span>
+                                <p className="sidebar-val">{show.genres?.map(g => g.name).join(', ')}</p>
+                            </div>
+                            <div className="sidebar-group">
+                                <span className="label">Maturity:</span>
+                                <span className="rating-pill-static">{contentRating || 'U/A 13+'}</span>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="container cast-section-v2">
+                <h3>Top Cast</h3>
+                <div className="cast-scroll-area">
+                    {show.credits?.cast?.slice(0, 15).map(person => (
+                        <div key={person.id} className="cast-card-v2" onClick={() => openCastModal(person)}>
+                            <div className="cast-img-wrapper">
+                                {person.profile_path ? (
+                                    <img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} />
+                                ) : (
+                                    <div className="cast-placeholder">
+                                        <Bookmark size={30} color="var(--text-muted)" />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="cast-info-v2">
+                                <p className="name">{person.name}</p>
+                                <p className="char">{person.character}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
@@ -219,6 +307,75 @@ const TVDetail = () => {
                   </motion.div>
                 </div>
               )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {selectedCast && (
+                    <div className="share-modal-overlay" onClick={closeCastModal}>
+                        <motion.div className="cast-modal glass" initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} onClick={e => e.stopPropagation()}>
+                            <button className="close-share" onClick={closeCastModal}><X size={20} /></button>
+                            {castLoading ? (
+                                <div className="cast-modal-loading">
+                                    <div className="cast-modal-avatar-skeleton skeleton-shimmer" />
+                                    <div className="cast-modal-text-skeleton skeleton-shimmer" />
+                                    <div className="cast-modal-text-skeleton short skeleton-shimmer" />
+                                </div>
+                            ) : castDetails ? (
+                                <>
+                                    <div className="cast-modal-header">
+                                        <div className="cast-modal-photo-wrapper">
+                                            {castDetails.profile_path ? (
+                                                <img src={`https://image.tmdb.org/t/p/w300${castDetails.profile_path}`} alt={castDetails.name} className="cast-modal-photo" />
+                                            ) : (
+                                                <div className="cast-modal-placeholder">
+                                                    <Bookmark size={40} color="var(--text-muted)" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="cast-modal-info">
+                                            <h2>{castDetails.name}</h2>
+                                            {castDetails.birthday && <p className="cast-meta-item">🎂 {new Date(castDetails.birthday).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>}
+                                            {castDetails.place_of_birth && <p className="cast-meta-item">📍 {castDetails.place_of_birth}</p>}
+                                            {castDetails.known_for_department && <p className="cast-meta-item">🎭 {castDetails.known_for_department}</p>}
+                                            <a href={`https://www.themoviedb.org/person/${castDetails.id}`} target="_blank" rel="noreferrer" className="tmdb-link"><ExternalLink size={14} /> View on TMDB</a>
+                                        </div>
+                                    </div>
+
+                                    {castDetails.biography && (
+                                        <div className="cast-bio">
+                                            <h4>Biography</h4>
+                                            <p>{castDetails.biography.length > 400 ? castDetails.biography.substring(0, 400) + '...' : castDetails.biography}</p>
+                                        </div>
+                                    )}
+
+                                    {castDetails.tv_credits?.cast?.length > 0 && (
+                                        <div className="cast-filmography">
+                                            <h4>Known For</h4>
+                                            <div className="filmography-scroll">
+                                                {castDetails.tv_credits.cast
+                                                    .sort((a, b) => (b.vote_average * b.vote_count) - (a.vote_average * a.vote_count))
+                                                    .slice(0, 10)
+                                                    .map(m => (
+                                                        <Link key={m.id + '-' + m.credit_id} to={`/tv/${m.id}`} className="filmography-item" onClick={closeCastModal}>
+                                                            {m.poster_path ? (
+                                                                <img src={`https://image.tmdb.org/t/p/w200${m.poster_path}`} alt={m.name} />
+                                                            ) : (
+                                                                <div className="film-placeholder">
+                                                                    <span>{m.name}</span>
+                                                                </div>
+                                                            )}
+                                                            <p>{m.name}</p>
+                                                        </Link>
+                                                    ))
+                                                }
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            ) : null}
+                        </motion.div>
+                    </div>
+                )}
             </AnimatePresence>
 
             <style>{`

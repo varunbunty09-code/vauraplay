@@ -27,6 +27,7 @@ const MovieDetail = () => {
   const [showRating, setShowRating] = useState(false);
   const [userRating, setUserRating] = useState(null); // 'loved', 'liked', 'disliked'
   const [ratingFeedback, setRatingFeedback] = useState('');
+  const [selectedLang, setSelectedLang] = useState('en');
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -45,6 +46,8 @@ const MovieDetail = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
+  const matchPercentage = movie ? Math.floor(movie.vote_average * 8 + 20) : 0;
+
   const checkWatchlist = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/watchlist/check/${id}/movie`);
@@ -53,10 +56,8 @@ const MovieDetail = () => {
   };
 
   const toggleWatchlist = async () => {
-    // Optimistic Update
     const previousState = inWatchlist;
     setInWatchlist(!previousState);
-
     try {
       if (previousState) {
         const { data } = await axios.get(`${API_URL}/watchlist/check/${id}/movie`);
@@ -71,7 +72,6 @@ const MovieDetail = () => {
         toast.success('Added to watchlist');
       }
     } catch (err) {
-      // Rollback on error
       setInWatchlist(previousState);
       toast.error('Watchlist Error');
     }
@@ -124,90 +124,95 @@ const MovieDetail = () => {
         </div>
 
         <div className="container detail-content">
-          <div className="detail-side">
-            <motion.div className="detail-poster" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}>
-              <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} />
-            </motion.div>
-          </div>
-
-          <div className="detail-main">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <div className="detail-meta">
-                <span className="rating-pill glass"><Star size={14} fill="var(--primary)" /> {movie.vote_average.toFixed(1)}</span>
-                <span><Calendar size={14} /> {new Date(movie.release_date).getFullYear()}</span>
-                <span><Clock size={14} /> {movie.runtime} min</span>
-              </div>
-              <h1>{movie.title}</h1>
-              <div className="genres">
-                {movie.genres?.map(g => <span key={g.id} className="genre-tag">{g.name}</span>)}
-              </div>
-              <p className="overview">{movie.overview}</p>
-              <div className="detail-actions">
-                <Link to={`/watch/movie/${movie.id}`} className="btn-primary"><Play size={20} fill="currentColor" /> Play Now</Link>
-                <motion.button
-                  className={`btn-outline watchlist-toggle ${inWatchlist ? 'active' : ''}`}
-                  onClick={toggleWatchlist}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <AnimatePresence mode="wait">
-                    {inWatchlist ? (
-                      <motion.span key="in" className="wl-inner" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }}>
-                        <Check size={20} /> In Library
-                      </motion.span>
-                    ) : (
-                      <motion.span key="out" className="wl-inner" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }}>
-                        <Bookmark size={20} /> Add to List
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
-                <div className="rating-wrapper">
-                  <button className={`btn-outline rate-btn ${userRating ? 'rated' : ''}`} onClick={() => setShowRating(!showRating)}>
-                    {userRating === 'loved' ? <Heart size={20} fill="#f43f5e" color="#f43f5e" /> : userRating === 'liked' ? <ThumbsUp size={20} color="var(--primary)" /> : userRating === 'disliked' ? <ThumbsDown size={20} color="var(--text-muted)" /> : <ThumbsUp size={20} />}
-                  </button>
-                  <AnimatePresence>
-                    {showRating && (
-                      <motion.div className="rating-panel glass" initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.9 }}>
-                        {ratingFeedback ? (
-                          <motion.p className="rating-feedback" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{ratingFeedback}</motion.p>
-                        ) : (
-                          <>
-                            <button className={`emoji-btn ${userRating === 'loved' ? 'selected' : ''}`} onClick={() => handleRate('loved')} title="Loved it"><span className="emoji">❤️</span><span className="emoji-label">Loved</span></button>
-                            <button className={`emoji-btn ${userRating === 'liked' ? 'selected' : ''}`} onClick={() => handleRate('liked')} title="Liked it"><span className="emoji">👍</span><span className="emoji-label">Good</span></button>
-                            <button className={`emoji-btn ${userRating === 'disliked' ? 'selected' : ''}`} onClick={() => handleRate('disliked')} title="Not for me"><span className="emoji">👎</span><span className="emoji-label">Not for me</span></button>
-                          </>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+          <div className="detail-main-split">
+            <div className="detail-left-content">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <div className="detail-meta-premium">
+                  <span className="match-tag">{matchPercentage}% match</span>
+                  <span className="year-val">{new Date(movie.release_date).getFullYear()}</span>
+                  <span className="runtime-val">{movie.runtime}m</span>
+                  <span className="hd-badge">HD</span>
                 </div>
-                <button className="btn-outline" onClick={() => setShowShare(true)}><Share2 size={20} /></button>
+
+                <h1 className="movie-hero-title">{movie.title}</h1>
+                
+                <p className="overview-premium">"{movie.tagline}"</p>
+                <p className="overview-main">{movie.overview}</p>
+
+                {/* Language Selector */}
+                <div className="language-selector-netflix">
+                  {movie.spoken_languages?.map(lang => (
+                    <button 
+                      key={lang.iso_639_1} 
+                      className={`lang-tab ${selectedLang === lang.iso_639_1 ? 'active' : ''}`}
+                      onClick={() => setSelectedLang(lang.iso_639_1)}
+                    >
+                      {lang.english_name}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="detail-actions">
+                  <Link to={`/watch/movie/${movie.id}?lang=${selectedLang}`} className="btn-primary">
+                    <Play size={20} fill="currentColor" /> Play Now
+                  </Link>
+                  <button className={`btn-outline watchlist-toggle ${inWatchlist ? 'in-list' : ''}`} onClick={toggleWatchlist}>
+                    {inWatchlist ? <><Bookmark size={20} fill="var(--primary)" /> In My List</> : <><Plus size={20} /> Add to List</>}
+                  </button>
+                  <button className="btn-outline btn-icon" onClick={() => setShowShare(true)} title="Share">
+                    <Share2 size={20} />
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+
+            <div className="detail-right-sidebar">
+              <div className="sidebar-group">
+                <span className="label">Cast:</span>
+                <p className="sidebar-val">
+                  {movie.credits?.cast?.slice(0, 5).map(c => c.name).join(', ')}
+                  {movie.credits?.cast?.length > 5 && '...'}
+                </p>
               </div>
-            </motion.div>
+              <div className="sidebar-group">
+                <span className="label">Genres:</span>
+                <p className="sidebar-val">{movie.genres?.map(g => g.name).join(', ')}</p>
+              </div>
+              <div className="sidebar-group">
+                <span className="label">Maturity:</span>
+                <span className="rating-pill-static">U/A 18+ [A]</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container extra-info">
-        {movie.credits?.cast && (
-          <div className="cast-section">
-            <h3>Top Cast</h3>
-            <div className="cast-grid">
-              {movie.credits.cast.slice(0, 6).map(person => (
-                <div key={person.id} className="cast-card" onClick={() => openCastModal(person)}>
-                  <img src={person.profile_path ? `https://image.tmdb.org/t/p/w200${person.profile_path}` : 'https://via.placeholder.com/200x300?text=No+Photo'} alt={person.name} />
-                  <p className="name">{person.name}</p>
-                  <p className="char">{person.character}</p>
-                </div>
-              ))}
+      <div className="container cast-section-v2">
+        <h3>Top Cast</h3>
+        <div className="cast-scroll-area">
+          {movie.credits?.cast?.slice(0, 15).map(person => (
+            <div key={person.id} className="cast-card-v2" onClick={() => openCastModal(person)}>
+              <div className="cast-img-wrapper">
+                {person.profile_path ? (
+                  <img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} />
+                ) : (
+                  <div className="cast-placeholder">
+                    <Bookmark size={30} color="var(--text-muted)" />
+                  </div>
+                )}
+              </div>
+              <div className="cast-info-v2">
+                <p className="name">{person.name}</p>
+                <p className="char">{person.character}</p>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
+      </div>
 
+      <div className="container similar-section">
         {movie.similar?.results.length > 0 && (
-          <div className="similar-section">
-            <MovieRow title="Similar Movies" items={movie.similar.results} />
-          </div>
+          <MovieRow title="More Like This" items={movie.similar.results} />
         )}
       </div>
 
@@ -247,7 +252,15 @@ const MovieDetail = () => {
               ) : castDetails ? (
                 <>
                   <div className="cast-modal-header">
-                    <img src={castDetails.profile_path ? `https://image.tmdb.org/t/p/w300${castDetails.profile_path}` : 'https://via.placeholder.com/300x450?text=No+Photo'} alt={castDetails.name} className="cast-modal-photo" />
+                    <div className="cast-modal-photo-wrapper">
+                      {castDetails.profile_path ? (
+                        <img src={`https://image.tmdb.org/t/p/w300${castDetails.profile_path}`} alt={castDetails.name} className="cast-modal-photo" />
+                      ) : (
+                        <div className="cast-modal-placeholder">
+                          <Bookmark size={40} color="var(--text-muted)" />
+                        </div>
+                      )}
+                    </div>
                     <div className="cast-modal-info">
                       <h2>{castDetails.name}</h2>
                       {castDetails.birthday && <p className="cast-meta-item">🎂 {new Date(castDetails.birthday).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>}
@@ -273,7 +286,13 @@ const MovieDetail = () => {
                           .slice(0, 10)
                           .map(m => (
                             <Link key={m.id + '-' + m.credit_id} to={`/movie/${m.id}`} className="filmography-item" onClick={closeCastModal}>
-                              <img src={m.poster_path ? `https://image.tmdb.org/t/p/w200${m.poster_path}` : 'https://via.placeholder.com/200x300?text=No+Image'} alt={m.title} />
+                              {m.poster_path ? (
+                                <img src={`https://image.tmdb.org/t/p/w200${m.poster_path}`} alt={m.title} />
+                              ) : (
+                                <div className="film-placeholder">
+                                  <span>{m.title}</span>
+                                </div>
+                              )}
                               <p>{m.title}</p>
                             </Link>
                           ))
