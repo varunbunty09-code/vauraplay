@@ -23,6 +23,7 @@ const TVDetail = () => {
     const [episodesLoading, setEpisodesLoading] = useState(false);
     const [showShare, setShowShare] = useState(false);
     const [contentRating, setContentRating] = useState('');
+    const [inWatchlist, setInWatchlist] = useState(false);
 
     useEffect(() => {
         const fetchShow = async () => {
@@ -35,6 +36,12 @@ const TVDetail = () => {
                 // Find US rating if available
                 const usRating = data.content_ratings?.results?.find(r => r.iso_3166_1 === 'US')?.rating;
                 setContentRating(usRating || data.content_ratings?.results?.[0]?.rating || '');
+
+                // Check if already in watchlist
+                try {
+                    const { data: wlData } = await axios.get(`${API_URL}/watchlist/check/${data.id}/tv`);
+                    setInWatchlist(wlData.inWatchlist);
+                } catch (e) {}
             } catch (err) {
                 toast.error('Failed to load series details');
             } finally {
@@ -60,6 +67,32 @@ const TVDetail = () => {
         };
         fetchEpisodes();
     }, [id, selectedSeason]);
+
+    const toggleWatchlist = async () => {
+        const prev = inWatchlist;
+        setInWatchlist(!prev);
+        try {
+            if (prev) {
+                const { data } = await axios.get(`${API_URL}/watchlist/check/${show.id}/tv`);
+                await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
+                toast.success('Removed from watchlist');
+            } else {
+                await axios.post(`${API_URL}/watchlist`, {
+                    tmdbId: show.id,
+                    mediaType: 'tv',
+                    title: show.name,
+                    posterPath: show.poster_path,
+                    backdropPath: show.backdrop_path,
+                    overview: show.overview,
+                    voteAverage: show.vote_average,
+                });
+                toast.success('Added to watchlist');
+            }
+        } catch (err) {
+            setInWatchlist(prev);
+            toast.error('Failed to update watchlist');
+        }
+    };
 
     const copyToClipboard = () => {
       navigator.clipboard.writeText(window.location.href);
@@ -95,7 +128,9 @@ const TVDetail = () => {
                         
                         <div className="detail-actions">
                             <Link to={`/watch/tv/${show.id}?s=1&e=1`} className="btn-primary"><Play size={20} fill="currentColor" /> Watch Now</Link>
-                            <button className="btn-outline"><Plus size={20} /> Add to List</button>
+                            <button className={`btn-outline ${inWatchlist ? 'in-list' : ''}`} onClick={toggleWatchlist}>
+                                {inWatchlist ? <><Bookmark size={20} fill="var(--primary)" /> In My List</> : <><Plus size={20} /> Add to List</>}
+                            </button>
                             <button className="btn-outline" onClick={() => setShowShare(true)}><Share2 size={20} /></button>
                         </div>
                     </div>
