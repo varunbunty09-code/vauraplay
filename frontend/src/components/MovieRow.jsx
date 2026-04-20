@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Star, Play, Plus, Check } from 'lucide-react
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const MovieCard = ({ item, type }) => {
@@ -21,14 +20,14 @@ const MovieCard = ({ item, type }) => {
     try {
       const { data } = await axios.get(`${API_URL}/watchlist/check/${item.id}/${mediaType}`);
       setInWatchlist(data.inWatchlist);
-    } catch (e) {}
+    } catch (e) { }
     setChecked(true);
   };
 
   const toggleWatchlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Optimistic Update
     const previousState = inWatchlist;
     setInWatchlist(!previousState);
@@ -117,16 +116,16 @@ const MovieRow = ({ title, items, type = 'movie' }) => {
   return (
     <div className="movie-row-container">
       <h3 className="row-title">{title}</h3>
-      
+
       <div className="row-wrapper">
         <button className="row-arrow left" onClick={() => scroll('left')}><ChevronLeft /></button>
-        
+
         <div className="movie-row" ref={rowRef}>
           {items?.map((item) => (
             <MovieCard key={item.id} item={item} type={type} />
           ))}
         </div>
-        
+
         <button className="row-arrow right" onClick={() => scroll('right')}><ChevronRight /></button>
       </div>
 
