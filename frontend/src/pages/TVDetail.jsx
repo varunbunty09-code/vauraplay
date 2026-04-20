@@ -103,40 +103,58 @@ const TVDetail = () => {
             </div>
 
             <div className="container season-section">
-                <div className="section-header">
-                  <h3>Seasons & Episodes</h3>
-                  <div className="season-selector">
-                    {seasons.filter(s => s.season_number > 0).map(s => (
-                      <button 
-                        key={s.id} 
-                        className={`season-btn glass ${selectedSeason === s.season_number ? 'active' : ''}`}
-                        onClick={() => setSelectedSeason(s.season_number)}
-                      >
-                        Season {s.season_number}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <div className="season-layout">
+                    <aside className="season-sidebar">
+                        <h3>Seasons</h3>
+                        <div className="season-stack">
+                            {seasons.filter(s => s.season_number > 0).map(s => (
+                                <button 
+                                    key={s.id} 
+                                    className={`season-stack-item ${selectedSeason === s.season_number ? 'active' : ''}`}
+                                    onClick={() => setSelectedSeason(s.season_number)}
+                                >
+                                    <div className="s-info">
+                                        <span className="s-name">Season {s.season_number}</span>
+                                        <span className="s-count">{s.episode_count} Episodes</span>
+                                    </div>
+                                    <div className="s-active-indicator"></div>
+                                </button>
+                            ))}
+                        </div>
+                    </aside>
 
-                {episodesLoading ? (
-                  <div className="flex-center" style={{padding: '3rem'}}><motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Play size={40} color="var(--primary)" /></motion.div></div>
-                ) : (
-                  <div className="episodes-grid">
-                    {episodes.map(ep => (
-                      <Link to={`/watch/tv/${id}?s=${selectedSeason}&e=${ep.episode_number}`} key={ep.id} className="episode-card glass">
-                        <div className="ep-thumb">
-                          <img src={ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : `https://image.tmdb.org/t/p/w300${show.backdrop_path}`} alt={ep.name} />
-                          <div className="ep-overlay"><Play size={24} fill="white" /></div>
-                          <span className="ep-num">E{ep.episode_number}</span>
+                    <main className="episodes-container">
+                        <div className="episodes-header">
+                            <h2>{seasons.find(s => s.season_number === selectedSeason)?.name || `Season ${selectedSeason}`}</h2>
+                            <p className="text-muted">{episodes.length} Episodes available</p>
                         </div>
-                        <div className="ep-info">
-                          <h4>{ep.name}</h4>
-                          <p>{ep.overview || 'No description available for this episode.'}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
+
+                        {episodesLoading ? (
+                            <div className="episodes-loader">
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                    <Play size={40} color="var(--primary)" fill="var(--primary)" />
+                                </motion.div>
+                                <p>Loading Episodes...</p>
+                            </div>
+                        ) : (
+                            <div className="episodes-grid">
+                                {episodes.map(ep => (
+                                    <Link to={`/watch/tv/${id}?s=${selectedSeason}&e=${ep.episode_number}`} key={ep.id} className="episode-card glass">
+                                        <div className="ep-thumb">
+                                            <img src={ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : `https://image.tmdb.org/t/p/w300${show.backdrop_path}`} alt={ep.name} />
+                                            <div className="ep-overlay"><Play size={24} fill="white" /></div>
+                                            <span className="ep-num">E{ep.episode_number}</span>
+                                        </div>
+                                        <div className="ep-info">
+                                            <h4>{ep.name}</h4>
+                                            <p>{ep.overview || 'No description available for this episode.'}</p>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </main>
+                </div>
             </div>
 
             <AnimatePresence>
@@ -172,47 +190,81 @@ const TVDetail = () => {
             </AnimatePresence>
 
             <style>{`
-                .tv .detail-hero { height: auto; min-height: 80vh; display: flex; align-items: flex-end; padding: 4rem 0; position: relative; }
+                .tv .detail-hero { height: auto; min-height: 85vh; display: flex; align-items: flex-end; padding: 6rem 0; position: relative; }
                 .backdrop-wrapper { position: absolute; inset: 0; z-index: 0; }
-                .backdrop-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-                .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0c 10%, transparent 80%), linear-gradient(to right, #0a0a0c 10%, transparent 80%); }
+                .backdrop-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+                .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0c 18%, transparent 95%), linear-gradient(to right, #0a0a0c 15%, transparent 85%); }
                 .detail-content { position: relative; z-index: 10; }
                 .detail-meta { display: flex; gap: 1.5rem; align-items: center; margin-bottom: 2rem; color: var(--text-dim); }
-                .rating-pill { display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; border-radius: 20px; color: var(--primary); font-weight: 700; background: rgba(13, 202, 240, 0.15); border: 1px solid rgba(13, 202, 240, 0.3); }
-                .age-pill { padding: 0.3rem 0.8rem; border-radius: 4px; font-weight: 700; font-size: 0.8rem; border: 1px solid var(--border-light); }
-                .overview { max-width: 700px; line-height: 1.7; font-size: 1.1rem; color: var(--text-dim); margin-bottom: 2rem; }
-                .detail-actions { display: flex; gap: 1rem; }
+                .rating-pill { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 1rem; border-radius: 20px; color: var(--primary); font-weight: 800; background: rgba(13, 202, 240, 0.15); border: 1.5px solid rgba(13, 202, 240, 0.3); box-shadow: 0 0 15px rgba(13, 202, 240, 0.1); }
+                .age-pill { padding: 0.4rem 1rem; border-radius: 6px; font-weight: 800; font-size: 0.85rem; border: 1.5px solid var(--border-light); background: rgba(255,255,255,0.05); color: white; text-transform: uppercase; }
+                .overview { max-width: 750px; line-height: 1.8; font-size: 1.15rem; color: var(--text-dim); margin-bottom: 2.5rem; }
+                .detail-actions { display: flex; gap: 1.2rem; }
 
-                .season-section { padding: 4rem 0 6rem; }
-                .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3rem; flex-wrap: wrap; gap: 1.5rem; }
-                .season-selector { display: flex; gap: 0.8rem; overflow-x: auto; padding: 0.5rem 0; scrollbar-width: none; }
-                .season-selector::-webkit-scrollbar { display: none; }
-                .season-btn { padding: 0.7rem 1.6rem; border-radius: 30px; border: 1px solid var(--border-light); color: white; cursor: pointer; white-space: nowrap; transition: .3s; font-weight: 600; font-size: 0.9rem; }
-                .season-btn:hover { border-color: var(--primary); background: rgba(255,255,255,0.05); }
-                .season-btn.active { border-color: var(--primary); background: var(--primary); color: black; box-shadow: 0 0 20px var(--primary-glow); }
+                .season-section { padding: 6rem 0; }
+                .season-layout { display: grid; grid-template-columns: 320px 1fr; gap: 4rem; }
                 
-                .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
-                .episode-card { display: flex; flex-direction: column; border-radius: var(--radius-md); overflow: hidden; transition: .3s; border: 1px solid transparent; text-decoration: none; color: inherit; }
-                .episode-card:hover { transform: translateY(-8px); border-color: var(--primary); background: rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+                .season-sidebar h3 { margin-bottom: 2rem; font-size: 1.5rem; }
+                .season-stack { display: flex; flex-direction: column; gap: 0.8rem; }
+                .season-stack-item {
+                  background: rgba(255,255,255,0.03); border: 1px solid var(--border-light);
+                  padding: 1.2rem 1.5rem; border-radius: 16px; color: white; cursor: pointer;
+                  display: flex; justify-content: space-between; align-items: center;
+                  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;
+                }
+                .season-stack-item:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateX(5px); }
+                .season-stack-item.active { background: rgba(13, 202, 240, 0.1); border-color: var(--primary); }
+                .s-info { display: flex; flex-direction: column; gap: 0.3rem; text-align: left; }
+                .s-name { font-weight: 700; font-size: 1.1rem; }
+                .s-count { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+                .s-active-indicator { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--primary); transition: 0.3s; opacity: 0; }
+                .season-stack-item.active .s-active-indicator { opacity: 1; }
+                .season-stack-item.active .s-name { color: var(--primary); }
+
+                .episodes-container { min-width: 0; }
+                .episodes-header { margin-bottom: 3rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1.5rem; }
+                .episodes-header h2 { font-size: 2.2rem; margin-bottom: 0.5rem; }
+                .episodes-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6rem 0; gap: 1.5rem; color: var(--text-muted); }
+                
+                .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; }
+                .episode-card { display: flex; flex-direction: column; border-radius: var(--radius-md); overflow: hidden; transition: .3s; text-decoration: none; color: inherit; background: rgba(255,255,255,0.02); border: 1px solid transparent; }
+                .episode-card:hover { transform: translateY(-10px); border-color: var(--primary); background: rgba(255,255,255,0.06); box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
                 .ep-thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; }
-                .ep-thumb img { width: 100%; height: 100%; object-fit: cover; transition: .5s; }
-                .episode-card:hover .ep-thumb img { transform: scale(1.08); }
+                .ep-thumb img { width: 100%; height: 100%; object-fit: cover; transition: .6s; }
+                .episode-card:hover .ep-thumb img { transform: scale(1.1); }
                 .ep-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: .3s; }
                 .episode-card:hover .ep-overlay { opacity: 1; }
-                .ep-num { position: absolute; bottom: 12px; right: 12px; background: var(--primary); color: black; font-weight: 800; font-size: 0.8rem; padding: 0.2rem 0.7rem; border-radius: 5px; }
+                .ep-num { position: absolute; bottom: 15px; right: 15px; background: var(--primary); color: black; font-weight: 800; font-size: 0.85rem; padding: 0.3rem 0.8rem; border-radius: 6px; box-shadow: 0 4px 10px rgba(13, 202, 240, 0.4); }
                 
-                .ep-info { padding: 1.5rem; }
-                .ep-info h4 { margin-bottom: 0.6rem; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--primary); }
-                .ep-info p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+                .ep-info { padding: 1.8rem; }
+                .ep-info h4 { margin-bottom: 0.8rem; font-size: 1.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--primary); }
+                .ep-info p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-                .share-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-                .share-modal { width: 100%; max-width: 450px; padding: 2.5rem; border-radius: var(--radius-lg); text-align: center; position: relative; }
-                .share-options { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; }
-                .share-btn { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; color: white; font-size: 0.8rem; transition: 0.3s; }
-                .copy-link { display: flex; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); border-radius: 10px; padding: 0.5rem; margin-top: 1rem; }
-                .copy-link input { flex: 1; background: none; border: none; color: var(--text-dim); padding: 0.5rem; font-size: 0.9rem; outline: none; }
-                .copy-link button { background: var(--primary); border: none; padding: 0.5rem 1rem; border-radius: 8px; color: black; cursor: pointer; }
-                .close-share { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); cursor: pointer; }
+                .share-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+                .share-modal { width: 100%; max-width: 480px; padding: 3rem; border-radius: 24px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.1); }
+                .share-options { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2.5rem; }
+                .share-btn { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; text-decoration: none; color: white; font-size: 0.9rem; transition: 0.3s; }
+                .copy-link { display: flex; background: rgba(255,255,255,0.06); border: 1px solid var(--border-light); border-radius: 12px; padding: 0.6rem; margin-top: 1.5rem; }
+                .copy-link input { flex: 1; background: none; border: none; color: var(--text-dim); padding: 0.6rem; font-size: 0.95rem; outline: none; }
+                .copy-link button { background: var(--primary); border: none; padding: 0.7rem 1.2rem; border-radius: 10px; color: black; cursor: pointer; transition: 0.3s; }
+                .copy-link button:hover { transform: scale(1.05); }
+                .close-share { position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,0.05); border: none; color: var(--text-muted); cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+                .close-share:hover { background: rgba(255,255,255,0.1); color: white; transform: rotate(90deg); }
+
+                @media (max-width: 1100px) {
+                  .season-layout { grid-template-columns: 1fr; gap: 3rem; }
+                  .season-stack { flex-direction: row; overflow-x: auto; padding-bottom: 1rem; scrollbar-width: none; }
+                  .season-stack::-webkit-scrollbar { display: none; }
+                  .season-stack-item { min-width: 200px; }
+                  .s-active-indicator { left: 0; right: 0; bottom: 0; top: auto; height: 3px; width: 100%; }
+                }
+
+                @media (max-width: 768px) {
+                  .tv .detail-hero { min-height: 70vh; padding: 4rem 0; }
+                  .detail-meta { flex-wrap: wrap; gap: 1rem; }
+                  .episodes-grid { grid-template-columns: 1fr; }
+                  .episodes-header h2 { font-size: 1.8rem; }
+                }
             `}</style>
         </div>
     );

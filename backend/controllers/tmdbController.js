@@ -97,7 +97,7 @@ exports.getMovieDetails = async (req, res) => {
 exports.getTVDetails = async (req, res) => {
   try {
     const data = await tmdbFetch(`/tv/${req.params.id}`, {
-      append_to_response: 'credits,similar,videos,images',
+      append_to_response: 'credits,similar,videos,images,content_ratings',
     });
     res.json(data);
   } catch (error) {
