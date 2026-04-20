@@ -103,58 +103,55 @@ const TVDetail = () => {
             </div>
 
             <div className="container season-section">
-                <div className="season-layout">
-                    <aside className="season-sidebar">
-                        <h3>Seasons</h3>
-                        <div className="season-stack">
+                <div className="season-header-new">
+                    <div className="title-area">
+                        <h2>Episodes</h2>
+                        <p>{episodes.length} items to watch</p>
+                    </div>
+                    <div className="season-dropdown-wrapper">
+                        <select 
+                            className="season-select-glass"
+                            value={selectedSeason}
+                            onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                        >
                             {seasons.filter(s => s.season_number > 0).map(s => (
-                                <button 
-                                    key={s.id} 
-                                    className={`season-stack-item ${selectedSeason === s.season_number ? 'active' : ''}`}
-                                    onClick={() => setSelectedSeason(s.season_number)}
-                                >
-                                    <div className="s-info">
-                                        <span className="s-name">Season {s.season_number}</span>
-                                        <span className="s-count">{s.episode_count} Episodes</span>
-                                    </div>
-                                    <div className="s-active-indicator"></div>
-                                </button>
+                                <option key={s.id} value={s.season_number}>
+                                    Season {s.season_number} ({s.episode_count} Episodes)
+                                </option>
                             ))}
-                        </div>
-                    </aside>
-
-                    <main className="episodes-container">
-                        <div className="episodes-header">
-                            <h2>{seasons.find(s => s.season_number === selectedSeason)?.name || `Season ${selectedSeason}`}</h2>
-                            <p className="text-muted">{episodes.length} Episodes available</p>
-                        </div>
-
-                        {episodesLoading ? (
-                            <div className="episodes-loader">
-                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-                                    <Play size={40} color="var(--primary)" fill="var(--primary)" />
-                                </motion.div>
-                                <p>Loading Episodes...</p>
-                            </div>
-                        ) : (
-                            <div className="episodes-grid">
-                                {episodes.map(ep => (
-                                    <Link to={`/watch/tv/${id}?s=${selectedSeason}&e=${ep.episode_number}`} key={ep.id} className="episode-card glass">
-                                        <div className="ep-thumb">
-                                            <img src={ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : `https://image.tmdb.org/t/p/w300${show.backdrop_path}`} alt={ep.name} />
-                                            <div className="ep-overlay"><Play size={24} fill="white" /></div>
-                                            <span className="ep-num">E{ep.episode_number}</span>
-                                        </div>
-                                        <div className="ep-info">
-                                            <h4>{ep.name}</h4>
-                                            <p>{ep.overview || 'No description available for this episode.'}</p>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
-                    </main>
+                        </select>
+                    </div>
                 </div>
+
+                {episodesLoading ? (
+                    <div className="episodes-loader">
+                        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
+                            <Play size={40} color="var(--primary)" fill="var(--primary)" />
+                        </motion.div>
+                        <p>Fetching episodes...</p>
+                    </div>
+                ) : (
+                    <div className="episodes-stack">
+                        {episodes.map(ep => (
+                            <Link to={`/watch/tv/${id}?s=${selectedSeason}&e=${ep.episode_number}`} key={ep.id} className="episode-bar glass">
+                                <div className="eb-thumb">
+                                    <img src={ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : `https://image.tmdb.org/t/p/w300${show.backdrop_path}`} alt={ep.name} />
+                                    <div className="eb-play-overlay"><Play size={20} fill="white" /></div>
+                                </div>
+                                <div className="eb-info">
+                                    <div className="eb-main">
+                                        <span className="eb-num">Episode {ep.episode_number}</span>
+                                        <h4 className="eb-title">{ep.name}</h4>
+                                    </div>
+                                    <p className="eb-overview">{ep.overview || 'No description available.'}</p>
+                                </div>
+                                <div className="eb-action">
+                                    <button className="ep-play-mini"><Play size={16} fill="black" /></button>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <AnimatePresence>
@@ -201,45 +198,6 @@ const TVDetail = () => {
                 .overview { max-width: 750px; line-height: 1.8; font-size: 1.15rem; color: var(--text-dim); margin-bottom: 2.5rem; }
                 .detail-actions { display: flex; gap: 1.2rem; }
 
-                .season-section { padding: 6rem 0; }
-                .season-layout { display: grid; grid-template-columns: 320px 1fr; gap: 4rem; }
-                
-                .season-sidebar h3 { margin-bottom: 2rem; font-size: 1.5rem; }
-                .season-stack { display: flex; flex-direction: column; gap: 0.8rem; }
-                .season-stack-item {
-                  background: rgba(255,255,255,0.03); border: 1px solid var(--border-light);
-                  padding: 1.2rem 1.5rem; border-radius: 16px; color: white; cursor: pointer;
-                  display: flex; justify-content: space-between; align-items: center;
-                  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;
-                }
-                .season-stack-item:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateX(5px); }
-                .season-stack-item.active { background: rgba(13, 202, 240, 0.1); border-color: var(--primary); }
-                .s-info { display: flex; flex-direction: column; gap: 0.3rem; text-align: left; }
-                .s-name { font-weight: 700; font-size: 1.1rem; }
-                .s-count { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
-                .s-active-indicator { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--primary); transition: 0.3s; opacity: 0; }
-                .season-stack-item.active .s-active-indicator { opacity: 1; }
-                .season-stack-item.active .s-name { color: var(--primary); }
-
-                .episodes-container { min-width: 0; }
-                .episodes-header { margin-bottom: 3rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1.5rem; }
-                .episodes-header h2 { font-size: 2.2rem; margin-bottom: 0.5rem; }
-                .episodes-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6rem 0; gap: 1.5rem; color: var(--text-muted); }
-                
-                .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; }
-                .episode-card { display: flex; flex-direction: column; border-radius: var(--radius-md); overflow: hidden; transition: .3s; text-decoration: none; color: inherit; background: rgba(255,255,255,0.02); border: 1px solid transparent; }
-                .episode-card:hover { transform: translateY(-10px); border-color: var(--primary); background: rgba(255,255,255,0.06); box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
-                .ep-thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; }
-                .ep-thumb img { width: 100%; height: 100%; object-fit: cover; transition: .6s; }
-                .episode-card:hover .ep-thumb img { transform: scale(1.1); }
-                .ep-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: .3s; }
-                .episode-card:hover .ep-overlay { opacity: 1; }
-                .ep-num { position: absolute; bottom: 15px; right: 15px; background: var(--primary); color: black; font-weight: 800; font-size: 0.85rem; padding: 0.3rem 0.8rem; border-radius: 6px; box-shadow: 0 4px 10px rgba(13, 202, 240, 0.4); }
-                
-                .ep-info { padding: 1.8rem; }
-                .ep-info h4 { margin-bottom: 0.8rem; font-size: 1.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--primary); }
-                .ep-info p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-
                 .share-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
                 .share-modal { width: 100%; max-width: 480px; padding: 3rem; border-radius: 24px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.1); }
                 .share-options { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2.5rem; }
@@ -251,19 +209,67 @@ const TVDetail = () => {
                 .close-share { position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,0.05); border: none; color: var(--text-muted); cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
                 .close-share:hover { background: rgba(255,255,255,0.1); color: white; transform: rotate(90deg); }
 
-                @media (max-width: 1100px) {
-                  .season-layout { grid-template-columns: 1fr; gap: 3rem; }
-                  .season-stack { flex-direction: row; overflow-x: auto; padding-bottom: 1rem; scrollbar-width: none; }
-                  .season-stack::-webkit-scrollbar { display: none; }
-                  .season-stack-item { min-width: 200px; }
-                  .s-active-indicator { left: 0; right: 0; bottom: 0; top: auto; height: 3px; width: 100%; }
+                .season-section { padding: 5rem 0 8rem; }
+                .season-header-new { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 2rem; }
+                .title-area h2 { font-size: 2.4rem; margin-bottom: 0.5rem; }
+                .title-area p { color: var(--text-muted); font-size: 1rem; }
+                
+                .season-select-glass {
+                  background: rgba(255,255,255,0.05); border: 1.5px solid var(--border-light);
+                  color: white; padding: 0.8rem 1.5rem; border-radius: 12px; font-size: 1rem;
+                  font-weight: 600; cursor: pointer; min-width: 240px; outline: none;
+                  transition: .3s; appearance: none;
+                  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+                  background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
                 }
+                .season-select-glass:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+                .season-select-glass option { background: #0f0f12; color: white; padding: 1rem; }
 
-                @media (max-width: 768px) {
-                  .tv .detail-hero { min-height: 70vh; padding: 4rem 0; }
-                  .detail-meta { flex-wrap: wrap; gap: 1rem; }
-                  .episodes-grid { grid-template-columns: 1fr; }
-                  .episodes-header h2 { font-size: 1.8rem; }
+                .episodes-stack { display: flex; flex-direction: column; gap: 1.2rem; }
+                .episode-bar {
+                  display: flex; align-items: center; gap: 2rem; padding: 1.2rem;
+                  border-radius: 20px; text-decoration: none; color: inherit;
+                  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                  border: 1px solid transparent;
+                }
+                .episode-bar:hover {
+                  background: rgba(255,255,255,0.05); border-color: rgba(13, 202, 240, 0.2);
+                  transform: scale(1.01); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                }
+                
+                .eb-thumb {
+                  width: 220px; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden;
+                  position: relative; flex-shrink: 0;
+                }
+                .eb-thumb img { width: 100%; height: 100%; object-fit: cover; transition: .5s; }
+                .episode-bar:hover .eb-thumb img { transform: scale(1.1); }
+                .eb-play-overlay {
+                  position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+                  display: flex; align-items: center; justify-content: center;
+                  opacity: 0; transition: .3s;
+                }
+                .episode-bar:hover .eb-play-overlay { opacity: 1; }
+
+                .eb-info { flex: 1; min-width: 0; }
+                .eb-main { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem; }
+                .eb-num { font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; }
+                .eb-title { font-size: 1.3rem; margin: 0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .eb-overview { font-size: 0.95rem; color: var(--text-dim); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+                .eb-action { padding: 0 1rem; }
+                .ep-play-mini {
+                  width: 45px; height: 45px; border-radius: 50%; background: white;
+                  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+                  transition: .3s; opacity: 0.6;
+                }
+                .episode-bar:hover .ep-play-mini { opacity: 1; background: var(--primary); transform: rotate(360deg); }
+
+                @media (max-width: 900px) {
+                  .episode-bar { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+                  .eb-thumb { width: 100%; }
+                  .eb-action { display: none; }
+                  .season-header-new { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+                  .season-select-glass { width: 100%; }
                 }
             `}</style>
         </div>
