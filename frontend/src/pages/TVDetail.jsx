@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import tmdbService from '../services/tmdbService';
-import { Play, Plus, Star, Calendar, Bookmark, List } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Play, Plus, Star, Calendar, Bookmark, List, Share2, MessageCircle, Twitter, Facebook, Copy, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import MovieRow from '../components/MovieRow';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -15,6 +15,7 @@ const TVDetail = () => {
     const [seasons, setSeasons] = useState([]);
     const [selectedSeason, setSelectedSeason] = useState(1);
     const [loading, setLoading] = useState(true);
+    const [showShare, setShowShare] = useState(false);
 
     useEffect(() => {
         const fetchShow = async () => {
@@ -30,7 +31,19 @@ const TVDetail = () => {
             }
         };
         fetchShow();
+        window.scrollTo(0, 0);
     }, [id]);
+
+    const copyToClipboard = () => {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+    };
+
+    const shareLinks = {
+      whatsapp: `https://wa.me/?text=${encodeURIComponent('Check out this show on VauraPlay: ' + window.location.href)}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ' + (show?.name || 'this') + ' on @VauraPlay')}&url=${encodeURIComponent(window.location.href)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`
+    };
 
     if (loading) return <div className="loading-screen" style={{height:'100vh'}}></div>;
 
@@ -55,6 +68,7 @@ const TVDetail = () => {
                         <div className="detail-actions">
                             <Link to={`/watch/tv/${show.id}?s=1&e=1`} className="btn-primary"><Play size={20} fill="currentColor" /> Watch Now</Link>
                             <button className="btn-outline"><Bookmark size={20} /> Add to List</button>
+                            <button className="btn-outline" onClick={() => setShowShare(true)}><Share2 size={20} /></button>
                         </div>
                     </div>
                 </div>
@@ -83,11 +97,65 @@ const TVDetail = () => {
                 </div>
             </div>
 
+            <AnimatePresence>
+              {showShare && (
+                <div className="share-modal-overlay" onClick={() => setShowShare(false)}>
+                  <motion.div 
+                    className="share-modal glass"
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <h3>Share this series</h3>
+                    <div className="share-options">
+                      <a href={shareLinks.whatsapp} target="_blank" rel="noreferrer" className="share-btn whatsapp">
+                        <MessageCircle size={24} /> WhatsApp
+                      </a>
+                      <a href={shareLinks.twitter} target="_blank" rel="noreferrer" className="share-btn twitter">
+                        <Twitter size={24} /> Twitter
+                      </a>
+                      <a href={shareLinks.facebook} target="_blank" rel="noreferrer" className="share-btn facebook">
+                        <Facebook size={24} /> Facebook
+                      </a>
+                    </div>
+                    <div className="copy-link">
+                      <input type="text" readOnly value={window.location.href} />
+                      <button onClick={copyToClipboard}><Copy size={18} /></button>
+                    </div>
+                    <button className="close-share" onClick={() => setShowShare(false)}><X size={20} /></button>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+
             <style>{`
+                .tv .detail-hero { height: auto; min-height: 80vh; display: flex; align-items: flex-end; padding: 4rem 0; position: relative; }
+                .backdrop-wrapper { position: absolute; inset: 0; z-index: 0; }
+                .backdrop-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+                .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0c 10%, transparent 80%), linear-gradient(to right, #0a0a0c 10%, transparent 80%); }
+                .detail-content { position: relative; z-index: 10; }
+                .detail-meta { display: flex; gap: 1.5rem; align-items: center; margin-bottom: 2rem; color: var(--text-dim); }
+                .overview { max-width: 700px; line-height: 1.7; font-size: 1.1rem; color: var(--text-dim); margin-bottom: 2rem; }
+                .detail-actions { display: flex; gap: 1rem; }
                 .season-section { padding: 4rem 0; }
                 .season-selector { display: flex; gap: 1rem; overflow-x: auto; padding: 1rem 0; margin-bottom: 2rem; }
-                .season-btn { padding: 0.8rem 1.5rem; border-radius: 10px; border: 1px solid var(--border-light); color: white; cursor: pointer; white-space: nowrap; }
+                .season-btn { padding: 0.8rem 1.5rem; border-radius: 10px; border: 1px solid var(--border-light); color: white; cursor: pointer; white-space: nowrap; transition: .3s; }
                 .season-btn.active { border-color: var(--primary); background: var(--primary-glow); color: var(--primary); }
+                
+                .share-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+                .share-modal { width: 100%; max-width: 450px; padding: 2.5rem; border-radius: var(--radius-lg); text-align: center; position: relative; }
+                .share-modal h3 { margin-bottom: 2rem; }
+                .share-options { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; }
+                .share-btn { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; color: white; font-size: 0.8rem; transition: 0.3s; }
+                .share-btn:hover { color: var(--primary); transform: translateY(-5px); }
+                .whatsapp { color: #25D366; }
+                .twitter { color: #1DA1F2; }
+                .facebook { color: #1877F2; }
+                .copy-link { display: flex; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); border-radius: 10px; padding: 0.5rem; margin-top: 1rem; }
+                .copy-link input { flex: 1; background: none; border: none; color: var(--text-dim); padding: 0.5rem; font-size: 0.9rem; outline: none; }
+                .copy-link button { background: var(--primary); border: none; padding: 0.5rem 1rem; border-radius: 8px; color: black; cursor: pointer; }
+                .close-share { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); cursor: pointer; }
             `}</style>
         </div>
     );

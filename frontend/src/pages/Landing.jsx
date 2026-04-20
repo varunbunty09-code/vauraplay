@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Shield, Zap, Palette, ArrowRight, Star, X } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 
 const Landing = () => {
   const [showDemo, setShowDemo] = useState(false);
+  const location = useLocation();
 
   return (
     <div className="landing-page">
@@ -30,7 +31,7 @@ const Landing = () => {
               integrated with our proprietary AI-powered recommendation engine.
             </p>
             <div className="hero-btns">
-              <Link to="/signup" className="btn-primary">Get Started Free <ArrowRight size={18} /></Link>
+              <Link to="/signup" state={{ from: location.state?.from }} className="btn-primary">Get Started Free <ArrowRight size={18} /></Link>
               <button onClick={() => setShowDemo(true)} className="btn-outline">Watch Demo</button>
             </div>
             
@@ -92,7 +93,7 @@ const Landing = () => {
               <h2>Ready to dive in?</h2>
               <p>Join thousands of users who have already upgraded their streaming experience.</p>
             </div>
-            <Link to="/signup" className="btn-primary">Create Your Account <ArrowRight size={18} /></Link>
+            <Link to="/signup" state={{ from: location.state?.from }} className="btn-primary">Create Your Account <ArrowRight size={18} /></Link>
           </div>
         </div>
       </section>
@@ -127,7 +128,7 @@ const Landing = () => {
               <div className="demo-info">
                 <h3>VauraPlay Platform Showcase</h3>
                 <p>Discover how VauraPlay empowers creators to build the next generation of streaming websites.</p>
-                <Link to="/signup" className="btn-primary" onClick={() => setShowDemo(false)}>Join Now</Link>
+                <Link to="/signup" state={{ from: location.state?.from }} className="btn-primary" onClick={() => setShowDemo(false)}>Join Now</Link>
               </div>
             </motion.div>
           </motion.div>

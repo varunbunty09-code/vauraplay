@@ -3,7 +3,7 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const ActivityLog = require('../models/ActivityLog');
 const sendEmail = require('../utils/sendEmail');
-const { otpEmail, welcomeEmail, loginNotificationEmail, forgotPasswordEmail } = require('../utils/emailTemplates');
+const { otpEmail, welcomeEmail, loginNotificationEmail, forgotPasswordEmail, emailChangeOtpEmail, deleteAccountOtpEmail, accountDeletedEmail } = require('../utils/emailTemplates');
 
 // @desc    Register user (Step 1: send OTP)
 // @route   POST /api/auth/signup
@@ -354,5 +354,153 @@ exports.getMe = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Request email change (Step 1: send OTP to current email)
+// @route   POST /api/auth/request-email-change
+exports.requestEmailChange = async (req, res) => {
+  try {
+    const { newEmail } = req.body;
+    if (!newEmail) return res.status(400).json({ message: 'New email is required' });
+
+    // Check if new email is already in use
+    const existing = await User.findOne({ email: newEmail });
+    if (existing) return res.status(400).json({ message: 'Email already in use by another account' });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Store pending email in a temp field
+    user.pendingEmail = newEmail;
+    const otp = user.generateOTP('email_change');
+    await user.save({ validateBeforeSave: false });
+
+    // Send OTP to current email for verification
+    await sendEmail({
+      to: user.email,
+      subject: '📧 VauraPlay - Email Change Verification',
+      html: emailChangeOtpEmail(user.username, otp, newEmail),
+    });
+
+    res.json({ message: 'Verification code sent to your current email' });
+  } catch (error) {
+    console.error('Request email change error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Verify email change (Step 2: verify OTP and update email)
+// @route   POST /api/auth/verify-email-change
+exports.verifyEmailChange = async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const user = await User.findById(req.user._id).select('+otp.code +otp.expiresAt +otp.purpose');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (!user.verifyOTP(otp, 'email_change')) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    if (!user.pendingEmail) {
+      return res.status(400).json({ message: 'No pending email change found' });
+    }
+
+    const oldEmail = user.email;
+    user.email = user.pendingEmail;
+    user.pendingEmail = undefined;
+    user.otp = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    await ActivityLog.create({
+      user: user._id,
+      action: 'email_changed',
+      details: `Email changed from ${oldEmail} to ${user.email}`,
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+
+    res.json({
+      message: 'Email changed successfully',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role,
+        preferences: user.preferences,
+      },
+    });
+  } catch (error) {
+    console.error('Verify email change error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Request account deletion (Step 1: send OTP)
+// @route   POST /api/auth/request-delete-account
+exports.requestDeleteAccount = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.deleteReason = reason || 'No reason provided';
+    const otp = user.generateOTP('delete_account');
+    await user.save({ validateBeforeSave: false });
+
+    await sendEmail({
+      to: user.email,
+      subject: '⚠️ VauraPlay - Account Deletion Confirmation',
+      html: deleteAccountOtpEmail(user.username, otp),
+    });
+
+    res.json({ message: 'Verification code sent to your email. Enter it to confirm deletion.' });
+  } catch (error) {
+    console.error('Request delete account error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Confirm account deletion (Step 2: verify OTP and delete)
+// @route   POST /api/auth/confirm-delete-account
+exports.confirmDeleteAccount = async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const user = await User.findById(req.user._id).select('+otp.code +otp.expiresAt +otp.purpose');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (!user.verifyOTP(otp, 'delete_account')) {
+      return res.status(400).json({ message: 'Invalid or expired OTP. Account was NOT deleted.' });
+    }
+
+    const username = user.username;
+    const email = user.email;
+
+    // Send farewell email BEFORE deleting
+    await sendEmail({
+      to: email,
+      subject: '👋 VauraPlay - Account Deleted',
+      html: accountDeletedEmail(username, email),
+    });
+
+    // Delete all related data
+    const Watchlist = require('../models/Watchlist');
+    const Progress = require('../models/Progress');
+
+    await Promise.all([
+      Watchlist.deleteMany({ user: user._id }),
+      Notification.deleteMany({ user: user._id }),
+      ActivityLog.deleteMany({ user: user._id }),
+      Progress.deleteMany({ user: user._id }),
+    ]);
+
+    // Delete the user
+    await User.findByIdAndDelete(user._id);
+
+    res.json({ message: 'Account permanently deleted. We\'re sorry to see you go.' });
+  } catch (error) {
+    console.error('Confirm delete account error:', error);
+    res.status(500).json({ message: 'Server error during account deletion' });
   }
 };

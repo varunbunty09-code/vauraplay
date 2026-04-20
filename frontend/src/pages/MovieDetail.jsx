@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import tmdbService from '../services/tmdbService';
-import { Play, Plus, Star, Clock, Calendar, Bookmark, Share2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Play, Plus, Star, Clock, Calendar, Bookmark, Share2, MessageCircle, Twitter, Facebook, Copy, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import MovieRow from '../components/MovieRow';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -14,6 +14,8 @@ const MovieDetail = () => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inWatchlist, setInWatchlist] = useState(false);
+
+  const [showShare, setShowShare] = useState(false);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -43,7 +45,6 @@ const MovieDetail = () => {
   const toggleWatchlist = async () => {
     try {
       if (inWatchlist) {
-         // Get the item ID first - normally we'd store it
          const { data } = await axios.get(`${API_URL}/watchlist/check/${id}/movie`);
          await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
          setInWatchlist(false);
@@ -64,6 +65,17 @@ const MovieDetail = () => {
     } catch (err) {
       toast.error('Watchlist error');
     }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Link copied to clipboard!');
+  };
+
+  const shareLinks = {
+    whatsapp: `https://wa.me/?text=${encodeURIComponent('Check out this movie on VauraPlay: ' + window.location.href)}`,
+    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ' + (movie?.title || 'this') + ' on @VauraPlay')}&url=${encodeURIComponent(window.location.href)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`
   };
 
   if (loading) return <div className="loading-screen" style={{height:'100vh'}}></div>;
@@ -114,7 +126,7 @@ const MovieDetail = () => {
                   <Bookmark size={20} fill={inWatchlist ? 'var(--primary)' : 'none'} /> 
                   {inWatchlist ? 'In Library' : 'Add to List'}
                 </button>
-                <button className="btn-outline"><Share2 size={20} /></button>
+                <button className="btn-outline" onClick={() => setShowShare(true)}><Share2 size={20} /></button>
               </div>
             </motion.div>
           </div>
@@ -127,11 +139,11 @@ const MovieDetail = () => {
              <h3>Top Cast</h3>
              <div className="cast-grid">
                 {movie.credits.cast.slice(0, 6).map(person => (
-                  <div key={person.id} className="cast-card">
-                    <img src={person.profile_path ? `https://image.tmdb.org/t/p/w200${person.profile_path}` : 'https://via.placeholder.com/200x300?text=No+Photo'} alt={person.name} />
-                    <p className="name">{person.name}</p>
-                    <p className="char">{person.character}</p>
-                  </div>
+                   <div key={person.id} className="cast-card">
+                     <img src={person.profile_path ? `https://image.tmdb.org/t/p/w200${person.profile_path}` : 'https://via.placeholder.com/200x300?text=No+Photo'} alt={person.name} />
+                     <p className="name">{person.name}</p>
+                     <p className="char">{person.character}</p>
+                   </div>
                 ))}
              </div>
            </div>
@@ -143,6 +155,38 @@ const MovieDetail = () => {
            </div>
          )}
       </div>
+
+      <AnimatePresence>
+        {showShare && (
+          <div className="share-modal-overlay" onClick={() => setShowShare(false)}>
+            <motion.div 
+              className="share-modal glass"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <h3>Share this movie</h3>
+              <div className="share-options">
+                <a href={shareLinks.whatsapp} target="_blank" rel="noreferrer" className="share-btn whatsapp">
+                  <MessageCircle size={24} /> WhatsApp
+                </a>
+                <a href={shareLinks.twitter} target="_blank" rel="noreferrer" className="share-btn twitter">
+                  <Twitter size={24} /> Twitter
+                </a>
+                <a href={shareLinks.facebook} target="_blank" rel="noreferrer" className="share-btn facebook">
+                  <Facebook size={24} /> Facebook
+                </a>
+              </div>
+              <div className="copy-link">
+                <input type="text" readOnly value={window.location.href} />
+                <button onClick={copyToClipboard}><Copy size={18} /></button>
+              </div>
+              <button className="close-share" onClick={() => setShowShare(false)}><X size={20} /></button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <style>{`
         .detail-page {
@@ -282,6 +326,91 @@ const MovieDetail = () => {
           .detail-meta, .genres, .detail-actions { justify-content: center; }
           .detail-poster { width: 200px; }
           .detail-main h1 { font-size: 2.5rem; }
+        }
+
+        .share-modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.8);
+          backdrop-filter: blur(5px);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+
+        .share-modal {
+          width: 100%;
+          max-width: 450px;
+          padding: 2.5rem;
+          border-radius: var(--radius-lg);
+          text-align: center;
+          position: relative;
+        }
+
+        .share-modal h3 { margin-bottom: 2rem; }
+
+        .share-options {
+          display: flex;
+          justify-content: center;
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .share-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+          text-decoration: none;
+          color: white;
+          font-size: 0.8rem;
+          transition: 0.3s;
+        }
+
+        .share-btn:hover { color: var(--primary); transform: translateY(-5px); }
+
+        .whatsapp { color: #25D366; }
+        .twitter { color: #1DA1F2; }
+        .facebook { color: #1877F2; }
+
+        .copy-link {
+          display: flex;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid var(--border-light);
+          border-radius: 10px;
+          padding: 0.5rem;
+          margin-top: 1rem;
+        }
+
+        .copy-link input {
+          flex: 1;
+          background: none;
+          border: none;
+          color: var(--text-dim);
+          padding: 0.5rem;
+          font-size: 0.9rem;
+          outline: none;
+        }
+
+        .copy-link button {
+          background: var(--primary);
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          color: black;
+          cursor: pointer;
+        }
+
+        .close-share {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: none;
+          border: none;
+          color: var(--text-muted);
+          cursor: pointer;
         }
       `}</style>
     </div>

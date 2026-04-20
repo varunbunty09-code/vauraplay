@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, ShieldCheck, Play, RefreshCw } from 'lucide-react';
@@ -8,6 +8,8 @@ import toast from 'react-hot-toast';
 const Signup = () => {
   const { signup, verifySignup } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
   const [step, setStep] = useState(1); // 1: Registration, 2: OTP
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -43,7 +45,7 @@ const Signup = () => {
     setLoading(true);
     try {
       await verifySignup(userId, formData.otp);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err) {
       // Error handled in context
     } finally {
@@ -152,7 +154,7 @@ const Signup = () => {
         </AnimatePresence>
 
         <div className="auth-footer">
-          Already have an account? <Link to="/login">Sign In</Link>
+          Already have an account? <Link to="/login" state={{ from: location.state?.from }}>Sign In</Link>
         </div>
       </motion.div>
       

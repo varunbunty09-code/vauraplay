@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema({
   otp: {
     code: { type: String, select: false },
     expiresAt: { type: Date, select: false },
-    purpose: { type: String, enum: ['signup', 'login', 'reset'], select: false },
+    purpose: { type: String, enum: ['signup', 'login', 'reset', 'email_change', 'delete_account'], select: false },
   },
   resetPasswordToken: { type: String, select: false },
   resetPasswordExpire: { type: Date, select: false },
@@ -59,6 +59,8 @@ const userSchema = new mongoose.Schema({
     playerColor: { type: String, default: '0dcaf0' },
     emailNotifications: { type: Boolean, default: true },
   },
+  pendingEmail: { type: String },
+  deleteReason: { type: String },
 }, {
   timestamps: true,
 });

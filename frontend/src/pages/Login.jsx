@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, ArrowRight, ShieldCheck, Play, RefreshCw } from 'lucide-react';
@@ -8,6 +8,8 @@ import toast from 'react-hot-toast';
 const Login = () => {
   const { login, verifyLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
   const [step, setStep] = useState(1); // 1: Credentials, 2: OTP
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -33,7 +35,7 @@ const Login = () => {
         toast.success('Security code sent to your email');
       } else {
         // Direct login if policy allows
-        navigate('/');
+        navigate(from, { replace: true });
       }
     } catch (err) {
       // Error handled in context
@@ -47,7 +49,7 @@ const Login = () => {
     setLoading(true);
     try {
       await verifyLogin(userId, formData.otp);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err) {
       // Error handled in context
     } finally {
@@ -151,7 +153,7 @@ const Login = () => {
         </AnimatePresence>
 
         <div className="auth-footer">
-          Don't have an account? <Link to="/signup">Join VauraPlay</Link>
+          Don't have an account? <Link to="/signup" state={{ from: location.state?.from }}>Join VauraPlay</Link>
         </div>
       </motion.div>
 

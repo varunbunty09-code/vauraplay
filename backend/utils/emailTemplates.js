@@ -146,6 +146,60 @@ const movieUpdateEmail = (username, movies) => {
   `);
 };
 
+// Email Change OTP Template
+const emailChangeOtpEmail = (username, otp, newEmail) => {
+  return baseTemplate(`
+    <p class="greeting">Email Change Request 📧</p>
+    <p>Hey ${username}, you requested to change your email address to <strong>${newEmail}</strong>.</p>
+    <p>Use the code below to verify this change:</p>
+    <div class="otp-box">
+      <div class="otp-code">${otp}</div>
+    </div>
+    <div class="info-box">
+      <p>⏰ This code expires in <strong>10 minutes</strong></p>
+      <p>🔒 If you didn't request this change, ignore this email</p>
+    </div>
+  `);
+};
+
+// Delete Account OTP Template
+const deleteAccountOtpEmail = (username, otp) => {
+  return baseTemplate(`
+    <p class="greeting">Account Deletion Confirmation ⚠️</p>
+    <p>Hey ${username}, you requested to <strong>permanently delete</strong> your VauraPlay account.</p>
+    <p>To confirm this action, enter the verification code below:</p>
+    <div class="otp-box">
+      <div class="otp-code">${otp}</div>
+    </div>
+    <div class="info-box">
+      <p>⏰ This code expires in <strong>10 minutes</strong></p>
+      <p>⚠️ This action is <strong>irreversible</strong></p>
+      <p>🗑️ All your data, watchlists, and progress will be permanently removed</p>
+    </div>
+    <p>If you didn't request this, please secure your account immediately.</p>
+  `);
+};
+
+// Account Deleted Confirmation Email
+const accountDeletedEmail = (username, email) => {
+  return baseTemplate(`
+    <p class="greeting">Account Deleted 👋</p>
+    <p>Hey ${username}, your VauraPlay account (<strong>${email}</strong>) has been permanently deleted.</p>
+    <div class="info-box">
+      <p><strong>What happens next:</strong></p>
+      <p>📋 All your watchlists and preferences have been removed</p>
+      <p>📊 Your watch history has been cleared</p>
+      <p>🔐 Your login credentials have been invalidated</p>
+      <p>📧 You will no longer receive emails from us</p>
+    </div>
+    <p>If you ever want to come back, you can create a new account at any time.</p>
+    <p style="text-align: center;">
+      <a href="${process.env.FRONTEND_URL}/signup" class="btn">Create New Account →</a>
+    </p>
+    <p style="font-size: 12px; color: #888;">If you didn't request this deletion, please contact us immediately at support@vauraplay.com</p>
+  `);
+};
+
 module.exports = {
   otpEmail,
   welcomeEmail,
@@ -153,4 +207,7 @@ module.exports = {
   forgotPasswordEmail,
   accountStatusEmail,
   movieUpdateEmail,
+  emailChangeOtpEmail,
+  deleteAccountOtpEmail,
+  accountDeletedEmail,
 };

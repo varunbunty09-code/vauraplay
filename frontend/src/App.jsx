@@ -44,8 +44,9 @@ const GuestRoute = ({ children }) => {
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const location = useLocation();
 
-  if (!token) return <Navigate to="/landing" replace />;
+  if (!token) return <Navigate to="/landing" state={{ from: location }} replace />;
   if (adminOnly && user?.role !== 'admin') return <Navigate to="/" replace />;
   
   return children;

@@ -9,6 +9,10 @@ const {
   resetPassword,
   resendOTP,
   getMe,
+  requestEmailChange,
+  verifyEmailChange,
+  requestDeleteAccount,
+  confirmDeleteAccount,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
@@ -20,5 +24,11 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 router.post('/resend-otp', resendOTP);
 router.get('/me', protect, getMe);
+
+// Email change & Account deletion (protected)
+router.post('/request-email-change', protect, requestEmailChange);
+router.post('/verify-email-change', protect, verifyEmailChange);
+router.post('/request-delete-account', protect, requestDeleteAccount);
+router.post('/confirm-delete-account', protect, confirmDeleteAccount);
 
 module.exports = router;
