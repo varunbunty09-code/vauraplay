@@ -59,9 +59,10 @@ const TVDetail = () => {
                     setInWatchlist(wlData.inWatchlist);
                 } catch (e) {}
 
-                // Fetch Recommendations
-                const recs = await tmdbService.getSimilar(id, 'tv');
-                setRecommendations(recs);
+                // Use similar data already fetched by getDetails
+                if (data.similar?.results) {
+                    setRecommendations(data.similar.results);
+                }
             } catch (err) {
                 toast.error('Failed to load series details');
             } finally {
@@ -152,7 +153,8 @@ const TVDetail = () => {
                 <div className="backdrop-wrapper">
                     <img src={`https://image.tmdb.org/t/p/original${show.backdrop_path}`} alt={show.name} />
                     <div className="detail-gradient"></div>
-                </div>                <div className="container detail-content">
+                </div>
+                <div className="container detail-content">
                     <div className="detail-main-split">
                         <div className="detail-left-content">
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -437,7 +439,7 @@ const TVDetail = () => {
 
             <style>{`
                 .tv .detail-hero { height: auto; min-height: 85vh; display: flex; align-items: flex-end; padding: 6rem 0; position: relative; }
-                .backdrop-wrapper { position: absolute; inset: 0; z-index: 0; }set: 0; z-index: 0; }
+                .backdrop-wrapper { position: absolute; inset: 0; z-index: 0; }
                 .backdrop-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
                 .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0c 18%, transparent 95%), linear-gradient(to right, #0a0a0c 15%, transparent 85%); }
                 .detail-content { position: relative; z-index: 10; }
@@ -450,13 +452,13 @@ const TVDetail = () => {
                 .share-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
                 .share-modal { width: 100%; max-width: 480px; padding: 3rem; border-radius: 24px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.1); }
                 .share-options { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2.5rem; }
-                .share-btn { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; text-decoration: none; color: white; font-size: 0.9rem; transition: 0.3s; }
-                .copy-link { display: flex; background: rgba(255,255,255,0.06); border: 1px solid var(--border-light); border-radius: 12px; padding: 0.6rem; margin-top: 1.5rem; }
-                .copy-link input { flex: 1; background: none; border: none; color: var(--text-dim); padding: 0.6rem; font-size: 0.95rem; outline: none; }
-                .copy-link button { background: var(--primary); border: none; padding: 0.7rem 1.2rem; border-radius: 10px; color: black; cursor: pointer; transition: 0.3s; }
-                .copy-link button:hover { transform: scale(1.05); }
-                .close-share { position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(255,255,255,0.05); border: none; color: var(--text-muted); cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-                .close-share:hover { background: rgba(255,255,255,0.1); color: white; transform: rotate(90deg); }
+                .share-btn { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; color: white; font-size: 0.8rem; transition: 0.3s; }
+                .share-btn:hover { color: var(--primary); transform: translateY(-5px); }
+                .whatsapp { color: #25D366; } .twitter { color: #1DA1F2; } .facebook { color: #1877F2; }
+                .copy-link { display: flex; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); border-radius: 10px; padding: 0.5rem; margin-top: 1rem; }
+                .copy-link input { flex: 1; background: none; border: none; color: var(--text-dim); padding: 0.5rem; font-size: 0.9rem; outline: none; }
+                .copy-link button { background: var(--primary); border: none; padding: 0.5rem 1rem; border-radius: 8px; color: black; cursor: pointer; }
+                .close-share { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); cursor: pointer; z-index: 10; }
 
                 .season-section { padding: 5rem 0 8rem; }
                 .season-header-new { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 2rem; }
@@ -519,6 +521,37 @@ const TVDetail = () => {
                   .eb-action { display: none; }
                   .season-header-new { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
                   .season-select-glass { width: 100%; }
+                }
+
+                /* Cast Modal */
+                .cast-modal { width: 100%; max-width: 650px; max-height: 85vh; overflow-y: auto; padding: 2.5rem; border-radius: var(--radius-lg); position: relative; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+                .cast-modal-header { display: flex; gap: 2rem; margin-bottom: 2rem; }
+                .cast-modal-photo { width: 180px; aspect-ratio: 2/3; object-fit: cover; border-radius: var(--radius-md); flex-shrink: 0; }
+                .cast-modal-info { display: flex; flex-direction: column; gap: 0.5rem; }
+                .cast-modal-info h2 { font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+                .cast-meta-item { font-size: 0.9rem; color: var(--text-dim); }
+                .tmdb-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; transition: 0.3s; }
+                .tmdb-link:hover { opacity: 0.8; }
+                .cast-bio { margin-bottom: 2rem; }
+                .cast-bio h4 { margin-bottom: 0.8rem; color: var(--primary); font-size: 1rem; }
+                .cast-bio p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.7; }
+                .cast-filmography h4 { margin-bottom: 1rem; color: var(--primary); font-size: 1rem; }
+                .filmography-scroll { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+                .filmography-item { flex: 0 0 120px; text-decoration: none; transition: 0.3s; }
+                .filmography-item:hover { transform: scale(1.05); }
+                .filmography-item img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 0.5rem; }
+                .filmography-item p { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .cast-modal-loading { display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 3rem; }
+                .cast-modal-avatar-skeleton { width: 150px; height: 225px; border-radius: var(--radius-md); }
+                .cast-modal-text-skeleton { width: 200px; height: 20px; border-radius: 4px; }
+                .cast-modal-text-skeleton.short { width: 120px; }
+                .skeleton-shimmer { background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 37%, rgba(255,255,255,0.03) 63%); background-size: 400% 100%; animation: skeleton-loading 1.4s ease infinite; }
+                @keyframes skeleton-loading { 0% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+                @media (max-width: 600px) {
+                  .cast-modal { padding: 1.5rem; }
+                  .cast-modal-header { flex-direction: column; align-items: center; text-align: center; }
+                  .cast-modal-photo { width: 140px; }
+                  .cast-modal-info { align-items: center; }
                 }
             `}</style>
         </div>
