@@ -162,26 +162,26 @@ const Watch = () => {
         
         .player-header {
           position: absolute;
-          top: 0;
-          left: 0;
-          z-index: 10;
-          padding: 1rem 1.5rem;
+          top: 30px;
+          left: 25px;
+          z-index: 100;
         }
-        
+
         .back-btn {
           background: none;
           border: none;
-          color: rgba(255,255,255,0.7);
+          color: rgba(255, 255, 255, 0.8);
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: 0.2s;
+          transition: all 0.3s ease;
           padding: 0;
         }
-        
+
         .back-btn:hover {
           color: white;
+          transform: scale(1.2);
         }
         
         .player-container {
