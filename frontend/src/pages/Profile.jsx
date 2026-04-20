@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Camera, Lock, Bell, Palette, Settings, History, Trash2, LogOut, Loader2, Bookmark, ShieldCheck, Mail, X, Check, Dices } from 'lucide-react';
+import { User, Camera, Lock, Bell, Palette, Settings, History, Trash2, LogOut, Loader2, Bookmark, ShieldCheck, Mail, X, Check, Dices, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
@@ -22,6 +22,20 @@ const Profile = () => {
   const [newEmail, setNewEmail] = useState('');
   const [deleteReason, setDeleteReason] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [avatarStyle, setAvatarStyle] = useState('avataaars');
+  const [avatarSeed, setAvatarSeed] = useState(user?.username || 'random');
+  const [avatarPreview, setAvatarPreview] = useState('');
+
+  const dicebearStyles = [
+    'avataaars', 'bottts', 'fun-emoji', 'lorelei', 'notionists',
+    'open-peeps', 'pixel-art', 'thumbs', 'big-smile', 'adventurer'
+  ];
+
+  const presetSeeds = [
+    'Luna', 'Max', 'Ruby', 'Felix', 'Zara', 'Atlas', 'Ember', 'Nova',
+    'Storm', 'Pixel', 'Blaze', 'Sky', 'Echo', 'Jade', 'Onyx', 'Sage'
+  ];
 
   const [formData, setFormData] = useState({
     username: user?.username || '',
@@ -68,15 +82,25 @@ const Profile = () => {
   };
 
   const handleDiceBearChange = async () => {
+    setShowAvatarPicker(true);
+    setAvatarSeed(Math.random().toString(36).substring(7));
+  };
+
+  const getAvatarUrl = (style, seed) => `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
+
+  useEffect(() => {
+    setAvatarPreview(getAvatarUrl(avatarStyle, avatarSeed));
+  }, [avatarStyle, avatarSeed]);
+
+  const handleSelectAvatar = async (url) => {
     setLoading(true);
-    const seed = Math.random().toString(36).substring(7);
-    const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
     try {
       const { data } = await axios.put(`${API_URL}/users/profile`, {
         avatar: { url, publicId: 'dicebear' }
       });
       setUser(data.user);
-      toast.success('Generated new random avatar!');
+      setShowAvatarPicker(false);
+      toast.success('Avatar updated!');
     } catch (err) {
       toast.error('Failed to change avatar');
     } finally {
@@ -184,7 +208,7 @@ const Profile = () => {
               <img src={user?.avatar?.url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`} alt="Avatar" />
               <div className="avatar-controls">
                 <button title="Upload Image" onClick={handleAvatarClick}><Camera size={16} /></button>
-                <button title="Random Avatar" onClick={handleDiceBearChange}><Dices size={16} /></button>
+                <button title="Choose Avatar" onClick={() => setShowAvatarPicker(true)}><Sparkles size={16} /></button>
               </div>
               {loading && <div className="loader"><Loader2 className="spin" /></div>}
             </div>
@@ -326,6 +350,68 @@ const Profile = () => {
            </AnimatePresence>
         </main>
       </motion.div>
+
+      {/* Avatar Picker Modal */}
+      <AnimatePresence>
+        {showAvatarPicker && (
+          <div className="otp-modal-overlay" onClick={() => setShowAvatarPicker(false)}>
+            <motion.div
+              className="avatar-picker-modal glass"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button className="close-picker" onClick={() => setShowAvatarPicker(false)}><X size={20} /></button>
+              <h3>Choose Your Avatar</h3>
+              <p>Pick a preset or create a custom DiceBear avatar</p>
+
+              {/* Preset Grid */}
+              <div className="preset-grid">
+                {presetSeeds.map(seed => {
+                  const url = getAvatarUrl(avatarStyle, seed);
+                  return (
+                    <button
+                      key={seed}
+                      className={`preset-avatar ${avatarSeed === seed ? 'selected' : ''}`}
+                      onClick={() => setAvatarSeed(seed)}
+                    >
+                      <img src={url} alt={seed} />
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Customizer */}
+              <div className="avatar-customizer">
+                <div className="customizer-row">
+                  <div className="customizer-field">
+                    <label>Style</label>
+                    <select value={avatarStyle} onChange={e => setAvatarStyle(e.target.value)}>
+                      {dicebearStyles.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div className="customizer-field">
+                    <label>Seed</label>
+                    <input type="text" value={avatarSeed} onChange={e => setAvatarSeed(e.target.value)} placeholder="Enter a name or keyword" />
+                  </div>
+                  <button className="randomize-btn" onClick={() => setAvatarSeed(Math.random().toString(36).substring(7))} title="Randomize">
+                    <Dices size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div className="avatar-preview-area">
+                <img src={avatarPreview} alt="Preview" className="avatar-preview-img" />
+                <button className="btn-primary use-avatar-btn" onClick={() => handleSelectAvatar(avatarPreview)} disabled={loading}>
+                  {loading ? 'Saving...' : 'Use this avatar'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* OTP Verification Modal */}
       <AnimatePresence>
@@ -470,6 +556,30 @@ const Profile = () => {
         .confirm-actions { display: flex; flex-direction: column; gap: 0.8rem; }
         .confirm-delete-btn { background: var(--accent); color: white; border: none; padding: 1rem 1.5rem; border-radius: var(--radius-sm); font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.95rem; transition: var(--transition-fast); }
         .confirm-delete-btn:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(244, 63, 94, 0.3); }
+
+        /* Avatar Picker Modal */
+        .avatar-picker-modal { width: 100%; max-width: 600px; padding: 2.5rem; border-radius: 20px; position: relative; max-height: 90vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+        .avatar-picker-modal h3 { text-align: center; margin-bottom: 0.5rem; font-size: 1.5rem; }
+        .avatar-picker-modal > p { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+        .close-picker { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-muted); cursor: pointer; z-index: 5; }
+        .close-picker:hover { color: white; }
+        .preset-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.6rem; margin-bottom: 2rem; }
+        .preset-avatar { width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 2px solid transparent; cursor: pointer; background: rgba(255,255,255,0.05); transition: all 0.2s ease; padding: 0; }
+        .preset-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .preset-avatar:hover { border-color: rgba(13,202,240,0.5); transform: scale(1.1); }
+        .preset-avatar.selected { border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow); transform: scale(1.1); }
+        .avatar-customizer { margin-bottom: 1.5rem; }
+        .customizer-row { display: flex; gap: 0.8rem; align-items: flex-end; }
+        .customizer-field { flex: 1; }
+        .customizer-field label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .customizer-field select, .customizer-field input { width: 100%; padding: 0.7rem 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); border-radius: 8px; color: white; font-size: 0.85rem; outline: none; transition: 0.2s; }
+        .customizer-field select:focus, .customizer-field input:focus { border-color: var(--primary); }
+        .customizer-field select option { background: #1a1a1e; color: white; }
+        .randomize-btn { width: 42px; height: 42px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; }
+        .randomize-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .avatar-preview-area { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+        .avatar-preview-img { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); background: rgba(255,255,255,0.05); }
+        .use-avatar-btn { padding: 0.7rem 2rem; font-size: 0.9rem; }
 
         @media (max-width: 900px) {
           .profile-layout { grid-template-columns: 1fr; }
