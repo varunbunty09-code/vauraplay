@@ -242,3 +242,42 @@ p { font-size: 1rem; color: var(--text-dim); line-height: 1.6; }
   to { transform: rotate(360deg); }
 }
 
+.auth-footer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.auth-footer a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.auth-header p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.auth-header h2 {
+  font-size: 2rem;
+}
+
+.back-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-dim) !important;
+  font-weight: 500 !important;
+  transition: var(--transition-smooth) !important;
+}
+
+.back-link:hover {
+  color: var(--primary) !important;
+  transform: translateX(-4px);
+  text-decoration: none !important;
+}
+

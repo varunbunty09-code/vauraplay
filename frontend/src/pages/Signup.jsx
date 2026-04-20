@@ -7,13 +7,14 @@ import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
 
 const Signup = () => {
-  const { signup, verifySignup } = useAuth();
+  const { signup, verifySignup, resendOTP } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
   const [step, setStep] = useState(1); // 1: Registration, 2: OTP
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [timer, setTimer] = useState(0);
   
   const [formData, setFormData] = useState({
     username: '',
@@ -21,6 +22,16 @@ const Signup = () => {
     password: '',
     otp: ''
   });
+
+  useEffect(() => {
+    let interval;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,6 +44,7 @@ const Signup = () => {
       const res = await signup(formData.username, formData.email, formData.password);
       setUserId(res.userId);
       setStep(2);
+      setTimer(60);
       toast.success('Verification code sent to your email');
     } catch (err) {
       // Error handled in context
@@ -51,6 +63,16 @@ const Signup = () => {
       // Error handled in context
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (timer > 0) return;
+    try {
+      await resendOTP(userId);
+      setTimer(60);
+    } catch (err) {
+      // Error handled in context
     }
   };
 
@@ -147,6 +169,12 @@ const Signup = () => {
               <button type="submit" className="btn-primary auth-btn" disabled={loading}>
                 {loading ? <RefreshCw className="spin" size={18} /> : <>Verify & Get Started <ArrowRight size={18} /></>}
               </button>
+              
+              <div className="resend-text" style={{ marginTop: '1.5rem', fontSize: '0.85rem', textAlign: 'center', color: 'var(--text-dim)' }}>
+                Didn't receive it? <button type="button" className="text-btn" onClick={handleResend} disabled={timer > 0}>
+                  {timer > 0 ? `Resend in ${timer}s` : 'Resend OTP'}
+                </button>
+              </div>
             </motion.form>
           )}
         </AnimatePresence>
@@ -177,6 +205,8 @@ const Signup = () => {
         .auth-footer { margin-top: 2rem; text-align: center; font-size: 0.9rem; color: var(--text-muted); }
         .auth-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
         .otp-input { text-align: center; letter-spacing: 12px; font-size: 1.5rem !important; font-weight: 700; }
+        .text-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 600; transition: var(--transition-fast); }
+        .text-btn:disabled { color: var(--text-muted); cursor: not-allowed; opacity: 0.8; }
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>

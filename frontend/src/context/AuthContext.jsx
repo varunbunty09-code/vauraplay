@@ -96,6 +96,16 @@ export const AuthProvider = ({ children }) => {
     toast.success('Logged out successfully');
   };
 
+  const resendOTP = async (userId) => {
+    try {
+      await axios.post(`${API_URL}/auth/resend-otp`, { userId });
+      toast.success('Security code resent to your email');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to resend code');
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -105,6 +115,7 @@ export const AuthProvider = ({ children }) => {
       verifyLogin,
       signup,
       verifySignup,
+      resendOTP,
       logout,
       setUser,
     }}>

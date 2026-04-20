@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, ArrowRight, ShieldCheck, Play, Loader2 } from 'lucide-react';
+import { Mail, ArrowRight, ShieldCheck, Play, Loader2, ChevronLeft } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
@@ -30,8 +30,24 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="auth-page">
+        <div className="auth-page flex-center">
+            <div className="auth-bg">
+                <div className="circle circle-1"></div>
+                <div className="circle circle-2"></div>
+            </div>
+            
             <div className="auth-container">
+            <style>{`
+                .auth-page { min-height: 100vh; width: 100%; position: relative; background: #050507; overflow: hidden; }
+                .auth-bg { position: absolute; inset: 0; z-index: 0; }
+                .circle { position: absolute; border-radius: 50%; filter: blur(100px); }
+                .circle-1 { width: 400px; height: 400px; top: -200px; left: -100px; background: rgba(13, 202, 240, 0.15); }
+                .circle-2 { width: 500px; height: 500px; bottom: -200px; right: -100px; background: rgba(99, 102, 241, 0.15); }
+                .auth-container { z-index: 10; position: relative; }
+                .success-icon { margin-bottom: 1.5rem; display: flex; justify-content: center; }
+                .success-state h3 { margin-bottom: 0.5rem; }
+                .success-state p { margin-bottom: 2rem; font-size: 0.9rem; }
+            `}</style>
                 <motion.div 
                     className="auth-card glass"
                     initial={{ opacity: 0, y: 20 }}
@@ -87,7 +103,9 @@ const ForgotPassword = () => {
                     </AnimatePresence>
 
                     <div className="auth-footer">
-                        <Link to="/login" className="back-link">Back to login</Link>
+                        <Link to="/login" className="back-link">
+                            <ChevronLeft size={16} /> Back to login
+                        </Link>
                     </div>
                 </motion.div>
             </div>

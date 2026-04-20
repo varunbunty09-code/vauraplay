@@ -7,19 +7,30 @@ import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
 
 const Login = () => {
-  const { login, verifyLogin } = useAuth();
+  const { login, verifyLogin, resendOTP } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
   const [step, setStep] = useState(1); // 1: Credentials, 2: OTP
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [timer, setTimer] = useState(0);
   
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     otp: ''
   });
+
+  useEffect(() => {
+    let interval;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,6 +44,7 @@ const Login = () => {
       if (res.requiresOTP) {
         setUserId(res.userId);
         setStep(2);
+        setTimer(60);
         toast.success('Security code sent to your email');
       } else {
         // Direct login if policy allows
@@ -55,6 +67,16 @@ const Login = () => {
       // Error handled in context
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (timer > 0) return;
+    try {
+      await resendOTP(userId);
+      setTimer(60);
+    } catch (err) {
+      // Error handled in context
     }
   };
 
@@ -144,7 +166,9 @@ const Login = () => {
               </button>
               
               <div className="resend-text">
-                Didn't receive it? <button type="button" className="text-btn">Resend OTP</button>
+                Didn't receive it? <button type="button" className="text-btn" onClick={handleResend} disabled={timer > 0}>
+                  {timer > 0 ? `Resend in ${timer}s` : 'Resend OTP'}
+                </button>
               </div>
             </motion.form>
           )}
@@ -303,6 +327,13 @@ const Login = () => {
           color: var(--primary);
           cursor: pointer;
           font-weight: 600;
+          transition: var(--transition-fast);
+        }
+        
+        .text-btn:disabled {
+          color: var(--text-muted);
+          cursor: not-allowed;
+          opacity: 0.8;
         }
         
         .spin {
