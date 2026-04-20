@@ -61,6 +61,11 @@ const userSchema = new mongoose.Schema({
   },
   pendingEmail: { type: String },
   deleteReason: { type: String },
+  previousPasswords: [{ type: String, select: false }],
+  previousEmails: [{
+    email: String,
+    changedAt: { type: Date, default: Date.now },
+  }],
 }, {
   timestamps: true,
 });
@@ -68,6 +73,17 @@ const userSchema = new mongoose.Schema({
 // Hash password before save
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
+
+  // Archive old password hash if this is an update (not first creation)
+  if (!this.isNew && this._previousPasswordHash) {
+    if (!this.previousPasswords) this.previousPasswords = [];
+    this.previousPasswords.push(this._previousPasswordHash);
+    // Keep only last 5
+    if (this.previousPasswords.length > 5) {
+      this.previousPasswords = this.previousPasswords.slice(-5);
+    }
+  }
+
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
   next();
@@ -76,6 +92,16 @@ userSchema.pre('save', async function (next) {
 // Compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Check if password was previously used
+userSchema.methods.checkPreviousPasswords = async function (candidatePassword) {
+  if (!this.previousPasswords || this.previousPasswords.length === 0) return false;
+  for (const hash of this.previousPasswords) {
+    const match = await bcrypt.compare(candidatePassword, hash);
+    if (match) return true;
+  }
+  return false;
 };
 
 // Generate JWT

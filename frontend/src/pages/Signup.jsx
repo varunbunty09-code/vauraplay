@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
   const [timer, setTimer] = useState(0);
-  
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -82,8 +82,8 @@ const Signup = () => {
         <div className="circle circle-1"></div>
         <div className="circle circle-2"></div>
       </div>
-      
-      <motion.div 
+
+      <motion.div
         className="auth-card glass"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -97,7 +97,7 @@ const Signup = () => {
 
         <AnimatePresence mode="wait">
           {step === 1 ? (
-            <motion.form 
+            <motion.form
               key="signup"
               onSubmit={handleSignupSubmit}
               initial={{ opacity: 0, x: -20 }}
@@ -106,10 +106,10 @@ const Signup = () => {
             >
               <div className="input-group">
                 <label><User size={16} /> Username</label>
-                <input 
-                  type="text" 
-                  name="username" 
-                  required 
+                <input
+                  type="text"
+                  name="username"
+                  required
                   placeholder="johndoe"
                   value={formData.username}
                   onChange={handleInputChange}
@@ -118,10 +118,10 @@ const Signup = () => {
 
               <div className="input-group">
                 <label><Mail size={16} /> Email Address</label>
-                <input 
-                  type="email" 
-                  name="email" 
-                  required 
+                <input
+                  type="email"
+                  name="email"
+                  required
                   placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleInputChange}
@@ -130,10 +130,10 @@ const Signup = () => {
 
               <div className="input-group">
                 <label><Lock size={16} /> Password</label>
-                <input 
-                  type="password" 
-                  name="password" 
-                  required 
+                <input
+                  type="password"
+                  name="password"
+                  required
                   placeholder="Min. 6 characters"
                   value={formData.password}
                   onChange={handleInputChange}
@@ -145,7 +145,7 @@ const Signup = () => {
               </button>
             </motion.form>
           ) : (
-            <motion.form 
+            <motion.form
               key="otp"
               onSubmit={handleOTPSubmit}
               initial={{ opacity: 0, x: 20 }}
@@ -154,10 +154,10 @@ const Signup = () => {
             >
               <div className="input-group">
                 <label><ShieldCheck size={16} /> Verification Code</label>
-                <input 
-                  type="text" 
-                  name="otp" 
-                  required 
+                <input
+                  type="text"
+                  name="otp"
+                  required
                   maxLength={6}
                   placeholder="123456"
                   className="otp-input"
@@ -169,7 +169,7 @@ const Signup = () => {
               <button type="submit" className="btn-primary auth-btn" disabled={loading}>
                 {loading ? <RefreshCw className="spin" size={18} /> : <>Verify & Get Started <ArrowRight size={18} /></>}
               </button>
-              
+
               <div className="resend-text" style={{ marginTop: '1.5rem', fontSize: '0.85rem', textAlign: 'center', color: 'var(--text-dim)' }}>
                 Didn't receive it? <button type="button" className="text-btn" onClick={handleResend} disabled={timer > 0}>
                   {timer > 0 ? `Resend in ${timer}s` : 'Resend OTP'}
@@ -183,7 +183,7 @@ const Signup = () => {
           Already have an account? <Link to="/login" state={{ from: location.state?.from }}>Sign In</Link>
         </div>
       </motion.div>
-      
+
       {/* Reusing styles from Login.jsx (Global style or shared component would be better in a larger app) */}
       <style>{`
         /* Styles are identical to Login.jsx */

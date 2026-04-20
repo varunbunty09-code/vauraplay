@@ -316,11 +316,27 @@ exports.resetPassword = async (req, res) => {
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
       resetPasswordExpire: { $gt: new Date() },
-    });
+    }).select('+password +previousPasswords');
 
     if (!user) return res.status(400).json({ message: 'Invalid or expired reset token' });
 
-    user.password = req.body.password;
+    const { password } = req.body;
+
+    // Check if same as current password
+    const isSameAsCurrent = await user.comparePassword(password);
+    if (isSameAsCurrent) {
+      return res.status(400).json({ message: 'New password cannot be the same as your current password' });
+    }
+
+    // Check against previous passwords
+    const wasUsedBefore = await user.checkPreviousPasswords(password);
+    if (wasUsedBefore) {
+      return res.status(400).json({ message: 'This password was used previously. Please choose a new one.' });
+    }
+
+    // Store old hash for archiving in pre-save hook
+    user._previousPasswordHash = user.password;
+    user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     await user.save();
@@ -437,6 +453,11 @@ exports.verifyEmailChange = async (req, res) => {
     }
 
     const oldEmail = user.email;
+    
+    // Store old email in history
+    if (!user.previousEmails) user.previousEmails = [];
+    user.previousEmails.push({ email: oldEmail, changedAt: new Date() });
+
     user.email = user.pendingEmail;
     user.pendingEmail = undefined;
     user.otp = undefined;
