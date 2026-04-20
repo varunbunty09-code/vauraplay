@@ -56,8 +56,8 @@ const Navbar = () => {
     }
   };
 
-  if (location.pathname === '/landing' || location.pathname === '/login' || location.pathname === '/signup') {
-    return null; // Hide navbar on auth/landing pages if preferred, or keep a simple version
+  if (location.pathname === '/landing' || location.pathname === '/login' || location.pathname === '/signup' || location.pathname.startsWith('/watch')) {
+    return null; // Hide navbar on auth, landing, and watch pages
   }
 
   return (

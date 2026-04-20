@@ -60,6 +60,26 @@ const Footer = () => {
         }
         
         .footer-brand { flex: 1; max-width: 400px; }
+        
+        .logo {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          text-decoration: none;
+          margin-bottom: 1rem;
+        }
+        
+        .logo-text {
+          font-size: 1.5rem;
+          font-weight: 900;
+          color: var(--text-main);
+          letter-spacing: 2px;
+        }
+        
+        .logo-text span {
+          color: var(--primary);
+        }
+
         .footer-brand p { margin: 1.5rem 0 2rem; }
         
         .social-links { display: flex; gap: 1.5rem; }
