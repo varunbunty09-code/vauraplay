@@ -18,6 +18,7 @@ const Browse = () => {
     const [localSearch, setLocalSearch] = useState(initialSearch);
     const [selectedGenre, setSelectedGenre] = useState('');
     const [showFilters, setShowFilters] = useState(false);
+    const filterRef = React.useRef(null);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -39,6 +40,16 @@ const Browse = () => {
     }, [type, initialSearch, selectedGenre]);
 
     useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (filterRef.current && !filterRef.current.contains(event.target)) {
+                setShowFilters(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
         const fetchGenres = async () => {
             const data = await tmdbService.getGenres(type);
             setGenres(data || []);
@@ -52,6 +63,7 @@ const Browse = () => {
         if (e.key === 'Enter') {
             setSearchParams({ type, search: localSearch });
             setSelectedGenre('');
+            setShowFilters(false);
         }
     };
 
@@ -91,7 +103,7 @@ const Browse = () => {
                             {localSearch && <X size={18} className="clear-icon" onClick={clearSearch} />}
                         </div>
                         
-                        <div className="filter-wrapper">
+                        <div className="filter-wrapper" ref={filterRef}>
                             <button 
                                 className={`btn-filter glass ${selectedGenre ? 'active' : ''}`}
                                 onClick={() => setShowFilters(!showFilters)}

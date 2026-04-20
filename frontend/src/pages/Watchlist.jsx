@@ -63,6 +63,7 @@ const Watchlist = () => {
                  vote_average: item.voteAverage || 0,
                }}
                type={item.mediaType}
+               showBadge={true}
              />
            ))}
         </div>

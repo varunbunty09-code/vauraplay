@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const MovieCard = ({ item, type }) => {
+const MovieCard = ({ item, type, showBadge = false }) => {
   const navigate = useNavigate();
   const [inWatchlist, setInWatchlist] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -94,7 +94,10 @@ const MovieCard = ({ item, type }) => {
             </div>
           </div>
         </div>
-        <p className="browse-card-title">{title}</p>
+        <div className="browse-card-info">
+          <p className="browse-card-title">{title}</p>
+          {showBadge && <span className="browse-card-badge">{mediaType === 'movie' ? 'MOVIE' : 'TV SHOW'}</span>}
+        </div>
       </Link>
     </motion.div>
   );
