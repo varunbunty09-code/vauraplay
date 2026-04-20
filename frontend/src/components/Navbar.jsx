@@ -135,7 +135,8 @@ const Navbar = () => {
                 <AnimatePresence>
                   {notificationsOpen && (
                     <motion.div
-                      className="notification-dropdown glass"
+                      className="notification-dropdown"
+                      style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.1)' }}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
@@ -176,7 +177,8 @@ const Navbar = () => {
                 <AnimatePresence>
                   {profileMenuOpen && (
                     <motion.div
-                      className="profile-dropdown glass"
+                      className="profile-dropdown"
+                      style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.1)' }}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
@@ -375,7 +377,7 @@ const Navbar = () => {
           width: 320px;
           border-radius: var(--radius-md);
           padding: 0.5rem;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+          box-shadow: 0 20px 50px rgba(0,0,0,0.9);
           z-index: 1100;
         }
 

@@ -164,18 +164,20 @@ const Home = () => {
 
       <style>{`
         .home-page { padding-bottom: 5rem; }
-        .home-hero { height: 85vh; position: relative; display: flex; align-items: center; margin-bottom: -50px; }
+        .home-hero { height: 90vh; position: relative; display: flex; align-items: center; margin-bottom: -50px; }
         .hero-backdrop { position: absolute; inset: 0; z-index: 0; }
         .hero-backdrop img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to right, #0a0a0c 10%, transparent 60%), linear-gradient(to top, #0a0a0c 5%, transparent 40%); }
-        .hero-info { position: relative; z-index: 10; max-width: 700px; }
-        .hero-info h1 { font-size: 4rem; margin-bottom: 1rem; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .hero-info p { font-size: 1.1rem; margin-bottom: 2rem; color: rgba(255,255,255,0.8); }
-        .hero-actions { display: flex; gap: 1rem; align-items: center; }
-        .add-list { width: 48px; height: 48px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s ease; overflow: hidden; }
+        .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to right, #0a0a0c 15%, transparent 70%), linear-gradient(to top, #0a0a0c 10%, transparent 50%); }
+        .hero-info { position: relative; z-index: 10; max-width: 850px; padding-top: 5rem; }
+        .hero-info h1 { font-size: clamp(3rem, 8vw, 5rem); margin-bottom: 1.5rem; text-shadow: 0 4px 30px rgba(0,0,0,0.7); line-height: 1.05; }
+        .hero-info p { font-size: 1.2rem; margin-bottom: 2.5rem; color: rgba(255,255,255,0.9); line-height: 1.6; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .hero-actions { display: flex; gap: 1.2rem; align-items: center; }
+        .btn-primary { padding: 1rem 2.5rem; font-size: 1.1rem; }
+        .btn-outline { padding: 1rem 2.5rem; font-size: 1.1rem; }
+        .add-list { width: 56px; height: 56px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s ease; overflow: hidden; }
         .add-list span { display: flex; align-items: center; justify-content: center; }
         .add-list.added { border-color: var(--primary); color: var(--primary); background: rgba(13, 202, 240, 0.15); }
-        .rows-container { position: relative; z-index: 20; margin-top: -100px; }
+        .rows-container { position: relative; z-index: 20; margin-top: -120px; }
 
         @media (max-width: 768px) {
           .home-hero { height: 70vh; }

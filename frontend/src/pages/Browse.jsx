@@ -91,7 +91,7 @@ const Browse = () => {
                     </motion.div>
 
                     <div className="browse-controls">
-                        <div className="search-box-large glass">
+                        <div className="search-box-large" style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.1)' }}>
                             <Search size={20} className="search-icon" />
                             <input 
                                 type="text" 
@@ -115,7 +115,8 @@ const Browse = () => {
                             <AnimatePresence>
                                 {showFilters && (
                                     <motion.div 
-                                        className="genre-dropdown glass"
+                                        className="genre-dropdown"
+                                        style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.1)' }}
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: 10 }}
@@ -249,7 +250,7 @@ const Browse = () => {
                     width: 400px;
                     z-index: 100;
                     border-radius: var(--radius-md);
-                    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+                    box-shadow: 0 20px 50px rgba(0,0,0,0.9);
                 }
                 
                 .genre-grid {
