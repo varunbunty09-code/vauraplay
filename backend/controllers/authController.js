@@ -97,7 +97,7 @@ exports.verifySignup = async (req, res) => {
     // Send welcome email
     await sendEmail({
       to: user.email,
-      subject: '🎉 Welcome to VauraPlay!',
+      subject: '🍿 Welcome to VauraPlay - Enjoy Unlimited Movies!',
       html: welcomeEmail(user.username),
     });
 

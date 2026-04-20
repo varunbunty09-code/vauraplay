@@ -63,17 +63,30 @@ const otpEmail = (username, otp, purpose) => {
 // Welcome Email Template
 const welcomeEmail = (username) => {
   return baseTemplate(`
-    <p class="greeting">Welcome to VauraPlay, ${username}! 🎉</p>
-    <p>Your account has been successfully verified and is ready to use.</p>
-    <p>Here's what you can do now:</p>
-    <div class="info-box">
-      <p>🎬 Browse 50,000+ movies and 25,000+ TV shows</p>
-      <p>📋 Create your personal watchlist</p>
-      <p>⏯️ Continue watching where you left off</p>
-      <p>🎨 Customize your player experience</p>
+    <p class="greeting">Welcome to the family, ${username}! 🍿</p>
+    <p>Your VauraPlay account has been successfully verified. Get ready for a premium streaming experience like never before!</p>
+    
+    <div class="otp-box" style="padding: 30px;">
+      <p style="font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 0;">Unlimited Movies & TV Shows</p>
+      <p style="font-size: 14px; opacity: 0.8;">Anytime. Anywhere. On Any Device.</p>
     </div>
+
+    <p><strong>Here's what you can enjoy with VauraPlay:</strong></p>
+    <div class="info-box">
+      <p>🎬 <strong>Massive Library:</strong> Access to over 50,000+ movies and trending TV shows updated daily.</p>
+      <p>💎 <strong>Premium Quality:</strong> Stream your favorite content in stunning 4K and HDR quality.</p>
+      <p>📋 <strong>Smart Watchlist:</strong> Add movies to your list and get personalized recommendations.</p>
+      <p>⏯️ <strong>Sync Progress:</strong> Start watching on your phone and finish on your laptop seamlessly.</p>
+    </div>
+
+    <p>We're thrilled to have you with us. Sit back, grab some popcorn, and start your binge-watching journey!</p>
+    
     <p style="text-align: center;">
-      <a href="${process.env.FRONTEND_URL}" class="btn">Start Watching Now →</a>
+      <a href="${process.env.FRONTEND_URL}" class="btn">Start Your Premium Experience →</a>
+    </p>
+    
+    <p style="font-size: 13px; color: #888; text-align: center; margin-top: 20px;">
+      Need help? Visit our <a href="${process.env.FRONTEND_URL}/help">Help Center</a> or reply to this email.
     </p>
   `);
 };
