@@ -621,14 +621,7 @@ const Profile = () => {
         .email-change-wrapper input { flex: 1; }
         .btn-small { padding: 0.5rem 1rem; border-radius: 8px; background: var(--primary); color: black; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
 
-        .watchlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.5rem; }
-        .watch-card { border-radius: 12px; overflow: hidden; text-decoration: none; transition: .3s; border: 1px solid var(--border-light); }
-        .watch-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .watch-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-        .watch-card-info { padding: 1rem; }
-        .watch-card-info h4 { font-size: 0.9rem; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .media-type { font-size: 0.7rem; text-transform: uppercase; color: var(--primary); font-weight: 700; opacity: 0.8; }
-        
+
         .empty-state { text-align: center; grid-column: 1/-1; padding: 4rem 0; color: var(--text-muted); }
         .empty-state p { margin: 1rem 0 2rem; }
 

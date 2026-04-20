@@ -134,11 +134,11 @@ const Browse = () => {
                     {loading ? (
                         <GridSkeleton />
                     ) : items.length > 0 ? (
-                        <div className="results-grid-container">
+                        <div className="browse-results-container">
                             <h3 className="results-title">
                                 {initialSearch ? `Results for "${initialSearch}"` : selectedGenre ? `${genres.find(g => g.id == selectedGenre)?.name} ${type === 'tv' ? 'Series' : 'Movies'}` : 'Popular Now'}
                             </h3>
-                            <div className="results-grid">
+                            <div className="browse-grid">
                                 {items.map(item => (
                                     <MovieCard key={item.id} item={item} type={type} />
                                 ))}
