@@ -15,6 +15,10 @@ const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
+// Trust proxy - required for Render/Vercel/cloud deployments behind reverse proxies
+// This ensures express-rate-limit correctly identifies users via X-Forwarded-For
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDB();
 
