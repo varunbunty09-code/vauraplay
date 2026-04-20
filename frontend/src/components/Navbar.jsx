@@ -89,7 +89,7 @@ const Navbar = () => {
 
   const hideNavbarPaths = ['/landing', '/login', '/signup', '/forgot-password'];
   const shouldHideNavbar = hideNavbarPaths.includes(location.pathname) 
-    || location.pathname.startsWith('/watch') 
+    || location.pathname.startsWith('/watch/') 
     || location.pathname.startsWith('/reset-password');
 
   if (shouldHideNavbar) {

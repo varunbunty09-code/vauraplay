@@ -57,7 +57,7 @@ const ConditionalFooter = () => {
   const location = useLocation();
   // Hide footer on watch, login, signup, and forgot-password pages
   const hideOn = ['/login', '/signup', '/forgot-password'];
-  const shouldHide = hideOn.includes(location.pathname) || location.pathname.startsWith('/watch') || location.pathname.startsWith('/reset-password');
+  const shouldHide = hideOn.includes(location.pathname) || location.pathname.startsWith('/watch/') || location.pathname.startsWith('/reset-password');
   if (shouldHide) return null;
   return <Footer />;
 };
