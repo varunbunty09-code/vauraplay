@@ -56,8 +56,13 @@ const Navbar = () => {
     }
   };
 
-  if (location.pathname === '/landing' || location.pathname === '/login' || location.pathname === '/signup' || location.pathname.startsWith('/watch')) {
-    return null; // Hide navbar on auth, landing, and watch pages
+  const hideNavbarPaths = ['/landing', '/login', '/signup', '/forgot-password'];
+  const shouldHideNavbar = hideNavbarPaths.includes(location.pathname) 
+    || location.pathname.startsWith('/watch') 
+    || location.pathname.startsWith('/reset-password');
+
+  if (shouldHideNavbar) {
+    return null;
   }
 
   return (

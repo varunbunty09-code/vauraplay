@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider } from 'react-helmet-async';
 
@@ -29,17 +29,39 @@ import TermsOfUse from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 
-// Protected Route Component
+// ─── Route Guards ──────────────────────────────────────────────
+
+// Prevents logged-IN users from accessing auth pages (login, signup, landing, etc.)
+// Redirects them to Home.
+const GuestRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  if (token) return <Navigate to="/" replace />;
+  return children;
+};
+
+// Prevents logged-OUT users from accessing private pages (home, browse, profile, etc.)
+// Redirects them to Landing.
 const ProtectedRoute = ({ children, adminOnly = false }) => {
-  // We'll implement real auth logic in the AuthContext later
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) return <Navigate to="/landing" replace />;
   if (adminOnly && user?.role !== 'admin') return <Navigate to="/" replace />;
   
   return children;
 };
+
+// ─── Footer Visibility Logic ───────────────────────────────────
+const ConditionalFooter = () => {
+  const location = useLocation();
+  // Hide footer on watch, login, signup, and forgot-password pages
+  const hideOn = ['/login', '/signup', '/forgot-password'];
+  const shouldHide = hideOn.includes(location.pathname) || location.pathname.startsWith('/watch') || location.pathname.startsWith('/reset-password');
+  if (shouldHide) return null;
+  return <Footer />;
+};
+
+// ─── App ───────────────────────────────────────────────────────
 
 function App() {
   return (
@@ -50,17 +72,19 @@ function App() {
             <Navbar />
             <main className="content-area">
               <Routes>
-                {/* Public Routes */}
-                <Route path="/landing" element={<Landing />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                {/* ── Guest-Only Routes (redirects to Home if logged in) ── */}
+                <Route path="/landing" element={<GuestRoute><Landing /></GuestRoute>} />
+                <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+                <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
+                <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
+                <Route path="/reset-password/:token" element={<GuestRoute><ResetPassword /></GuestRoute>} />
+
+                {/* ── Public Routes (accessible by everyone) ── */}
                 <Route path="/help" element={<HelpCenter />} />
                 <Route path="/terms" element={<TermsOfUse />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 
-                {/* Private Routes */}
+                {/* ── Private Routes (redirects to Landing if logged out) ── */}
                 <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 <Route path="/movie/:id" element={<ProtectedRoute><MovieDetail /></ProtectedRoute>} />
                 <Route path="/tv/:id" element={<ProtectedRoute><TVDetail /></ProtectedRoute>} />
@@ -69,14 +93,14 @@ function App() {
                 <Route path="/watchlist" element={<ProtectedRoute><Watchlist /></ProtectedRoute>} />
                 <Route path="/browse" element={<ProtectedRoute><Browse /></ProtectedRoute>} />
                 
-                {/* Admin Routes */}
+                {/* ── Admin Routes ── */}
                 <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
                 
-                {/* Misc */}
+                {/* ── Catch-All ── */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
-            <Footer />
+            <ConditionalFooter />
             <Toaster position="bottom-right" toastOptions={{
               style: {
                 background: '#151518',
