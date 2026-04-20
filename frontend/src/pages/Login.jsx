@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
   const [timer, setTimer] = useState(0);
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -86,8 +86,8 @@ const Login = () => {
         <div className="circle circle-1"></div>
         <div className="circle circle-2"></div>
       </div>
-      
-      <motion.div 
+
+      <motion.div
         className="auth-card glass"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -101,7 +101,7 @@ const Login = () => {
 
         <AnimatePresence mode="wait">
           {step === 1 ? (
-            <motion.form 
+            <motion.form
               key="login"
               onSubmit={handleLoginSubmit}
               initial={{ opacity: 0, x: -20 }}
@@ -110,10 +110,10 @@ const Login = () => {
             >
               <div className="input-group">
                 <label><Mail size={16} /> Email Address</label>
-                <input 
-                  type="email" 
-                  name="email" 
-                  required 
+                <input
+                  type="email"
+                  name="email"
+                  required
                   placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleInputChange}
@@ -125,10 +125,10 @@ const Login = () => {
                   <label><Lock size={16} /> Password</label>
                   <Link to="/forgot-password">Forgot?</Link>
                 </div>
-                <input 
-                  type="password" 
-                  name="password" 
-                  required 
+                <input
+                  type="password"
+                  name="password"
+                  required
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleInputChange}
@@ -140,7 +140,7 @@ const Login = () => {
               </button>
             </motion.form>
           ) : (
-            <motion.form 
+            <motion.form
               key="otp"
               onSubmit={handleOTPSubmit}
               initial={{ opacity: 0, x: 20 }}
@@ -149,10 +149,10 @@ const Login = () => {
             >
               <div className="input-group">
                 <label><ShieldCheck size={16} /> Verification Code</label>
-                <input 
-                  type="text" 
-                  name="otp" 
-                  required 
+                <input
+                  type="text"
+                  name="otp"
+                  required
                   maxLength={6}
                   placeholder="123456"
                   className="otp-input"
@@ -164,7 +164,7 @@ const Login = () => {
               <button type="submit" className="btn-primary auth-btn" disabled={loading}>
                 {loading ? <RefreshCw className="spin" size={18} /> : <>Verify & Enter <ArrowRight size={18} /></>}
               </button>
-              
+
               <div className="resend-text">
                 Didn't receive it? <button type="button" className="text-btn" onClick={handleResend} disabled={timer > 0}>
                   {timer > 0 ? `Resend in ${timer}s` : 'Resend OTP'}
