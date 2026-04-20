@@ -136,7 +136,7 @@ const Navbar = () => {
 
               <div className="profile-menu-container" ref={profileRef}>
                 <button className="profile-btn" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
-                  <img src={user?.avatar?.url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'} alt="Avatar" />
+                  <img src={user?.avatar?.url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`} alt="Avatar" />
                 </button>
 
                 <AnimatePresence>
