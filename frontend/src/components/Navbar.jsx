@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Search, Bell, User, Play, LogOut, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Search, Bell, User, Play, LogOut, Menu, X, LayoutDashboard, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import Logo from './Logo';
@@ -142,7 +142,7 @@ const Navbar = () => {
                     >
                       <div className="dropdown-header">
                         <h3>Notifications</h3>
-                        <button className="text-btn" onClick={handleMarkAllRead}>Mark all read</button>
+                        <button className="mark-read-btn" onClick={handleMarkAllRead}><Check size={14} /> Mark all read</button>
                       </div>
                       <div className="notification-list">
                         {notifications.length > 0 ? (
@@ -406,6 +406,26 @@ const Navbar = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+        }
+
+        .mark-read-btn {
+          background: rgba(13, 202, 240, 0.1);
+          border: 1px solid rgba(13, 202, 240, 0.2);
+          color: var(--primary);
+          padding: 0.4rem 0.8rem;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+          transition: var(--transition-fast);
+        }
+
+        .mark-read-btn:hover {
+          background: var(--primary);
+          color: black;
         }
 
         .notification-list {

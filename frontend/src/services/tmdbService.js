@@ -22,6 +22,11 @@ const tmdbService = {
     const { data } = await axios.get(`${API_URL}/tmdb/${type}/${id}`);
     return data;
   },
+
+  getTVSeason: async (id, seasonNumber) => {
+    const { data } = await axios.get(`${API_URL}/tmdb/tv/${id}/season/${seasonNumber}`);
+    return data;
+  },
   
   search: async (query, type = 'multi') => {
     const { data } = await axios.get(`${API_URL}/tmdb/search`, { params: { query, type } });

@@ -18,8 +18,11 @@ const TVDetail = () => {
     const [show, setShow] = useState(null);
     const [seasons, setSeasons] = useState([]);
     const [selectedSeason, setSelectedSeason] = useState(1);
+    const [episodes, setEpisodes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [episodesLoading, setEpisodesLoading] = useState(false);
     const [showShare, setShowShare] = useState(false);
+    const [contentRating, setContentRating] = useState('');
 
     useEffect(() => {
         const fetchShow = async () => {
@@ -28,6 +31,10 @@ const TVDetail = () => {
                 const data = await tmdbService.getDetails(id, 'tv');
                 setShow(data);
                 setSeasons(data.seasons);
+                
+                // Find US rating if available
+                const usRating = data.content_ratings?.results?.find(r => r.iso_3166_1 === 'US')?.rating;
+                setContentRating(usRating || data.content_ratings?.results?.[0]?.rating || '');
             } catch (err) {
                 toast.error('Failed to load series details');
             } finally {
@@ -37,6 +44,22 @@ const TVDetail = () => {
         fetchShow();
         window.scrollTo(0, 0);
     }, [id]);
+
+    useEffect(() => {
+        const fetchEpisodes = async () => {
+            if (!id) return;
+            setEpisodesLoading(true);
+            try {
+                const data = await tmdbService.getTVSeason(id, selectedSeason);
+                setEpisodes(data.episodes || []);
+            } catch (err) {
+                console.error('Failed to load episodes');
+            } finally {
+                setEpisodesLoading(false);
+            }
+        };
+        fetchEpisodes();
+    }, [id, selectedSeason]);
 
     const copyToClipboard = () => {
       navigator.clipboard.writeText(window.location.href);
@@ -64,6 +87,7 @@ const TVDetail = () => {
                         <h1>{show.name}</h1>
                         <div className="detail-meta">
                             <span className="rating-pill glass"><Star size={14} fill="var(--primary)" /> {show.vote_average.toFixed(1)}</span>
+                            {contentRating && <span className="age-pill glass">{contentRating}</span>}
                             <span>{show.number_of_seasons} Seasons</span>
                             <span>{show.first_air_date?.split('-')[0]}</span>
                         </div>
@@ -71,7 +95,7 @@ const TVDetail = () => {
                         
                         <div className="detail-actions">
                             <Link to={`/watch/tv/${show.id}?s=1&e=1`} className="btn-primary"><Play size={20} fill="currentColor" /> Watch Now</Link>
-                            <button className="btn-outline"><Bookmark size={20} /> Add to List</button>
+                            <button className="btn-outline"><Plus size={20} /> Add to List</button>
                             <button className="btn-outline" onClick={() => setShowShare(true)}><Share2 size={20} /></button>
                         </div>
                     </div>
@@ -79,26 +103,40 @@ const TVDetail = () => {
             </div>
 
             <div className="container season-section">
-                <h3>Seasons & Episodes</h3>
-                <div className="season-selector">
-                   {seasons.filter(s => s.season_number > 0).map(s => (
-                     <button 
-                       key={s.id} 
-                       className={`season-btn glass ${selectedSeason === s.season_number ? 'active' : ''}`}
-                       onClick={() => setSelectedSeason(s.season_number)}
-                     >
-                       Season {s.season_number}
-                     </button>
-                   ))}
+                <div className="section-header">
+                  <h3>Seasons & Episodes</h3>
+                  <div className="season-selector">
+                    {seasons.filter(s => s.season_number > 0).map(s => (
+                      <button 
+                        key={s.id} 
+                        className={`season-btn glass ${selectedSeason === s.season_number ? 'active' : ''}`}
+                        onClick={() => setSelectedSeason(s.season_number)}
+                      >
+                        Season {s.season_number}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="episode-grid">
-                   <p className="text-muted">Select an episode to start watching season {selectedSeason}.</p>
-                   {/* In a fuller app, we'd fetch actual episode list for the season here */}
-                   <div className="flex-center" style={{padding: '3rem'}}>
-                      <Link to={`/watch/tv/${id}?s=${selectedSeason}&e=1`} className="btn-outline"><List size={18} /> View Season {selectedSeason} Episodes</Link>
-                   </div>
-                </div>
+                {episodesLoading ? (
+                  <div className="flex-center" style={{padding: '3rem'}}><motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}><Play size={40} color="var(--primary)" /></motion.div></div>
+                ) : (
+                  <div className="episodes-grid">
+                    {episodes.map(ep => (
+                      <Link to={`/watch/tv/${id}?s=${selectedSeason}&e=${ep.episode_number}`} key={ep.id} className="episode-card glass">
+                        <div className="ep-thumb">
+                          <img src={ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : `https://image.tmdb.org/t/p/w300${show.backdrop_path}`} alt={ep.name} />
+                          <div className="ep-overlay"><Play size={24} fill="white" /></div>
+                          <span className="ep-num">E{ep.episode_number}</span>
+                        </div>
+                        <div className="ep-info">
+                          <h4>{ep.name}</h4>
+                          <p>{ep.overview || 'No description available for this episode.'}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
             </div>
 
             <AnimatePresence>
@@ -140,22 +178,37 @@ const TVDetail = () => {
                 .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0c 10%, transparent 80%), linear-gradient(to right, #0a0a0c 10%, transparent 80%); }
                 .detail-content { position: relative; z-index: 10; }
                 .detail-meta { display: flex; gap: 1.5rem; align-items: center; margin-bottom: 2rem; color: var(--text-dim); }
+                .rating-pill { display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; border-radius: 20px; color: var(--primary); font-weight: 700; background: rgba(13, 202, 240, 0.15); border: 1px solid rgba(13, 202, 240, 0.3); }
+                .age-pill { padding: 0.3rem 0.8rem; border-radius: 4px; font-weight: 700; font-size: 0.8rem; border: 1px solid var(--border-light); }
                 .overview { max-width: 700px; line-height: 1.7; font-size: 1.1rem; color: var(--text-dim); margin-bottom: 2rem; }
                 .detail-actions { display: flex; gap: 1rem; }
-                .season-section { padding: 4rem 0; }
-                .season-selector { display: flex; gap: 1rem; overflow-x: auto; padding: 1rem 0; margin-bottom: 2rem; }
-                .season-btn { padding: 0.8rem 1.5rem; border-radius: 10px; border: 1px solid var(--border-light); color: white; cursor: pointer; white-space: nowrap; transition: .3s; }
-                .season-btn.active { border-color: var(--primary); background: var(--primary-glow); color: var(--primary); }
+
+                .season-section { padding: 4rem 0 6rem; }
+                .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3rem; flex-wrap: wrap; gap: 1.5rem; }
+                .season-selector { display: flex; gap: 0.8rem; overflow-x: auto; padding: 0.5rem 0; scrollbar-width: none; }
+                .season-selector::-webkit-scrollbar { display: none; }
+                .season-btn { padding: 0.7rem 1.6rem; border-radius: 30px; border: 1px solid var(--border-light); color: white; cursor: pointer; white-space: nowrap; transition: .3s; font-weight: 600; font-size: 0.9rem; }
+                .season-btn:hover { border-color: var(--primary); background: rgba(255,255,255,0.05); }
+                .season-btn.active { border-color: var(--primary); background: var(--primary); color: black; box-shadow: 0 0 20px var(--primary-glow); }
                 
+                .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+                .episode-card { display: flex; flex-direction: column; border-radius: var(--radius-md); overflow: hidden; transition: .3s; border: 1px solid transparent; text-decoration: none; color: inherit; }
+                .episode-card:hover { transform: translateY(-8px); border-color: var(--primary); background: rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+                .ep-thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; }
+                .ep-thumb img { width: 100%; height: 100%; object-fit: cover; transition: .5s; }
+                .episode-card:hover .ep-thumb img { transform: scale(1.08); }
+                .ep-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: .3s; }
+                .episode-card:hover .ep-overlay { opacity: 1; }
+                .ep-num { position: absolute; bottom: 12px; right: 12px; background: var(--primary); color: black; font-weight: 800; font-size: 0.8rem; padding: 0.2rem 0.7rem; border-radius: 5px; }
+                
+                .ep-info { padding: 1.5rem; }
+                .ep-info h4 { margin-bottom: 0.6rem; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--primary); }
+                .ep-info p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
                 .share-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
                 .share-modal { width: 100%; max-width: 450px; padding: 2.5rem; border-radius: var(--radius-lg); text-align: center; position: relative; }
-                .share-modal h3 { margin-bottom: 2rem; }
                 .share-options { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; }
                 .share-btn { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; color: white; font-size: 0.8rem; transition: 0.3s; }
-                .share-btn:hover { color: var(--primary); transform: translateY(-5px); }
-                .whatsapp { color: #25D366; }
-                .twitter { color: #1DA1F2; }
-                .facebook { color: #1877F2; }
                 .copy-link { display: flex; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); border-radius: 10px; padding: 0.5rem; margin-top: 1rem; }
                 .copy-link input { flex: 1; background: none; border: none; color: var(--text-dim); padding: 0.5rem; font-size: 0.9rem; outline: none; }
                 .copy-link button { background: var(--primary); border: none; padding: 0.5rem 1rem; border-radius: 8px; color: black; cursor: pointer; }

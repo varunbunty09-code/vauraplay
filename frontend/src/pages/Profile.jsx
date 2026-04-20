@@ -5,6 +5,7 @@ import { User, Camera, Lock, Bell, Palette, Settings, History, Trash2, LogOut, L
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import MovieCard from '../components/MovieCard';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -306,21 +307,21 @@ const Profile = () => {
                <motion.section key="watchlist" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
                  <h2>My Watchlist</h2>
                  {loading && watchlist.length === 0 ? <Loader2 className="spin" /> : (
-                   <div className="watchlist-grid">
+                   <div className="browse-grid">
                       {watchlist.length > 0 ? watchlist.map(item => (
-                        <div key={item._id} className="watch-card glass" onClick={() => navigate(`/${item.mediaType}/${item.tmdbId}`)} style={{cursor:'pointer'}}>
-                           <div className="watch-card-thumb">
-                             <img src={`https://image.tmdb.org/t/p/w300${item.posterPath}`} alt={item.title} />
-                             <div className="watch-card-overlay">
-                               <button className="wc-play" onClick={(e) => { e.stopPropagation(); navigate(`/watch/${item.mediaType}/${item.tmdbId}`); }}><PlayCircle size={36} /></button>
-                               <button className="wc-remove" onClick={(e) => removeFromWatchlist(e, item._id)}><Trash2 size={18} /></button>
-                             </div>
-                           </div>
-                           <div className="watch-card-info">
-                             <h4>{item.title}</h4>
-                             <span className="media-type">{item.mediaType}</span>
-                           </div>
-                        </div>
+                        <MovieCard 
+                          key={item._id}
+                          item={{
+                            id: item.tmdbId,
+                            title: item.title,
+                            name: item.title,
+                            poster_path: item.posterPath,
+                            backdrop_path: item.backdropPath,
+                            overview: item.overview,
+                            vote_average: item.voteAverage || 0,
+                          }}
+                          type={item.mediaType}
+                        />
                       )) : (
                         <div className="empty-state">
                           <Bookmark size={48} />
@@ -401,8 +402,43 @@ const Profile = () => {
                <motion.section key="security" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
                   <h2>Security & Danger Zone</h2>
                   <div className="security-info glass">
-                    <h4>Account Security</h4>
-                    <p>Password management coming soon. For now, use the forgot password flow if needed.</p>
+                    <h4><Lock size={18} /> Change Password</h4>
+                    <p style={{marginBottom:'1.5rem', fontSize:'0.85rem'}}>Choose a strong password you haven't used before.</p>
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      const form = e.target;
+                      const currentPassword = form.currentPassword.value;
+                      const newPassword = form.newPassword.value;
+                      const confirmPassword = form.confirmPassword.value;
+                      if (newPassword.length < 6) return toast.error('Password must be at least 6 characters');
+                      if (newPassword !== confirmPassword) return toast.error('Passwords do not match');
+                      setLoading(true);
+                      try {
+                        await axios.put(`${API_URL}/users/change-password`, { currentPassword, newPassword });
+                        toast.success('Password changed successfully');
+                        form.reset();
+                      } catch (err) {
+                        toast.error(err.response?.data?.message || 'Failed to change password');
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}>
+                      <div className="security-field">
+                        <label>Current Password</label>
+                        <input type="password" name="currentPassword" required placeholder="••••••••" />
+                      </div>
+                      <div className="security-field">
+                        <label>New Password</label>
+                        <input type="password" name="newPassword" required placeholder="Min. 6 characters" minLength={6} />
+                      </div>
+                      <div className="security-field">
+                        <label>Confirm New Password</label>
+                        <input type="password" name="confirmPassword" required placeholder="Re-enter new password" />
+                      </div>
+                      <button type="submit" className="btn-primary" disabled={loading} style={{marginTop:'1rem'}}>
+                        {loading ? <Loader2 className="spin" size={18} /> : <><Lock size={16} /> Update Password</>}
+                      </button>
+                    </form>
                   </div>
                   <div className="danger-zone">
                      <h3>Delete Account</h3>
@@ -604,7 +640,12 @@ const Profile = () => {
         .color-box { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: .2s; }
         .color-box.active { border-color: white; transform: scale(1.2); }
         
-        .security-info { padding: 1.5rem; margin-bottom: 2rem; border: 1px solid var(--border-light); }
+        .security-info { padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border-light); border-radius: var(--radius-md); }
+        .security-info h4 { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .security-field { margin-bottom: 1.2rem; }
+        .security-field label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.5rem; font-weight: 600; }
+        .security-field input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-light); padding: 0.9rem 1rem; border-radius: var(--radius-sm); color: white; font-size: 0.95rem; transition: var(--transition-fast); }
+        .security-field input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 10px var(--primary-glow); }
 
         .danger-zone { padding: 2rem; border: 1px solid rgba(244, 63, 94, 0.3); border-radius: var(--radius-md); background: rgba(244, 63, 94, 0.05); }
         .delete-reason { width: 100%; height: 80px; margin: 1.5rem 0; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light); border-radius: 8px; padding: 1rem; color: white; resize: none; }

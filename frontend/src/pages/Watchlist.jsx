@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Bookmark, PlayCircle, Trash2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Bookmark } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { GridSkeleton } from '../components/skeleton/MovieSkeleton';
+import MovieCard from '../components/MovieCard';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const Watchlist = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   const fetchWatchlist = async () => {
     try {
@@ -27,22 +27,6 @@ const Watchlist = () => {
   useEffect(() => {
     fetchWatchlist();
   }, []);
-
-  const removeItem = async (e, itemId) => {
-    e.stopPropagation();
-    try {
-      await axios.delete(`${API_URL}/watchlist/${itemId}`);
-      setItems(items.filter(item => item._id !== itemId));
-      toast.success('Removed from watchlist');
-    } catch (err) {
-      toast.error('Failed to remove item');
-    }
-  };
-
-  const handlePlay = (e, item) => {
-    e.stopPropagation();
-    navigate(`/watch/${item.mediaType}/${item.tmdbId}`);
-  };
 
   if (loading) return (
     <div className="watchlist-page container">
@@ -65,29 +49,21 @@ const Watchlist = () => {
             <Link to="/" className="btn-primary">Browse Content</Link>
         </div>
       ) : (
-        <div className="watchlist-grid">
+        <div className="browse-grid">
            {items.map((item) => (
-             <motion.div 
-               key={item._id} 
-               className="watchlist-card glass"
-               initial={{ opacity: 0, scale: 0.9 }}
-               animate={{ opacity: 1, scale: 1 }}
-               whileHover={{ y: -5 }}
-               onClick={() => navigate(`/${item.mediaType}/${item.tmdbId}`)}
-               style={{ cursor: 'pointer' }}
-             >
-                <div className="card-thumb">
-                   <img src={`https://image.tmdb.org/t/p/w500${item.posterPath}`} alt={item.title} />
-                   <div className="card-actions">
-                      <button className="play-btn" onClick={(e) => handlePlay(e, item)}><PlayCircle size={40} /></button>
-                      <button className="del-btn" onClick={(e) => removeItem(e, item._id)}><Trash2 size={20} /></button>
-                   </div>
-                </div>
-                <div className="card-info">
-                   <h4>{item.title}</h4>
-                   <span>{item.mediaType.toUpperCase()}</span>
-                </div>
-             </motion.div>
+             <MovieCard
+               key={item._id}
+               item={{
+                 id: item.tmdbId,
+                 title: item.title,
+                 name: item.title,
+                 poster_path: item.posterPath,
+                 backdrop_path: item.backdropPath,
+                 overview: item.overview,
+                 vote_average: item.voteAverage || 0,
+               }}
+               type={item.mediaType}
+             />
            ))}
         </div>
       )}
@@ -104,61 +80,6 @@ const Watchlist = () => {
           gap: 1.5rem;
           text-align: center;
         }
-        
-        .watchlist-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-          gap: 2rem;
-        }
-        
-        .watchlist-card {
-          border-radius: var(--radius-md);
-          overflow: hidden;
-        }
-        
-        .card-thumb {
-          position: relative;
-          aspect-ratio: 2/3;
-        }
-        
-        .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .card-actions {
-          position: absolute;
-          inset: 0;
-          background: rgba(0,0,0,0.6);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 1.5rem;
-          opacity: 0;
-          transition: var(--transition-fast);
-        }
-        
-        .watchlist-card:hover .card-actions { opacity: 1; }
-        
-        .play-btn { background: none; border: none; color: white; cursor: pointer; transition: var(--transition-fast); }
-        .play-btn:hover { color: var(--primary); transform: scale(1.1); }
-        
-        .del-btn {
-          background: rgba(255,255,255,0.1);
-          border: none;
-          color: white;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: var(--transition-fast);
-        }
-        
-        .del-btn:hover { background: var(--accent); }
-        
-        .card-info { padding: 1rem; }
-        .card-info h4 { margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem; color: white; }
-        .card-info span { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
       `}</style>
     </div>
   );

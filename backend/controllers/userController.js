@@ -96,11 +96,23 @@ exports.uploadAvatar = async (req, res) => {
 exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    const user = await User.findById(req.user._id).select('+password');
+    const user = await User.findById(req.user._id).select('+password +previousPasswords');
 
     const isMatch = await user.comparePassword(currentPassword);
     if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
 
+    // Check if new password is same as current
+    const isSame = await user.comparePassword(newPassword);
+    if (isSame) return res.status(400).json({ message: 'New password cannot be the same as your current password' });
+
+    // Check against previous passwords
+    const wasUsedBefore = await user.checkPreviousPasswords(newPassword);
+    if (wasUsedBefore) {
+      return res.status(400).json({ message: 'This password was used previously. Please choose a new one.' });
+    }
+
+    // Store old hash for archiving in pre-save hook
+    user._previousPasswordHash = user.password;
     user.password = newPassword;
     await user.save();
 
