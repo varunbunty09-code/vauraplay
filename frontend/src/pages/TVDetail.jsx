@@ -330,9 +330,14 @@ const TVDetail = () => {
                 )}
             </div>
 
-            {recommendations.length > 0 && (
+            {recommendations.length > 0 ? (
                 <div className="container similar-section">
-                    <MovieRow title="More Like This" movies={recommendations} type="tv" />
+                    <MovieRow title="More Like This" items={recommendations} type="tv" />
+                </div>
+            ) : (
+                <div className="container similar-section">
+                    <h3 style={{ marginBottom: '1rem' }}>More Like This</h3>
+                    <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No similar series found for this title.</p>
                 </div>
             )}
 
@@ -451,6 +456,7 @@ const TVDetail = () => {
 
                 .share-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
                 .share-modal { width: 100%; max-width: 480px; padding: 3rem; border-radius: 24px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.1); }
+                .share-modal h3 { margin-bottom: 2rem; }
                 .share-options { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2.5rem; }
                 .share-btn { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; color: white; font-size: 0.8rem; transition: 0.3s; }
                 .share-btn:hover { color: var(--primary); transform: translateY(-5px); }

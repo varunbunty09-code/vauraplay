@@ -248,8 +248,13 @@ const MovieDetail = () => {
       </div>
 
       <div className="container similar-section">
-        {movie.similar?.results.length > 0 && (
+        {movie.similar?.results?.length > 0 ? (
           <MovieRow title="More Like This" items={movie.similar.results} />
+        ) : (
+          <>
+            <h3 style={{ marginBottom: '1rem' }}>More Like This</h3>
+            <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No similar movies found for this title.</p>
+          </>
         )}
       </div>
 
