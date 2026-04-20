@@ -11,13 +11,24 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const profileRef = useRef(null);
+  const notificationRef = useRef(null);
+
+  const notifications = [
+    { id: 1, title: 'Welcome to VauraPlay!', message: 'Start exploring over 75,000+ movies.', time: '2m ago', unread: true },
+    { id: 2, title: 'New Movie Added', message: 'Michael (2025) is now available to stream.', time: '1h ago', unread: true },
+    { id: 3, title: 'Admin Message', message: 'The server will undergo maintenance at midnight.', time: '3h ago', unread: false }
+  ];
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileMenuOpen(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setNotificationsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -78,7 +89,43 @@ const Navbar = () => {
             />
           </div>
 
-          <button className="icon-btn"><Bell size={20} /></button>
+          <div className="notification-container" ref={notificationRef}>
+            <button className="icon-btn" onClick={() => setNotificationsOpen(!notificationsOpen)}>
+              <Bell size={20} />
+              <span className="badge-count">2</span>
+            </button>
+
+            <AnimatePresence>
+              {notificationsOpen && (
+                <motion.div 
+                  className="notification-dropdown glass"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                >
+                  <div className="dropdown-header">
+                    <h3>Notifications</h3>
+                    <button className="text-btn">Mark all read</button>
+                  </div>
+                  <div className="notification-list">
+                    {notifications.map(notif => (
+                      <div key={notif.id} className={`notification-item ${notif.unread ? 'unread' : ''}`}>
+                        <div className="notif-content">
+                          <p className="notif-title">{notif.title}</p>
+                          <p className="notif-msg">{notif.message}</p>
+                          <p className="notif-time">{notif.time}</p>
+                        </div>
+                        {notif.unread && <span className="unread-dot"></span>}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="dropdown-footer">
+                    <Link to="/help" onClick={() => setNotificationsOpen(false)}>View all activity</Link>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           
           <div className="profile-menu-container" ref={profileRef}>
             <button className="profile-btn" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
@@ -274,19 +321,94 @@ const Navbar = () => {
           position: relative;
         }
         
-        .profile-dropdown {
+        .profile-dropdown, .notification-dropdown {
           position: absolute;
           top: 50px;
           right: 0;
-          width: 220px;
+          width: 320px;
           border-radius: var(--radius-md);
           padding: 0.5rem;
           box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+          z-index: 1100;
         }
+
+        .profile-dropdown { width: 220px; }
         
+        .notification-container { position: relative; }
+        
+        .badge-count {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          background: var(--accent);
+          color: white;
+          font-size: 0.65rem;
+          font-weight: 800;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid var(--bg-main);
+        }
+
         .dropdown-header {
           padding: 1rem;
           border-bottom: 1px solid var(--border-light);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .notification-list {
+          max-height: 350px;
+          overflow-y: auto;
+        }
+
+        .notification-item {
+          padding: 1rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 1rem;
+          border-bottom: 1px solid rgba(255,255,255,0.03);
+          cursor: pointer;
+          transition: var(--transition-fast);
+        }
+
+        .notification-item:hover {
+          background: rgba(255,255,255,0.03);
+        }
+
+        .notification-item.unread {
+          background: rgba(13, 202, 240, 0.03);
+        }
+
+        .notif-title { font-weight: 700; color: white; font-size: 0.9rem; margin-bottom: 0.2rem; }
+        .notif-msg { font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; }
+        .notif-time { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem; }
+
+        .unread-dot {
+          width: 8px;
+          height: 8px;
+          background: var(--primary);
+          border-radius: 50%;
+          margin-top: 5px;
+          flex-shrink: 0;
+        }
+
+        .dropdown-footer {
+          padding: 1rem;
+          text-align: center;
+          border-top: 1px solid var(--border-light);
+        }
+
+        .dropdown-footer a {
+          text-decoration: none;
+          color: var(--primary);
+          font-size: 0.85rem;
+          font-weight: 600;
         }
         
         .dropdown-header .username {
