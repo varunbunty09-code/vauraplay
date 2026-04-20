@@ -69,97 +69,110 @@ const Navbar = () => {
             <span className="logo-text">VAURA<span>PLAY</span></span>
           </Link>
 
-          <ul className="nav-links">
-            <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link></li>
-            <li><Link to="/browse?type=movie" className={location.pathname === '/browse' ? 'active' : ''}>Movies</Link></li>
-            <li><Link to="/browse?type=tv">TV Shows</Link></li>
-            <li><Link to="/watchlist">My List</Link></li>
-          </ul>
+          {user && (
+            <ul className="nav-links">
+              <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link></li>
+              <li><Link to="/browse?type=movie" className={location.pathname === '/browse' ? 'active' : ''}>Movies</Link></li>
+              <li><Link to="/browse?type=tv">TV Shows</Link></li>
+              <li><Link to="/watchlist">My List</Link></li>
+            </ul>
+          )}
         </div>
 
         <div className="nav-right">
-          <div className="search-bar glass">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Search movies, TV shows..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearchCommit}
-            />
-          </div>
+          {user ? (
+            <>
+              <div className="search-bar glass">
+                <Search size={18} />
+                <input
+                  type="text"
+                  placeholder="Search movies, TV shows..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchCommit}
+                />
+              </div>
 
-          <div className="notification-container" ref={notificationRef}>
-            <button className="icon-btn" onClick={() => setNotificationsOpen(!notificationsOpen)}>
-              <Bell size={20} />
-              <span className="badge-count">2</span>
-            </button>
+              <div className="notification-container" ref={notificationRef}>
+                <button className="icon-btn" onClick={() => setNotificationsOpen(!notificationsOpen)}>
+                  <Bell size={20} />
+                  <span className="badge-count">2</span>
+                </button>
 
-            <AnimatePresence>
-              {notificationsOpen && (
-                <motion.div
-                  className="notification-dropdown glass"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                >
-                  <div className="dropdown-header">
-                    <h3>Notifications</h3>
-                    <button className="text-btn">Mark all read</button>
-                  </div>
-                  <div className="notification-list">
-                    {notifications.map(notif => (
-                      <div key={notif.id} className={`notification-item ${notif.unread ? 'unread' : ''}`}>
-                        <div className="notif-content">
-                          <p className="notif-title">{notif.title}</p>
-                          <p className="notif-msg">{notif.message}</p>
-                          <p className="notif-time">{notif.time}</p>
-                        </div>
-                        {notif.unread && <span className="unread-dot"></span>}
+                <AnimatePresence>
+                  {notificationsOpen && (
+                    <motion.div
+                      className="notification-dropdown glass"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                    >
+                      <div className="dropdown-header">
+                        <h3>Notifications</h3>
+                        <button className="text-btn">Mark all read</button>
                       </div>
-                    ))}
-                  </div>
-                  <div className="dropdown-footer">
-                    <Link to="/help" onClick={() => setNotificationsOpen(false)}>View all activity</Link>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                      <div className="notification-list">
+                        {notifications.map(notif => (
+                          <div key={notif.id} className={`notification-item ${notif.unread ? 'unread' : ''}`}>
+                            <div className="notif-content">
+                              <p className="notif-title">{notif.title}</p>
+                              <p className="notif-msg">{notif.message}</p>
+                              <p className="notif-time">{notif.time}</p>
+                            </div>
+                            {notif.unread && <span className="unread-dot"></span>}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="dropdown-footer">
+                        <Link to="/help" onClick={() => setNotificationsOpen(false)}>View all activity</Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-          <div className="profile-menu-container" ref={profileRef}>
-            <button className="profile-btn" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
-              <img src={user?.avatar?.url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'} alt="Avatar" />
+              <div className="profile-menu-container" ref={profileRef}>
+                <button className="profile-btn" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
+                  <img src={user?.avatar?.url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'} alt="Avatar" />
+                </button>
+
+                <AnimatePresence>
+                  {profileMenuOpen && (
+                    <motion.div
+                      className="profile-dropdown glass"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                    >
+                      <div className="dropdown-header">
+                        <p className="username">{user?.username || 'User'}</p>
+                        <p className="email">{user?.email}</p>
+                      </div>
+                      <ul>
+                        <li onClick={() => setProfileMenuOpen(false)}><Link to="/profile"><User size={16} /> Profile</Link></li>
+                        {user?.role === 'admin' && (
+                          <li onClick={() => setProfileMenuOpen(false)}><Link to="/admin"><LayoutDashboard size={16} /> Admin Panel</Link></li>
+                        )}
+                        <li className="divider"></li>
+                        <li onClick={handleLogout} className="logout"><LogOut size={16} /> Sign Out</li>
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </>
+          ) : (
+            <div className="auth-btns">
+              <Link to="/login" className="btn-text">Sign In</Link>
+              <Link to="/signup" className="btn-primary-sm">Get Started</Link>
+            </div>
+          )}
+
+          {user && (
+            <button className="mobile-toggle" onClick={() => setMobileMenuOpen(true)}>
+              <Menu size={24} />
             </button>
-
-            <AnimatePresence>
-              {profileMenuOpen && (
-                <motion.div
-                  className="profile-dropdown glass"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                >
-                  <div className="dropdown-header">
-                    <p className="username">{user?.username || 'User'}</p>
-                    <p className="email">{user?.email}</p>
-                  </div>
-                  <ul>
-                    <li onClick={() => setProfileMenuOpen(false)}><Link to="/profile"><User size={16} /> Profile</Link></li>
-                    {user?.role === 'admin' && (
-                      <li onClick={() => setProfileMenuOpen(false)}><Link to="/admin"><LayoutDashboard size={16} /> Admin Panel</Link></li>
-                    )}
-                    <li className="divider"></li>
-                    <li onClick={handleLogout} className="logout"><LogOut size={16} /> Sign Out</li>
-                  </ul>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <button className="mobile-toggle" onClick={() => setMobileMenuOpen(true)}>
-            <Menu size={24} />
-          </button>
+          )}
         </div>
       </div>
 
@@ -521,8 +534,40 @@ const Navbar = () => {
           color: var(--accent);
         }
         
+        .btn-text {
+          color: white;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 0.95rem;
+          transition: var(--transition-fast);
+        }
+
+        .btn-text:hover { color: var(--primary); }
+
+        .btn-primary-sm {
+          background: var(--primary);
+          color: black;
+          padding: 0.6rem 1.2rem;
+          border-radius: var(--radius-sm);
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 0.9rem;
+          transition: var(--transition-fast);
+        }
+
+        .btn-primary-sm:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px var(--primary-glow);
+        }
+
+        .auth-btns {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+        }
+
         @media (max-width: 900px) {
-          .nav-links, .search-bar, .icon-btn, .profile-menu-container {
+          .nav-links, .search-bar, .notification-container, .profile-menu-container {
             display: none;
           }
           .mobile-toggle {
