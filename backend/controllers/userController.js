@@ -7,13 +7,25 @@ const { cloudinary } = require('../config/cloudinary');
 // @route   PUT /api/users/profile
 exports.updateProfile = async (req, res) => {
   try {
-    const { username, preferences } = req.body;
+    const { username, preferences, avatar } = req.body;
     const user = await User.findById(req.user._id);
 
     if (username && username !== user.username) {
       const existing = await User.findOne({ username });
       if (existing) return res.status(400).json({ message: 'Username already taken' });
       user.username = username;
+    }
+
+    if (avatar) {
+      // If switching from Cloudinary to DiceBear, delete the Cloudinary image
+      if (avatar.publicId === 'dicebear' && user.avatar.publicId && user.avatar.publicId !== 'dicebear') {
+        try {
+          await cloudinary.uploader.destroy(user.avatar.publicId);
+        } catch (e) {
+          console.error('Cloudinary cleanup failed:', e);
+        }
+      }
+      user.avatar = avatar;
     }
 
     if (preferences) {
