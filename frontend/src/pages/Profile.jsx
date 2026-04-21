@@ -308,6 +308,8 @@ const Profile = () => {
 
         {/* Main Content */}
         <main className="profile-main glass">
+           <AnimatePresence mode="wait">
+             {activeTab === 'general' && (
                 <motion.section key="general" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
                   <h2>Account Settings</h2>
                      <div className="form-group">
