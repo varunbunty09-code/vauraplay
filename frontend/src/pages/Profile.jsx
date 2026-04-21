@@ -417,7 +417,20 @@ const Profile = () => {
             {activeTab === 'activity' && (
               <motion.section key="activity" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
                 <h2>Activity Log</h2>
-                {loading && activityLogs.length === 0 ? <Loader2 className="spin" /> : (
+                {loading && activityLogs.length === 0 ? (
+                  <div className="activity-list">
+                    {[1,2,3,4].map(i => (
+                      <div key={i} className="activity-item glass">
+                        <div className="activity-icon-wrap skeleton-shimmer" style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+                        <div className="activity-info" style={{ flex: 1 }}>
+                          <div className="skeleton-shimmer" style={{ width: '30%', height: 14, borderRadius: 6, marginBottom: 8 }} />
+                          <div className="skeleton-shimmer" style={{ width: '55%', height: 12, borderRadius: 6, marginBottom: 8 }} />
+                          <div className="skeleton-shimmer" style={{ width: '40%', height: 10, borderRadius: 6 }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
                   <>
                     <AnimatePresence mode="wait">
                       <motion.div
