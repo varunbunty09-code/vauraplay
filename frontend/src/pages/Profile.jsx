@@ -152,8 +152,22 @@ const Profile = () => {
     setLoading(true);
     try {
       const payload = {};
-      if (field === 'username') payload.username = formData.username;
-      if (field === 'phone') payload.phone = `${formData.countryCode}${formData.phoneNumber}`;
+      if (field === 'username') {
+        if (!formData.username.trim()) {
+          toast.error('Username cannot be empty');
+          setLoading(false);
+          return;
+        }
+        payload.username = formData.username;
+      }
+      if (field === 'phone') {
+        if (!formData.phoneNumber.trim()) {
+          toast.error('Please enter your phone number');
+          setLoading(false);
+          return;
+        }
+        payload.phone = `${formData.countryCode}${formData.phoneNumber}`;
+      }
       
       const { data } = await axios.put(`${API_URL}/users/profile`, payload);
       setUser(data.user);

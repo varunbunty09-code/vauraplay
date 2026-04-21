@@ -11,6 +11,9 @@ exports.updateProfile = async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (phone !== undefined) {
+      if (phone && phone.length < 10) {
+        return res.status(400).json({ message: 'Invalid phone number format' });
+      }
       user.phone = phone;
     }
 
