@@ -151,10 +151,10 @@ const MovieDetail = () => {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`
   };
 
+  const [backdropError, setBackdropError] = useState(false);
+
   if (loading) return <DetailSkeleton />;
   if (!movie) return <div className="error-screen container">Movie not found</div>;
-
-  const [backdropError, setBackdropError] = useState(false);
 
   return (
     <div className="detail-page">

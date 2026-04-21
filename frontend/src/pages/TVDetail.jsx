@@ -3,8 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import tmdbService from '../services/tmdbService';
 import { Play, Plus, Star, Calendar, Bookmark, List, Share2, MessageCircle, Copy, X, ExternalLink, Check, ThumbsUp, ThumbsDown, Heart } from 'lucide-react';
 
-const TwitterIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>;
-const FacebookIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>;
+const TwitterIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>;
+const FacebookIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>;
 import { motion, AnimatePresence } from 'framer-motion';
 import MovieRow from '../components/MovieRow';
 import { DetailSkeleton } from '../components/skeleton/MovieSkeleton';
@@ -52,7 +52,7 @@ const TVDetail = () => {
                 const data = await tmdbService.getDetails(id, 'tv');
                 setShow(data);
                 setSeasons(data.seasons);
-                
+
                 // Find US rating if available
                 const usRating = data.content_ratings?.results?.find(r => r.iso_3166_1 === 'US')?.rating;
                 setContentRating(usRating || data.content_ratings?.results?.[0]?.rating || '');
@@ -61,7 +61,7 @@ const TVDetail = () => {
                 try {
                     const { data: wlData } = await axios.get(`${API_URL}/watchlist/check/${data.id}/tv`);
                     setInWatchlist(wlData.inWatchlist);
-                } catch (e) {}
+                } catch (e) { }
 
                 // Use similar data already fetched by getDetails
                 if (data.similar?.results) {
@@ -193,45 +193,45 @@ const TVDetail = () => {
     };
 
     const openCastModal = async (person) => {
-      setSelectedCast(person);
-      setCastLoading(true);
-      setCastDetails(null);
-      try {
-        const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY;
-        const { data } = await axios.get(`https://api.themoviedb.org/3/person/${person.id}?api_key=${TMDB_KEY}&append_to_response=tv_credits`);
-        setCastDetails(data);
-      } catch (err) {
-        toast.error('Failed to load actor details');
-      } finally {
-        setCastLoading(false);
-      }
+        setSelectedCast(person);
+        setCastLoading(true);
+        setCastDetails(null);
+        try {
+            const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY;
+            const { data } = await axios.get(`https://api.themoviedb.org/3/person/${person.id}?api_key=${TMDB_KEY}&append_to_response=tv_credits`);
+            setCastDetails(data);
+        } catch (err) {
+            toast.error('Failed to load actor details');
+        } finally {
+            setCastLoading(false);
+        }
     };
 
     const closeCastModal = () => { setSelectedCast(null); setCastDetails(null); };
 
     const copyToClipboard = () => {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard!');
+        navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
     };
 
     const shareLinks = {
-      whatsapp: `https://wa.me/?text=${encodeURIComponent('Check out this show on VauraPlay: ' + window.location.href)}`,
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ' + (show?.name || 'this') + ' on @VauraPlay')}&url=${encodeURIComponent(window.location.href)}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`
+        whatsapp: `https://wa.me/?text=${encodeURIComponent('Check out this show on VauraPlay: ' + window.location.href)}`,
+        twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ' + (show?.name || 'this') + ' on @VauraPlay')}&url=${encodeURIComponent(window.location.href)}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`
     };
 
-    if (loading) return <DetailSkeleton />;
-
     const [backdropError, setBackdropError] = useState(false);
+
+    if (loading) return <DetailSkeleton />;
 
     return (
         <div className="detail-page tv">
             <div className="detail-hero">
                 <div className="backdrop-wrapper">
                     {show.backdrop_path && !backdropError ? (
-                        <img 
-                            src={`https://image.tmdb.org/t/p/original${show.backdrop_path}`} 
-                            alt={show.name} 
+                        <img
+                            src={`https://image.tmdb.org/t/p/original${show.backdrop_path}`}
+                            alt={show.name}
                             onError={() => setBackdropError(true)}
                         />
                     ) : (
@@ -251,15 +251,15 @@ const TVDetail = () => {
                                 </div>
 
                                 <h1 className="movie-hero-title">{show.name}</h1>
-                                
+
                                 {show.tagline && <p className="overview-premium">"{show.tagline}"</p>}
                                 <p className="overview-main">{show.overview}</p>
 
                                 {/* Language Selector */}
                                 <div className="language-selector-netflix">
                                     {show.spoken_languages?.map(lang => (
-                                        <button 
-                                            key={lang.iso_639_1} 
+                                        <button
+                                            key={lang.iso_639_1}
                                             className={`lang-tab ${selectedLang === lang.iso_639_1 ? 'active' : ''}`}
                                             onClick={() => setSelectedLang(lang.iso_639_1)}
                                         >
@@ -269,64 +269,64 @@ const TVDetail = () => {
                                 </div>
 
                                 <div className="detail-actions-wrapper">
-                                  {heroResumeEp && (
-                                    <div className="movie-progress-bar-wrapper">
-                                      <div className="movie-progress-track">
-                                        <div className="movie-progress-fill" style={{ width: `${heroResumeEp.progress}%` }} />
-                                      </div>
-                                      <span className="movie-progress-text">
-                                        S{heroResumeEp.season}:E{heroResumeEp.episode} · {formatTime(heroResumeEp.currentTime)} / {formatTime(heroResumeEp.duration)}
-                                      </span>
-                                    </div>
-                                  )}
-                                  <div className="detail-actions">
-                                    <Link to={heroResumeEp ? `/watch/tv/${show.id}?s=${heroResumeEp.season}&e=${heroResumeEp.episode}&lang=${selectedLang}` : `/watch/tv/${show.id}?s=${selectedSeason}&e=1&lang=${selectedLang}`} className="btn-primary">
-                                        <Play size={20} fill="currentColor" /> {heroResumeEp ? `Resume S${heroResumeEp.season}:E${heroResumeEp.episode}` : 'Watch Now'}
-                                    </Link>
-                                    
-                                    <motion.button
-                                        className={`btn-outline watchlist-toggle ${inWatchlist ? 'active' : ''}`}
-                                        onClick={toggleWatchlist}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        <AnimatePresence mode="wait">
-                                            {inWatchlist ? (
-                                                <motion.span key="in" className="wl-inner" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }}>
-                                                    <Check size={20} /> In Library
-                                                </motion.span>
-                                            ) : (
-                                                <motion.span key="out" className="wl-inner" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }}>
-                                                    <Plus size={20} /> Add to List
-                                                </motion.span>
-                                            )}
-                                        </AnimatePresence>
-                                    </motion.button>
+                                    {heroResumeEp && (
+                                        <div className="movie-progress-bar-wrapper">
+                                            <div className="movie-progress-track">
+                                                <div className="movie-progress-fill" style={{ width: `${heroResumeEp.progress}%` }} />
+                                            </div>
+                                            <span className="movie-progress-text">
+                                                S{heroResumeEp.season}:E{heroResumeEp.episode} · {formatTime(heroResumeEp.currentTime)} / {formatTime(heroResumeEp.duration)}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="detail-actions">
+                                        <Link to={heroResumeEp ? `/watch/tv/${show.id}?s=${heroResumeEp.season}&e=${heroResumeEp.episode}&lang=${selectedLang}` : `/watch/tv/${show.id}?s=${selectedSeason}&e=1&lang=${selectedLang}`} className="btn-primary">
+                                            <Play size={20} fill="currentColor" /> {heroResumeEp ? `Resume S${heroResumeEp.season}:E${heroResumeEp.episode}` : 'Watch Now'}
+                                        </Link>
 
-                                    <div className="rating-wrapper">
-                                        <button className={`btn-outline rate-btn ${userRating ? 'rated' : ''}`} onClick={() => setShowRating(!showRating)}>
-                                            {userRating === 'loved' ? <Heart size={20} fill="#f43f5e" color="#f43f5e" /> : userRating === 'liked' ? <ThumbsUp size={20} color="var(--primary)" /> : userRating === 'disliked' ? <ThumbsDown size={20} color="var(--text-muted)" /> : <ThumbsUp size={20} />}
+                                        <motion.button
+                                            className={`btn-outline watchlist-toggle ${inWatchlist ? 'active' : ''}`}
+                                            onClick={toggleWatchlist}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            <AnimatePresence mode="wait">
+                                                {inWatchlist ? (
+                                                    <motion.span key="in" className="wl-inner" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }}>
+                                                        <Check size={20} /> In Library
+                                                    </motion.span>
+                                                ) : (
+                                                    <motion.span key="out" className="wl-inner" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }}>
+                                                        <Plus size={20} /> Add to List
+                                                    </motion.span>
+                                                )}
+                                            </AnimatePresence>
+                                        </motion.button>
+
+                                        <div className="rating-wrapper">
+                                            <button className={`btn-outline rate-btn ${userRating ? 'rated' : ''}`} onClick={() => setShowRating(!showRating)}>
+                                                {userRating === 'loved' ? <Heart size={20} fill="#f43f5e" color="#f43f5e" /> : userRating === 'liked' ? <ThumbsUp size={20} color="var(--primary)" /> : userRating === 'disliked' ? <ThumbsDown size={20} color="var(--text-muted)" /> : <ThumbsUp size={20} />}
+                                            </button>
+                                            <AnimatePresence>
+                                                {showRating && (
+                                                    <motion.div className="rating-panel glass" initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.9 }}>
+                                                        {ratingFeedback ? (
+                                                            <motion.p className="rating-feedback" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{ratingFeedback}</motion.p>
+                                                        ) : (
+                                                            <>
+                                                                <button className={`emoji-btn ${userRating === 'loved' ? 'selected' : ''}`} onClick={() => handleRate('loved')} title="Loved it"><span className="emoji">❤️</span><span className="emoji-label">Loved</span></button>
+                                                                <button className={`emoji-btn ${userRating === 'liked' ? 'selected' : ''}`} onClick={() => handleRate('liked')} title="Liked it"><span className="emoji">👍</span><span className="emoji-label">Good</span></button>
+                                                                <button className={`emoji-btn ${userRating === 'disliked' ? 'selected' : ''}`} onClick={() => handleRate('disliked')} title="Not for me"><span className="emoji">👎</span><span className="emoji-label">Not for me</span></button>
+                                                            </>
+                                                        )}
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+
+                                        <button className="btn-outline btn-icon" onClick={() => setShowShare(true)}>
+                                            <Share2 size={20} />
                                         </button>
-                                        <AnimatePresence>
-                                            {showRating && (
-                                                <motion.div className="rating-panel glass" initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.9 }}>
-                                                    {ratingFeedback ? (
-                                                        <motion.p className="rating-feedback" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{ratingFeedback}</motion.p>
-                                                    ) : (
-                                                        <>
-                                                            <button className={`emoji-btn ${userRating === 'loved' ? 'selected' : ''}`} onClick={() => handleRate('loved')} title="Loved it"><span className="emoji">❤️</span><span className="emoji-label">Loved</span></button>
-                                                            <button className={`emoji-btn ${userRating === 'liked' ? 'selected' : ''}`} onClick={() => handleRate('liked')} title="Liked it"><span className="emoji">👍</span><span className="emoji-label">Good</span></button>
-                                                            <button className={`emoji-btn ${userRating === 'disliked' ? 'selected' : ''}`} onClick={() => handleRate('disliked')} title="Not for me"><span className="emoji">👎</span><span className="emoji-label">Not for me</span></button>
-                                                        </>
-                                                    )}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
                                     </div>
-
-                                    <button className="btn-outline btn-icon" onClick={() => setShowShare(true)}>
-                                        <Share2 size={20} />
-                                    </button>
-                                  </div>
                                 </div>
                             </motion.div>
                         </div>
@@ -387,7 +387,7 @@ const TVDetail = () => {
                         <p>{episodes.length} items to watch</p>
                     </div>
                     <div className="season-dropdown-wrapper">
-                        <select 
+                        <select
                             className="season-select-glass"
                             value={selectedSeason}
                             onChange={(e) => setSelectedSeason(Number(e.target.value))}
@@ -456,35 +456,35 @@ const TVDetail = () => {
             )}
 
             <AnimatePresence>
-              {showShare && (
-                <div className="share-modal-overlay" onClick={() => setShowShare(false)}>
-                  <motion.div 
-                    className="share-modal glass"
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <h3>Share this series</h3>
-                    <div className="share-options">
-                      <a href={shareLinks.whatsapp} target="_blank" rel="noreferrer" className="share-btn whatsapp">
-                        <MessageCircle size={24} /> WhatsApp
-                      </a>
-                      <a href={shareLinks.twitter} target="_blank" rel="noreferrer" className="share-btn twitter">
-                        <TwitterIcon /> Twitter
-                      </a>
-                      <a href={shareLinks.facebook} target="_blank" rel="noreferrer" className="share-btn facebook">
-                        <FacebookIcon /> Facebook
-                      </a>
+                {showShare && (
+                    <div className="share-modal-overlay" onClick={() => setShowShare(false)}>
+                        <motion.div
+                            className="share-modal glass"
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <h3>Share this series</h3>
+                            <div className="share-options">
+                                <a href={shareLinks.whatsapp} target="_blank" rel="noreferrer" className="share-btn whatsapp">
+                                    <MessageCircle size={24} /> WhatsApp
+                                </a>
+                                <a href={shareLinks.twitter} target="_blank" rel="noreferrer" className="share-btn twitter">
+                                    <TwitterIcon /> Twitter
+                                </a>
+                                <a href={shareLinks.facebook} target="_blank" rel="noreferrer" className="share-btn facebook">
+                                    <FacebookIcon /> Facebook
+                                </a>
+                            </div>
+                            <div className="copy-link">
+                                <input type="text" readOnly value={window.location.href} />
+                                <button onClick={copyToClipboard}><Copy size={18} /></button>
+                            </div>
+                            <button className="close-share" onClick={() => setShowShare(false)}><X size={20} /></button>
+                        </motion.div>
                     </div>
-                    <div className="copy-link">
-                      <input type="text" readOnly value={window.location.href} />
-                      <button onClick={copyToClipboard}><Copy size={18} /></button>
-                    </div>
-                    <button className="close-share" onClick={() => setShowShare(false)}><X size={20} /></button>
-                  </motion.div>
-                </div>
-              )}
+                )}
             </AnimatePresence>
 
             <AnimatePresence>
