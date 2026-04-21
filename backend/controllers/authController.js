@@ -45,8 +45,12 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: 'Username already taken' });
     }
 
+    if (!phone || phone.length < 10) {
+      return res.status(400).json({ message: 'A valid phone number is required' });
+    }
+
     // Create unverified user
-    const user = await User.create({ username, email, password, phone: phone || '', isVerified: false });
+    const user = await User.create({ username, email, password, phone, isVerified: false });
 
     // Generate and send OTP
     const otp = user.generateOTP('signup');

@@ -49,9 +49,12 @@ const Signup = () => {
     if (formData.password.length < 6) {
       return toast.error('Password must be at least 6 characters');
     }
+    if (!formData.phone || !formData.phone.trim()) {
+      return toast.error('Please enter your phone number');
+    }
     setLoading(true);
     try {
-      const fullPhone = formData.phone ? `${formData.countryCode}${formData.phone}` : '';
+      const fullPhone = `${formData.countryCode}${formData.phone.trim()}`;
       const res = await signup(formData.username, formData.email, formData.password, fullPhone);
       setUserId(res.userId);
       setStep(2);
