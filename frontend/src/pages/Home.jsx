@@ -164,13 +164,13 @@ const Home = () => {
 
       <style>{`
         .home-page { padding-bottom: 5rem; }
-        .home-hero { height: 90vh; position: relative; display: flex; align-items: center; margin-bottom: -50px; }
+        .home-hero { height: 90vh; position: relative; display: flex; align-items: flex-end; margin-bottom: -50px; }
         .hero-backdrop { position: absolute; inset: 0; z-index: 0; }
-        .hero-backdrop img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to right, #0a0a0c 15%, transparent 70%), linear-gradient(to top, #0a0a0c 10%, transparent 50%); }
-        .hero-info { position: relative; z-index: 10; max-width: 850px; padding-top: 5rem; }
-        .hero-info h1 { font-size: clamp(3rem, 8vw, 5rem); margin-bottom: 1.5rem; text-shadow: 0 4px 30px rgba(0,0,0,0.7); line-height: 1.05; }
-        .hero-info p { font-size: 1.2rem; margin-bottom: 2.5rem; color: rgba(255,255,255,0.9); line-height: 1.6; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .hero-backdrop img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+        .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to right, #0a0a0c 20%, transparent 75%), linear-gradient(to top, #0a0a0c 15%, transparent 60%); }
+        .hero-info { position: relative; z-index: 10; max-width: 650px; padding-bottom: 8rem; }
+        .hero-info h1 { font-size: clamp(2.8rem, 6vw, 4.5rem); margin-bottom: 1.2rem; text-shadow: 0 4px 30px rgba(0,0,0,0.7); line-height: 1.05; font-weight: 900; }
+        .hero-info p { font-size: 1.1rem; margin-bottom: 2rem; color: rgba(255,255,255,0.85); line-height: 1.7; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         .hero-actions { display: flex; gap: 1.2rem; align-items: center; }
         .btn-primary { padding: 1rem 2.5rem; font-size: 1.1rem; }
         .btn-outline { padding: 1rem 2.5rem; font-size: 1.1rem; }
@@ -180,8 +180,11 @@ const Home = () => {
         .rows-container { position: relative; z-index: 20; margin-top: -120px; }
 
         @media (max-width: 768px) {
-          .home-hero { height: 70vh; }
-          .hero-info h1 { font-size: 2.5rem; }
+          .home-hero { height: 70vh; align-items: flex-end; }
+          .hero-info { padding-bottom: 5rem; }
+          .hero-info h1 { font-size: 2.2rem; }
+          .hero-info p { font-size: 1rem; }
+          .hero-actions { flex-wrap: wrap; }
           .rows-container { margin-top: 0; }
         }
       `}</style>
