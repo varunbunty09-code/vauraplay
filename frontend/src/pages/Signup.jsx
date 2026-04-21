@@ -186,7 +186,7 @@ const Signup = () => {
                     >
                       {countryCodes.map(c => (
                         <option key={c.code + c.country} value={c.code}>
-                          {c.flag} {c.code} ({c.country})
+                          {c.code} ({c.name})
                         </option>
                       ))}
                     </select>
@@ -275,10 +275,11 @@ const Signup = () => {
           min-width: 140px;
         }
         .selected-flag {
-          width: 20px;
+          width: 22px;
           height: auto;
           border-radius: 2px;
           object-fit: cover;
+          margin-right: -4px;
         }
         .globe-icon { color: var(--text-muted); }
         .text-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 600; transition: var(--transition-fast); }

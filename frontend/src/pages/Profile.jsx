@@ -333,7 +333,7 @@ const Profile = () => {
                             >
                               {countryCodes.map(c => (
                                 <option key={c.code + c.country} value={c.code}>
-                                  {c.flag} {c.code} ({c.country})
+                                  {c.code} ({c.name})
                                 </option>
                               ))}
                             </select>
@@ -692,10 +692,11 @@ const Profile = () => {
           color: white;
         }
         .selected-flag {
-          width: 20px;
+          width: 22px;
           height: auto;
           border-radius: 2px;
           object-fit: cover;
+          margin-right: -4px;
         }
         .globe-icon { color: var(--text-muted); }
 
