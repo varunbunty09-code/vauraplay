@@ -675,13 +675,13 @@ const Profile = () => {
           background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); color: white; 
         }
         
-        .field-update-wrapper { display: flex; gap: 1rem; max-width: 600px; margin-bottom: 0.5rem; align-items: center; }
+        .field-update-wrapper { display: flex; gap: 1rem; max-width: 800px; margin-bottom: 0.5rem; align-items: center; }
         .field-update-wrapper input { flex: 1; }
         
         .country-code-select {
           display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.05); 
           border: 1px solid var(--border-light); border-radius: 10px; padding: 0 0.8rem;
-          height: 48px; min-width: 120px;
+          height: 48px; width: 180px; flex-shrink: 0;
         }
         .country-code-select select {
           background: transparent; border: none; color: white; outline: none; width: 100%; cursor: pointer;
