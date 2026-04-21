@@ -114,7 +114,7 @@ const Login = () => {
                   type="email"
                   name="email"
                   required
-                  placeholder="name@example.com"
+                  placeholder="Enter Email"
                   value={formData.email}
                   onChange={handleInputChange}
                 />
@@ -129,7 +129,7 @@ const Login = () => {
                   type="password"
                   name="password"
                   required
-                  placeholder="••••••••"
+                  placeholder="Enter Password"
                   value={formData.password}
                   onChange={handleInputChange}
                 />

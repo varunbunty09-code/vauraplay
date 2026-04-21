@@ -173,8 +173,8 @@ const Signup = () => {
                     {(() => {
                       const country = countryCodes.find(c => c.code === formData.countryCode);
                       return country ? (
-                        <img 
-                          src={`https://flagcdn.com/w40/${country.country.toLowerCase()}.png`} 
+                        <img
+                          src={`https://flagcdn.com/w40/${country.country.toLowerCase()}.png`}
                           alt={country.name}
                           className="selected-flag"
                         />
@@ -198,7 +198,7 @@ const Signup = () => {
                     type="tel"
                     name="phone"
                     required
-                    placeholder="9876543210"
+                    placeholder="Enter Phone Number"
                     value={formData.phone}
                     onChange={handleInputChange}
                   />

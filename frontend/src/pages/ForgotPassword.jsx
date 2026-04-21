@@ -35,9 +35,9 @@ const ForgotPassword = () => {
                 <div className="circle circle-1"></div>
                 <div className="circle circle-2"></div>
             </div>
-            
+
             <div className="auth-container">
-            <style>{`
+                <style>{`
                 .auth-page { min-height: 100vh; width: 100%; position: relative; background: #050507; overflow: hidden; }
                 .auth-bg { position: absolute; inset: 0; z-index: 0; }
                 .circle { position: absolute; border-radius: 50%; filter: blur(100px); }
@@ -48,7 +48,7 @@ const ForgotPassword = () => {
                 .success-state h3 { margin-bottom: 0.5rem; }
                 .success-state p { margin-bottom: 2rem; font-size: 0.9rem; }
             `}</style>
-                <motion.div 
+                <motion.div
                     className="auth-card glass"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -61,7 +61,7 @@ const ForgotPassword = () => {
 
                     <AnimatePresence mode="wait">
                         {!isSent ? (
-                            <motion.form 
+                            <motion.form
                                 key="form"
                                 onSubmit={handleSubmit}
                                 initial={{ opacity: 0 }}
@@ -70,9 +70,9 @@ const ForgotPassword = () => {
                             >
                                 <div className="form-group">
                                     <label><Mail size={16} /> Email Address</label>
-                                    <input 
-                                        type="email" 
-                                        placeholder="name@example.com"
+                                    <input
+                                        type="email"
+                                        placeholder="Enter Email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
@@ -84,7 +84,7 @@ const ForgotPassword = () => {
                                 </button>
                             </motion.form>
                         ) : (
-                            <motion.div 
+                            <motion.div
                                 key="success"
                                 className="success-state text-center"
                                 initial={{ scale: 0.9, opacity: 0 }}

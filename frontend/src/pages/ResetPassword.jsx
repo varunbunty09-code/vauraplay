@@ -34,7 +34,7 @@ const ResetPassword = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (password !== confirmPassword) {
             return toast.error('Passwords do not match');
         }
@@ -58,7 +58,7 @@ const ResetPassword = () => {
     return (
         <div className="auth-page">
             <div className="auth-container">
-                <motion.div 
+                <motion.div
                     className="auth-card glass"
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -81,9 +81,9 @@ const ResetPassword = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label><Lock size={16} /> New Password</label>
-                            <input 
-                                type="password" 
-                                placeholder="••••••••"
+                            <input
+                                type="password"
+                                placeholder="Enter New Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -92,9 +92,9 @@ const ResetPassword = () => {
 
                         <div className="form-group">
                             <label><Lock size={16} /> Confirm Password</label>
-                            <input 
-                                type="password" 
-                                placeholder="••••••••"
+                            <input
+                                type="password"
+                                placeholder="Confirm Password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
