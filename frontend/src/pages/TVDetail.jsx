@@ -629,14 +629,6 @@ const TVDetail = () => {
                 }
                 .episode-bar:hover .ep-play-mini { opacity: 1; background: var(--primary); transform: rotate(360deg); }
 
-                @media (max-width: 900px) {
-                  .episode-bar { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-                  .eb-thumb-wrap { width: 100%; }
-                  .eb-action { display: none; }
-                  .season-header-new { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-                  .season-select-glass { width: 100%; }
-                }
-
                 /* Cast Modal */
                 .cast-modal { width: 100%; max-width: 650px; max-height: 85vh; overflow-y: auto; padding: 2.5rem; border-radius: var(--radius-lg); position: relative; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
                 .cast-modal-header { display: flex; gap: 2rem; margin-bottom: 2rem; }
@@ -661,7 +653,35 @@ const TVDetail = () => {
                 .cast-modal-text-skeleton.short { width: 120px; }
                 .skeleton-shimmer { background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 37%, rgba(255,255,255,0.03) 63%); background-size: 400% 100%; animation: skeleton-loading 1.4s ease infinite; }
                 @keyframes skeleton-loading { 0% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+                @media (max-width: 900px) {
+                  .tv .detail-hero { padding-top: 120px; padding-bottom: 4rem; height: auto; min-height: auto; align-items: center; }
+                  .detail-content { flex-direction: column; align-items: center; text-align: center; }
+                  .detail-main-split { flex-direction: column; align-items: center; gap: 3rem; }
+                  .detail-left-content { width: 100%; }
+                  .detail-meta-premium, .detail-actions, .language-selector-netflix, .detail-actions-wrapper { justify-content: center; align-items: center; }
+                  .movie-hero-title { font-size: 2.5rem; }
+                  .overview-main, .overview-premium { max-width: 100%; margin-left: auto; margin-right: auto; }
+                  .detail-right-sidebar { 
+                    width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+                    gap: 1.5rem; border-left: none; padding-left: 0; padding-top: 2rem; 
+                    border-top: 1px solid rgba(255,255,255,0.1); 
+                  }
+                  .sidebar-group { text-align: center; }
+
+                  .episode-bar { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+                  .eb-thumb-wrap { width: 100%; }
+                  .eb-action { display: none; }
+                  .season-header-new { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+                  .season-select-glass { width: 100%; }
+                }
+
                 @media (max-width: 600px) {
+                  .movie-hero-title { font-size: 2rem; }
+                  .detail-actions { flex-direction: column; width: 100%; }
+                  .detail-actions .btn-primary, .detail-actions .btn-outline { width: 100%; justify-content: center; }
+                  .detail-meta-premium { flex-wrap: wrap; gap: 1rem; }
+                  .language-selector-netflix { overflow-x: auto; width: 100%; padding-bottom: 0.5rem; }
                   .cast-modal { padding: 1.5rem; }
                   .cast-modal-header { flex-direction: column; align-items: center; text-align: center; }
                   .cast-modal-photo { width: 140px; }
