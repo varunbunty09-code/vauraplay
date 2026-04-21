@@ -152,6 +152,7 @@ const Profile = () => {
     try {
       const { data } = await axios.put(`${API_URL}/users/profile`, {
         username: formData.username,
+        phone: formData.phone,
         preferences: {
           autoPlay: formData.autoPlay,
           playerColor: formData.playerColor,
@@ -293,12 +294,16 @@ const Profile = () => {
                     </div>
                     <div className="form-group">
                       <label>Phone Number</label>
-                      <input 
-                        type="tel" 
-                        placeholder="+91 9876543210"
-                        value={formData.phone} 
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      />
+                      <div className="phone-change-wrapper">
+                        <input 
+                          type="tel" 
+                          placeholder="e.g. +1 234 567 8900"
+                          value={formData.phone} 
+                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        />
+                        <button type="button" className="btn-small" onClick={handleSaveProfile}>Update Phone</button>
+                      </div>
+                      <small>Current: {user?.phone || 'Not set'} • Use international format (e.g. +1...)</small>
                     </div>
                     <div className="form-group">
                       <label>Email Address</label>
@@ -628,9 +633,10 @@ const Profile = () => {
           background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); color: white; 
         }
         
-        .email-change-wrapper { display: flex; gap: 1rem; max-width: 500px; margin-bottom: 0.5rem; }
-        .email-change-wrapper input { flex: 1; }
-        .btn-small { padding: 0.5rem 1rem; border-radius: 8px; background: var(--primary); color: black; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+        .email-change-wrapper, .phone-change-wrapper { display: flex; gap: 1rem; max-width: 550px; margin-bottom: 0.5rem; }
+        .email-change-wrapper input, .phone-change-wrapper input { flex: 1; }
+        .btn-small { padding: 0.5rem 1.2rem; border-radius: 8px; background: var(--primary); color: black; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 700; white-space: nowrap; transition: 0.3s; }
+        .btn-small:hover { transform: translateY(-2px); box-shadow: 0 5px 15px var(--primary-glow); }
 
 
         .empty-state { text-align: center; grid-column: 1/-1; padding: 4rem 0; color: var(--text-muted); }

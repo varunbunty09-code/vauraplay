@@ -165,7 +165,7 @@ const Signup = () => {
                 <input
                   type="tel"
                   name="phone"
-                  placeholder="+91 9876543210"
+                  placeholder="e.g. +1 234 567 8900"
                   value={formData.phone}
                   onChange={handleInputChange}
                 />

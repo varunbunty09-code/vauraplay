@@ -418,6 +418,7 @@ exports.getMe = async (req, res) => {
         isVerified: user.isVerified,
         isActive: user.isActive,
         lastLogin: user.lastLogin,
+        phone: user.phone || '',
         createdAt: user.createdAt,
       },
     });
