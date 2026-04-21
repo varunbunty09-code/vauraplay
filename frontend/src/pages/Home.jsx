@@ -85,6 +85,8 @@ const Home = () => {
     }
   };
 
+  const [heroError, setHeroError] = useState(false);
+
   if (loading) return (
     <div className="home-page-loading">
       <HeroSkeleton />
@@ -101,7 +103,15 @@ const Home = () => {
       {heroMovie && (
         <section className="home-hero">
           <div className="hero-backdrop">
-            <img src={`https://image.tmdb.org/t/p/original${heroMovie.backdrop_path}`} alt={heroMovie.title} />
+            {heroMovie.backdrop_path && !heroError ? (
+              <img 
+                src={`https://image.tmdb.org/t/p/original${heroMovie.backdrop_path}`} 
+                alt={heroMovie.title} 
+                onError={() => setHeroError(true)}
+              />
+            ) : (
+              <div className="backdrop-placeholder" />
+            )}
             <div className="hero-gradient"></div>
           </div>
           

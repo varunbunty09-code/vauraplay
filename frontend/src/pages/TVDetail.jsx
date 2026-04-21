@@ -222,11 +222,21 @@ const TVDetail = () => {
 
     if (loading) return <DetailSkeleton />;
 
+    const [backdropError, setBackdropError] = useState(false);
+
     return (
         <div className="detail-page tv">
             <div className="detail-hero">
                 <div className="backdrop-wrapper">
-                    <img src={`https://image.tmdb.org/t/p/original${show.backdrop_path}`} alt={show.name} />
+                    {show.backdrop_path && !backdropError ? (
+                        <img 
+                            src={`https://image.tmdb.org/t/p/original${show.backdrop_path}`} 
+                            alt={show.name} 
+                            onError={() => setBackdropError(true)}
+                        />
+                    ) : (
+                        <div className="backdrop-placeholder" />
+                    )}
                     <div className="detail-gradient"></div>
                 </div>
                 <div className="container detail-content">

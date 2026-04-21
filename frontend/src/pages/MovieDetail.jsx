@@ -154,11 +154,21 @@ const MovieDetail = () => {
   if (loading) return <DetailSkeleton />;
   if (!movie) return <div className="error-screen container">Movie not found</div>;
 
+  const [backdropError, setBackdropError] = useState(false);
+
   return (
     <div className="detail-page">
       <div className="detail-hero">
         <div className="backdrop-wrapper">
-          <img src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`} alt={movie.title} />
+          {movie.backdrop_path && !backdropError ? (
+            <img 
+              src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`} 
+              alt={movie.title} 
+              onError={() => setBackdropError(true)}
+            />
+          ) : (
+            <div className="backdrop-placeholder" />
+          )}
           <div className="detail-gradient"></div>
         </div>
 

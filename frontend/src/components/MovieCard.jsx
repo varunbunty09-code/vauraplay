@@ -68,7 +68,12 @@ const MovieCard = ({ item, type, showBadge = false }) => {
     navigate(`/watch/${mediaType}/${item.id}`);
   };
 
-  const getImageUrl = (path) => path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/500x750?text=No+Image';
+  const [imgError, setImgError] = useState(false);
+
+  const getImageUrl = (path) => {
+    if (imgError || !path) return null;
+    return `https://image.tmdb.org/t/p/w500${path}`;
+  };
 
   return (
     <motion.div
@@ -79,7 +84,19 @@ const MovieCard = ({ item, type, showBadge = false }) => {
     >
       <Link to={`/${mediaType}/${item.id}`}>
         <div className="browse-card-image">
-          <img src={getImageUrl(item.poster_path)} alt={title} loading="lazy" />
+          {getImageUrl(item.poster_path) ? (
+            <img 
+              src={getImageUrl(item.poster_path)} 
+              alt={title} 
+              loading="lazy" 
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="browse-card-placeholder">
+              <span className="placeholder-title">{title}</span>
+              <div className="placeholder-icon">🎬</div>
+            </div>
+          )}
           <div className="browse-card-overlay">
             <div className="browse-overlay-top">
               <div className="browse-rating"><Star size={12} fill="var(--primary)" /> {item.vote_average?.toFixed(1)}</div>
