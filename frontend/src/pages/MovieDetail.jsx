@@ -55,7 +55,7 @@ const MovieDetail = () => {
       if (!user) return;
       try {
         const { data } = await axios.get(`${API_URL}/progress/${id}/movie`);
-        if (data && data.progress > 0) {
+        if (data && data.currentTime > 0) {
           setWatchProgress(data);
         }
       } catch (err) {
@@ -64,6 +64,17 @@ const MovieDetail = () => {
     };
     fetchProgress();
   }, [id, user]);
+
+  const formatTime = (secs) => {
+    if (!secs || secs <= 0) return '0:00';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = Math.floor(secs % 60);
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  };
+
+  const hasProgress = watchProgress && watchProgress.currentTime > 0 && (watchProgress.progress || 0) < 95;
 
   const matchPercentage = movie ? Math.floor(movie.vote_average * 8 + 20) : 0;
 
@@ -181,19 +192,19 @@ const MovieDetail = () => {
                 </div>
 
                 <div className="detail-actions-wrapper">
-                  {watchProgress && watchProgress.progress > 0 && watchProgress.progress < 95 && (
+                  {hasProgress && (
                     <div className="movie-progress-bar-wrapper">
                       <div className="movie-progress-track">
                         <div className="movie-progress-fill" style={{ width: `${watchProgress.progress}%` }} />
                       </div>
                       <span className="movie-progress-text">
-                        {Math.floor(watchProgress.currentTime / 60)} of {Math.floor(watchProgress.duration / 60)}m
+                        {formatTime(watchProgress.currentTime)} / {formatTime(watchProgress.duration)}
                       </span>
                     </div>
                   )}
                   <div className="detail-actions">
                     <Link to={`/watch/movie/${movie.id}?lang=${selectedLang}`} className="btn-primary">
-                      <Play size={20} fill="currentColor" /> {watchProgress && watchProgress.progress > 0 && watchProgress.progress < 95 ? 'Resume' : 'Play Now'}
+                      <Play size={20} fill="currentColor" /> {hasProgress ? 'Resume' : 'Play Now'}
                     </Link>
 
                   <motion.button

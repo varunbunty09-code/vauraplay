@@ -67,14 +67,15 @@ exports.updateProgress = async (req, res) => {
 // @route   GET /api/progress/:tmdbId/:mediaType
 exports.getProgress = async (req, res) => {
   try {
+    const tmdbId = parseInt(req.params.tmdbId);
     const filter = {
       user: req.user._id,
-      tmdbId: req.params.tmdbId,
+      tmdbId,
       mediaType: req.params.mediaType,
     };
 
-    if (req.query.season) filter.season = req.query.season;
-    if (req.query.episode) filter.episode = req.query.episode;
+    if (req.query.season) filter.season = parseInt(req.query.season);
+    if (req.query.episode) filter.episode = parseInt(req.query.episode);
 
     // For TV shows without a specific episode, return all episode progress for that season
     if (req.params.mediaType === 'tv' && !req.query.episode) {
@@ -83,7 +84,7 @@ exports.getProgress = async (req, res) => {
     }
 
     const progress = await WatchProgress.findOne(filter);
-    res.json(progress || { progress: 0, currentTime: 0 });
+    res.json(progress || { progress: 0, currentTime: 0, duration: 0 });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }

@@ -35,6 +35,7 @@ const TVDetail = () => {
     const [userRating, setUserRating] = useState(null);
     const [ratingFeedback, setRatingFeedback] = useState('');
     const [episodeProgressMap, setEpisodeProgressMap] = useState({});
+    const [lastResumeEp, setLastResumeEp] = useState(null);
 
     const handleRate = (rating) => {
         setUserRating(rating);
@@ -76,6 +77,28 @@ const TVDetail = () => {
         window.scrollTo(0, 0);
     }, [id]);
 
+    // Fetch the most recent in-progress episode across ALL seasons for hero Resume button
+    useEffect(() => {
+        const fetchResumeEp = async () => {
+            if (!user || !id) return;
+            try {
+                // No season filter = returns ALL progress for this show
+                const { data } = await axios.get(`${API_URL}/progress/${id}/tv`);
+                if (Array.isArray(data) && data.length > 0) {
+                    const inProgress = data
+                        .filter(p => p.currentTime > 0 && (p.progress || 0) < 95)
+                        .sort((a, b) => new Date(b.lastWatched) - new Date(a.lastWatched));
+                    if (inProgress.length > 0) {
+                        setLastResumeEp(inProgress[0]);
+                    }
+                }
+            } catch (err) {
+                // Silently fail
+            }
+        };
+        fetchResumeEp();
+    }, [id, user]);
+
     const matchPercentage = show ? Math.floor(show.vote_average * 8 + 20) : 0;
 
     useEffect(() => {
@@ -114,13 +137,25 @@ const TVDetail = () => {
         fetchEpisodeProgress();
     }, [id, selectedSeason, user]);
 
-    // Find the last watched episode that is still in-progress for the Resume button
+    // Find the last watched episode in the CURRENT season for per-season context
     const lastWatchedEp = useMemo(() => {
         const inProgress = Object.values(episodeProgressMap)
-            .filter(p => p.progress > 0 && p.progress < 95)
+            .filter(p => p.currentTime > 0 && (p.progress || 0) < 95)
             .sort((a, b) => new Date(b.lastWatched) - new Date(a.lastWatched));
         return inProgress.length > 0 ? inProgress[0] : null;
     }, [episodeProgressMap]);
+
+    // Hero resume uses cross-season lastResumeEp, falling back to current season's lastWatchedEp
+    const heroResumeEp = lastResumeEp || lastWatchedEp;
+
+    const formatTime = (secs) => {
+        if (!secs || secs <= 0) return '0:00';
+        const h = Math.floor(secs / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        const s = Math.floor(secs % 60);
+        if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        return `${m}:${String(s).padStart(2, '0')}`;
+    };
 
     const toggleWatchlist = async () => {
         const prev = inWatchlist;
@@ -224,19 +259,19 @@ const TVDetail = () => {
                                 </div>
 
                                 <div className="detail-actions-wrapper">
-                                  {lastWatchedEp && (
+                                  {heroResumeEp && (
                                     <div className="movie-progress-bar-wrapper">
                                       <div className="movie-progress-track">
-                                        <div className="movie-progress-fill" style={{ width: `${lastWatchedEp.progress}%` }} />
+                                        <div className="movie-progress-fill" style={{ width: `${heroResumeEp.progress}%` }} />
                                       </div>
                                       <span className="movie-progress-text">
-                                        {Math.floor(lastWatchedEp.currentTime / 60)} of {Math.floor(lastWatchedEp.duration / 60)}m
+                                        S{heroResumeEp.season}:E{heroResumeEp.episode} · {formatTime(heroResumeEp.currentTime)} / {formatTime(heroResumeEp.duration)}
                                       </span>
                                     </div>
                                   )}
                                   <div className="detail-actions">
-                                    <Link to={lastWatchedEp ? `/watch/tv/${show.id}?s=${lastWatchedEp.season}&e=${lastWatchedEp.episode}&lang=${selectedLang}` : `/watch/tv/${show.id}?s=${selectedSeason}&e=1&lang=${selectedLang}`} className="btn-primary">
-                                        <Play size={20} fill="currentColor" /> {lastWatchedEp ? 'Resume' : 'Watch Now'}
+                                    <Link to={heroResumeEp ? `/watch/tv/${show.id}?s=${heroResumeEp.season}&e=${heroResumeEp.episode}&lang=${selectedLang}` : `/watch/tv/${show.id}?s=${selectedSeason}&e=1&lang=${selectedLang}`} className="btn-primary">
+                                        <Play size={20} fill="currentColor" /> {heroResumeEp ? `Resume S${heroResumeEp.season}:E${heroResumeEp.episode}` : 'Watch Now'}
                                     </Link>
                                     
                                     <motion.button
@@ -367,10 +402,15 @@ const TVDetail = () => {
                                         <img src={ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : `https://image.tmdb.org/t/p/w300${show.backdrop_path}`} alt={ep.name} />
                                         <div className="eb-play-overlay"><Play size={20} fill="white" /></div>
                                     </div>
-                                    {episodeProgressMap[ep.episode_number] && episodeProgressMap[ep.episode_number].progress > 0 && (
-                                        <div className="ep-progress-track">
-                                            <div className="ep-progress-fill" style={{ width: `${Math.min(episodeProgressMap[ep.episode_number].progress, 100)}%` }} />
-                                        </div>
+                                    {episodeProgressMap[ep.episode_number] && episodeProgressMap[ep.episode_number].currentTime > 0 && (
+                                        <>
+                                            <div className="ep-progress-track">
+                                                <div className="ep-progress-fill" style={{ width: `${Math.min(episodeProgressMap[ep.episode_number].progress || 0, 100)}%` }} />
+                                            </div>
+                                            <span className="ep-time-text">
+                                                {formatTime(episodeProgressMap[ep.episode_number].currentTime)} / {formatTime(episodeProgressMap[ep.episode_number].duration)}
+                                            </span>
+                                        </>
                                     )}
                                 </div>
                                 <div className="eb-info">
@@ -566,6 +606,7 @@ const TVDetail = () => {
                 .eb-thumb img { width: 100%; height: 100%; object-fit: cover; transition: .5s; }
                 .ep-progress-track { width: 100%; height: 3px; background: rgba(255,255,255,0.15); border-radius: 0 0 4px 4px; margin-top: -3px; position: relative; z-index: 2; }
                 .ep-progress-fill { height: 100%; background: #e50914; border-radius: 0 0 4px 4px; transition: width 0.3s ease; }
+                .ep-time-text { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; display: block; font-weight: 500; }
                 .episode-bar:hover .eb-thumb img { transform: scale(1.1); }
                 .eb-play-overlay {
                   position: absolute; inset: 0; background: rgba(0,0,0,0.4);
