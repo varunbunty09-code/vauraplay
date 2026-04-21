@@ -26,13 +26,13 @@ exports.updateProgress = async (req, res) => {
 
     const filter = {
       user: req.user._id,
-      tmdbId,
+      tmdbId: parseInt(tmdbId),
       mediaType,
     };
 
     if (mediaType === 'tv') {
-      filter.season = season;
-      filter.episode = episode;
+      filter.season = parseInt(season);
+      filter.episode = parseInt(episode);
     }
 
     const update = {

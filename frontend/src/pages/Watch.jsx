@@ -19,47 +19,101 @@ const Watch = () => {
   const [playerUrl, setPlayerUrl] = useState('');
   const [contentTitle, setContentTitle] = useState('');
   const [isReady, setIsReady] = useState(false);
-  const lastSaveRef = useRef(0); // Throttle progress saves
+  const [posterPath, setPosterPath] = useState('');
+  
+  // Progress tracking refs (using refs to avoid re-renders)
+  const elapsedRef = useRef(0);        // seconds watched this session
+  const durationRef = useRef(0);       // total duration in seconds
+  const previousTimeRef = useRef(0);   // previously saved currentTime
+  const lastSaveRef = useRef(0);       // throttle saves
+  const titleRef = useRef('');
+  const posterRef = useRef('');
+  const timerRef = useRef(null);
 
+  // Fetch TMDB details for runtime + title + poster
   useEffect(() => {
     const fetchDetails = async () => {
       try {
         const { data } = await axios.get(`https://api.themoviedb.org/3/${type}/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`);
         setContentTitle(data.title || data.name);
+        titleRef.current = data.title || data.name;
+        
+        const poster = data.poster_path || data.backdrop_path || '';
+        setPosterPath(poster);
+        posterRef.current = poster;
+
+        // Get duration in seconds
+        if (type === 'movie') {
+          durationRef.current = (data.runtime || 120) * 60; // runtime is in minutes
+        } else {
+          // For TV, fetch episode details to get runtime
+          try {
+            const epData = await axios.get(`https://api.themoviedb.org/3/tv/${id}/season/${season}/episode/${episode}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`);
+            durationRef.current = (epData.data.runtime || data.episode_run_time?.[0] || 30) * 60;
+          } catch {
+            durationRef.current = (data.episode_run_time?.[0] || 30) * 60;
+          }
+        }
       } catch (err) {
-        console.error('Failed to fetch title');
+        console.error('Failed to fetch details');
+        durationRef.current = type === 'movie' ? 7200 : 1800; // fallback: 2h or 30m
       }
     };
     fetchDetails();
-  }, [type, id]);
+  }, [type, id, season, episode]);
 
+  // Load previously saved progress
+  useEffect(() => {
+    const loadSavedProgress = async () => {
+      if (!user) return;
+      try {
+        const url = type === 'tv' 
+          ? `${API_URL}/progress/${id}/${type}?season=${season}&episode=${episode}`
+          : `${API_URL}/progress/${id}/${type}`;
+        const { data } = await axios.get(url);
+        if (data && data.currentTime > 0) {
+          previousTimeRef.current = data.currentTime;
+        }
+      } catch {
+        // No previous progress
+      }
+    };
+    loadSavedProgress();
+  }, [id, type, season, episode, user]);
 
-  // Throttled save: only save every 30 seconds
-  const saveProgress = useCallback(async (progressData) => {
+  // Save progress to backend
+  const saveProgress = useCallback(async (force = false) => {
+    if (!user) return;
     const now = Date.now();
-    if (now - lastSaveRef.current < 30000) return; // Skip if < 30s since last save
+    if (!force && now - lastSaveRef.current < 30000) return;
     lastSaveRef.current = now;
+
+    const currentTime = previousTimeRef.current + elapsedRef.current;
+    const duration = durationRef.current || 1;
+    const progress = Math.min(Math.round((currentTime / duration) * 100), 100);
+
+    if (currentTime <= 0) return;
 
     try {
       await axios.post(`${API_URL}/progress`, {
-        tmdbId: progressData.id || id,
-        mediaType: progressData.mediaType || type,
-        progress: progressData.progress,
-        currentTime: progressData.currentTime,
-        duration: progressData.duration,
-        season: parseInt(progressData.season || season),
-        episode: parseInt(progressData.episode || episode),
-        title: document.title || 'Streaming'
+        tmdbId: parseInt(id),
+        mediaType: type,
+        progress,
+        currentTime,
+        duration,
+        season: parseInt(season),
+        episode: parseInt(episode),
+        title: titleRef.current || document.title || 'Streaming',
+        posterPath: posterRef.current,
       });
     } catch (err) {
-      // Silently fail - don't interrupt playback
+      // Silently fail
     }
-  }, [id, type, season, episode]);
+  }, [id, type, season, episode, user]);
 
+  // Start elapsed time tracker & setup player
   useEffect(() => {
-    // Construct Vidking embed URL per official docs:
-    // Movies:  /embed/movie/{tmdbId}
-    // TV:      /embed/tv/{tmdbId}/{season}/{episode}
+    // Construct Vidking embed URL
     let url = '';
     if (type === 'movie') {
       url = `https://www.vidking.net/embed/movie/${id}`;
@@ -67,7 +121,6 @@ const Watch = () => {
       url = `https://www.vidking.net/embed/tv/${id}/${season}/${episode}`;
     }
 
-    // URL Parameters per docs: color, autoPlay, nextEpisode, episodeSelector, progress
     const color = user?.preferences?.playerColor || '0dcaf0';
     const params = new URLSearchParams({
       color: color,
@@ -79,40 +132,34 @@ const Watch = () => {
     
     setPlayerUrl(url);
     setIsReady(true);
+    elapsedRef.current = 0;
 
-    // Listen for Vidking postMessage progress events
-    // Event Data Structure (from docs):
-    // { type: "PLAYER_EVENT", data: { event, currentTime, duration, progress, id, mediaType, season, episode, timestamp } }
-    const handleMessage = (event) => {
-      try {
-        const raw = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-        
-        if (raw.type === 'PLAYER_EVENT' && raw.data) {
-          const { event: playerEvent } = raw.data;
-
-          switch (playerEvent) {
-            case 'timeupdate':
-              saveProgress(raw.data);
-              break;
-            case 'ended':
-              // Save final progress at 100%
-              lastSaveRef.current = 0; // Force save
-              saveProgress({ ...raw.data, progress: 100 });
-              break;
-            case 'play':
-            case 'pause':
-            case 'seeked':
-              // Can be used for analytics
-              break;
-          }
-        }
-      } catch (e) {
-        // Not a Vidking message, ignore
+    // Track time on page (1 second interval)
+    timerRef.current = setInterval(() => {
+      elapsedRef.current += 1;
+      
+      // Auto-save every 30 seconds
+      if (elapsedRef.current % 30 === 0) {
+        saveProgress();
       }
-    };
+    }, 1000);
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    // Save initial "started watching" after 5 seconds
+    const initialSave = setTimeout(() => {
+      saveProgress(true);
+    }, 5000);
+
+    // Cleanup: save progress when leaving the page
+    const handleBeforeUnload = () => saveProgress(true);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(timerRef.current);
+      clearTimeout(initialSave);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Final save on unmount
+      saveProgress(true);
+    };
   }, [id, type, season, episode, user, saveProgress]);
 
   return (
