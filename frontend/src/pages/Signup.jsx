@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, ShieldCheck, Play, RefreshCw, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
+import { countryCodes } from '../constants/countries';
 
 const Signup = () => {
   const { signup, verifySignup, resendOTP } = useAuth();
@@ -25,19 +26,6 @@ const Signup = () => {
     confirmPassword: '',
     otp: ''
   });
-
-  const countryCodes = [
-    { code: '+91', country: 'IN', name: 'India' },
-    { code: '+1', country: 'US', name: 'USA' },
-    { code: '+44', country: 'GB', name: 'UK' },
-    { code: '+61', country: 'AU', name: 'Australia' },
-    { code: '+49', country: 'DE', name: 'Germany' },
-    { code: '+33', country: 'FR', name: 'France' },
-    { code: '+81', country: 'JP', name: 'Japan' },
-    { code: '+86', country: 'CN', name: 'China' },
-    { code: '+971', country: 'AE', name: 'UAE' },
-    { code: '+966', country: 'SA', name: 'Saudi Arabia' },
-  ];
 
   useEffect(() => {
     let interval;

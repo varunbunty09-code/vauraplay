@@ -6,19 +6,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
-
-const countryCodes = [
-    { code: '+91', country: 'IN', name: 'India' },
-    { code: '+1', country: 'US', name: 'USA' },
-    { code: '+44', country: 'GB', name: 'UK' },
-    { code: '+61', country: 'AU', name: 'Australia' },
-    { code: '+49', country: 'DE', name: 'Germany' },
-    { code: '+33', country: 'FR', name: 'France' },
-    { code: '+81', country: 'JP', name: 'Japan' },
-    { code: '+86', country: 'CN', name: 'China' },
-    { code: '+971', country: 'AE', name: 'UAE' },
-    { code: '+966', country: 'SA', name: 'Saudi Arabia' },
-];
+import { countryCodes } from '../constants/countries';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
