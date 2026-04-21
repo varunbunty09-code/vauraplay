@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, ShieldCheck, Play, RefreshCw, Phone } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, ShieldCheck, Play, RefreshCw, Phone, Globe } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
 import { countryCodes } from '../constants/countries';
@@ -163,14 +163,14 @@ const Signup = () => {
                 />
               </div>
 
-               <div className="input-group">
+              <div className="input-group">
                 <label><Phone size={16} /> Phone Number</label>
                 <div className="phone-input-container" style={{ display: 'flex', gap: '0.5rem' }}>
                   <div className="country-code-select">
                     <Globe size={14} className="globe-icon" />
-                    <select 
-                      name="countryCode" 
-                      value={formData.countryCode} 
+                    <select
+                      name="countryCode"
+                      value={formData.countryCode}
                       onChange={handleInputChange}
                       className="country-select"
                       required
