@@ -676,6 +676,10 @@ const Profile = () => {
           background: transparent; border: none; color: white; outline: none; width: 100%; cursor: pointer;
           font-weight: 600;
         }
+        .country-code-select select option {
+          background: #121214;
+          color: white;
+        }
         .globe-icon { color: var(--text-muted); }
 
         .btn-small { padding: 0.5rem 1.2rem; border-radius: 8px; background: var(--primary); color: black; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 700; white-space: nowrap; transition: 0.3s; }
