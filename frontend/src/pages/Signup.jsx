@@ -165,9 +165,9 @@ const Signup = () => {
 
               <div className="input-group">
                 <label><Phone size={16} /> Phone Number</label>
-                <div className="phone-input-container" style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="phone-input-container" style={{ display: 'flex', gap: '0.8rem' }}>
                   <div className="country-code-select">
-                    <Globe size={14} className="globe-icon" />
+                    <Globe size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
                     <select
                       name="countryCode"
                       value={formData.countryCode}
@@ -259,9 +259,9 @@ const Signup = () => {
         .country-select { background: transparent; border: none; padding: 0; color: white; cursor: pointer; font-weight: 600; flex: 1; }
         .country-select option { background: #121214; color: white; }
         .country-code-select { 
-          display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); 
-          border: 1px solid var(--border-light); padding: 0 0.8rem; border-radius: var(--radius-sm);
-          min-width: 130px;
+          display: flex; align-items: center; gap: 0.6rem; background: rgba(255, 255, 255, 0.05); 
+          border: 1px solid var(--border-light); padding: 0 1rem; border-radius: var(--radius-sm);
+          min-width: 140px;
         }
         .globe-icon { color: var(--text-muted); }
         .text-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 600; transition: var(--transition-fast); }
