@@ -364,7 +364,8 @@ const Profile = () => {
                       type="tel"
                       placeholder="New Phone Number"
                       value={formData.phoneNumber}
-                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value.replace(/\D/g, '') })}
+                      inputMode="numeric"
                     />
                     <button type="button" className="btn-small" onClick={() => handleUpdateProfile('phone')}>Update Phone</button>
                   </div>
@@ -675,12 +676,14 @@ const Profile = () => {
               <h3>Verification Required</h3>
               <p>Enter the code sent to your email to confirm this action.</p>
               <input
-                type="text"
+                type="tel"
                 maxLength={6}
                 className="otp-input-field"
                 placeholder="123456"
                 value={otpCode}
-                onChange={e => setOtpCode(e.target.value)}
+                onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                inputMode="numeric"
+                autoComplete="one-time-code"
               />
               <div className="modal-actions">
                 <button className="btn-primary" onClick={handleOtpVerify} disabled={loading}>{loading ? 'Verifying...' : 'Verify & Confirm'}</button>

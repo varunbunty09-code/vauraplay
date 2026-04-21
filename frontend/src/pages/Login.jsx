@@ -33,7 +33,14 @@ const Login = () => {
   }, [timer]);
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Restrict OTP and Phone to numbers only
+    if (name === 'otp' || name === 'phone') {
+      const numericValue = value.replace(/\D/g, '');
+      setFormData({ ...formData, [name]: numericValue });
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleLoginSubmit = async (e) => {
@@ -150,7 +157,7 @@ const Login = () => {
               <div className="input-group">
                 <label><ShieldCheck size={16} /> Verification Code</label>
                 <input
-                  type="text"
+                  type="tel"
                   name="otp"
                   required
                   maxLength={6}
@@ -158,6 +165,8 @@ const Login = () => {
                   className="otp-input"
                   value={formData.otp}
                   onChange={handleInputChange}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
                 />
               </div>
 
