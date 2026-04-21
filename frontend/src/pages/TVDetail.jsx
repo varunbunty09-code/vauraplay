@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import tmdbService from '../services/tmdbService';
 import { Play, Plus, Star, Calendar, Bookmark, List, Share2, MessageCircle, Copy, X, ExternalLink, Check, ThumbsUp, ThumbsDown, Heart } from 'lucide-react';
@@ -10,11 +10,13 @@ import MovieRow from '../components/MovieRow';
 import { DetailSkeleton } from '../components/skeleton/MovieSkeleton';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const TVDetail = () => {
     const { id } = useParams();
+    const { user } = useAuth();
     const [show, setShow] = useState(null);
     const [seasons, setSeasons] = useState([]);
     const [selectedSeason, setSelectedSeason] = useState(1);
@@ -32,6 +34,7 @@ const TVDetail = () => {
     const [showRating, setShowRating] = useState(false);
     const [userRating, setUserRating] = useState(null);
     const [ratingFeedback, setRatingFeedback] = useState('');
+    const [episodeProgressMap, setEpisodeProgressMap] = useState({});
 
     const handleRate = (rating) => {
         setUserRating(rating);
@@ -90,6 +93,34 @@ const TVDetail = () => {
         };
         fetchEpisodes();
     }, [id, selectedSeason]);
+
+    // Fetch watch progress for all episodes in the current season
+    useEffect(() => {
+        const fetchEpisodeProgress = async () => {
+            if (!user || !id) return;
+            try {
+                const { data } = await axios.get(`${API_URL}/progress/${id}/tv?season=${selectedSeason}`);
+                if (Array.isArray(data)) {
+                    const map = {};
+                    data.forEach(p => {
+                        map[p.episode] = p;
+                    });
+                    setEpisodeProgressMap(map);
+                }
+            } catch (err) {
+                // Silently fail
+            }
+        };
+        fetchEpisodeProgress();
+    }, [id, selectedSeason, user]);
+
+    // Find the last watched episode that is still in-progress for the Resume button
+    const lastWatchedEp = useMemo(() => {
+        const inProgress = Object.values(episodeProgressMap)
+            .filter(p => p.progress > 0 && p.progress < 95)
+            .sort((a, b) => new Date(b.lastWatched) - new Date(a.lastWatched));
+        return inProgress.length > 0 ? inProgress[0] : null;
+    }, [episodeProgressMap]);
 
     const toggleWatchlist = async () => {
         const prev = inWatchlist;
@@ -183,9 +214,20 @@ const TVDetail = () => {
                                     ))}
                                 </div>
 
-                                <div className="detail-actions">
-                                    <Link to={`/watch/tv/${show.id}?s=${selectedSeason}&e=1&lang=${selectedLang}`} className="btn-primary">
-                                        <Play size={20} fill="currentColor" /> Watch Now
+                                <div className="detail-actions-wrapper">
+                                  {lastWatchedEp && (
+                                    <div className="movie-progress-bar-wrapper">
+                                      <div className="movie-progress-track">
+                                        <div className="movie-progress-fill" style={{ width: `${lastWatchedEp.progress}%` }} />
+                                      </div>
+                                      <span className="movie-progress-text">
+                                        {Math.floor(lastWatchedEp.currentTime / 60)} of {Math.floor(lastWatchedEp.duration / 60)}m
+                                      </span>
+                                    </div>
+                                  )}
+                                  <div className="detail-actions">
+                                    <Link to={lastWatchedEp ? `/watch/tv/${show.id}?s=${lastWatchedEp.season}&e=${lastWatchedEp.episode}&lang=${selectedLang}` : `/watch/tv/${show.id}?s=${selectedSeason}&e=1&lang=${selectedLang}`} className="btn-primary">
+                                        <Play size={20} fill="currentColor" /> {lastWatchedEp ? 'Resume' : 'Watch Now'}
                                     </Link>
                                     
                                     <motion.button
@@ -230,6 +272,7 @@ const TVDetail = () => {
                                     <button className="btn-outline btn-icon" onClick={() => setShowShare(true)}>
                                         <Share2 size={20} />
                                     </button>
+                                  </div>
                                 </div>
                             </motion.div>
                         </div>
@@ -310,9 +353,16 @@ const TVDetail = () => {
                     <div className="episodes-stack">
                         {episodes.map(ep => (
                             <Link to={`/watch/tv/${id}?s=${selectedSeason}&e=${ep.episode_number}`} key={ep.id} className="episode-bar glass">
-                                <div className="eb-thumb">
-                                    <img src={ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : `https://image.tmdb.org/t/p/w300${show.backdrop_path}`} alt={ep.name} />
-                                    <div className="eb-play-overlay"><Play size={20} fill="white" /></div>
+                                <div className="eb-thumb-wrap">
+                                    <div className="eb-thumb">
+                                        <img src={ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : `https://image.tmdb.org/t/p/w300${show.backdrop_path}`} alt={ep.name} />
+                                        <div className="eb-play-overlay"><Play size={20} fill="white" /></div>
+                                    </div>
+                                    {episodeProgressMap[ep.episode_number] && episodeProgressMap[ep.episode_number].progress > 0 && (
+                                        <div className="ep-progress-track">
+                                            <div className="ep-progress-fill" style={{ width: `${Math.min(episodeProgressMap[ep.episode_number].progress, 100)}%` }} />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="eb-info">
                                     <div className="eb-main">
@@ -444,6 +494,11 @@ const TVDetail = () => {
 
             <style>{`
                 .tv .detail-hero { height: auto; min-height: 85vh; display: flex; align-items: flex-end; padding: 6rem 0; position: relative; }
+                .detail-actions-wrapper { display: flex; flex-direction: column; gap: 0.5rem; }
+                .movie-progress-bar-wrapper { display: flex; align-items: center; gap: 1rem; max-width: 400px; }
+                .movie-progress-track { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; }
+                .movie-progress-fill { height: 100%; background: #e50914; border-radius: 4px; transition: width 0.3s ease; }
+                .movie-progress-text { font-size: 0.85rem; color: var(--text-dim); white-space: nowrap; font-weight: 500; }
                 .backdrop-wrapper { position: absolute; inset: 0; z-index: 0; }
                 .backdrop-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
                 .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0c 18%, transparent 95%), linear-gradient(to right, #0a0a0c 15%, transparent 85%); }
@@ -494,11 +549,14 @@ const TVDetail = () => {
                   transform: scale(1.01); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
                 }
                 
+                .eb-thumb-wrap { flex-shrink: 0; width: 220px; display: flex; flex-direction: column; }
                 .eb-thumb {
-                  width: 220px; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden;
-                  position: relative; flex-shrink: 0;
+                  width: 100%; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden;
+                  position: relative;
                 }
                 .eb-thumb img { width: 100%; height: 100%; object-fit: cover; transition: .5s; }
+                .ep-progress-track { width: 100%; height: 3px; background: rgba(255,255,255,0.15); border-radius: 0 0 4px 4px; margin-top: -3px; position: relative; z-index: 2; }
+                .ep-progress-fill { height: 100%; background: #e50914; border-radius: 0 0 4px 4px; transition: width 0.3s ease; }
                 .episode-bar:hover .eb-thumb img { transform: scale(1.1); }
                 .eb-play-overlay {
                   position: absolute; inset: 0; background: rgba(0,0,0,0.4);
@@ -523,7 +581,7 @@ const TVDetail = () => {
 
                 @media (max-width: 900px) {
                   .episode-bar { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-                  .eb-thumb { width: 100%; }
+                  .eb-thumb-wrap { width: 100%; }
                   .eb-action { display: none; }
                   .season-header-new { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
                   .season-select-glass { width: 100%; }

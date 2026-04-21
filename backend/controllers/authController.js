@@ -4,6 +4,7 @@ const Notification = require('../models/Notification');
 const ActivityLog = require('../models/ActivityLog');
 const sendEmail = require('../utils/sendEmail');
 const { otpEmail, welcomeEmail, loginNotificationEmail, forgotPasswordEmail, emailChangeOtpEmail, deleteAccountOtpEmail, accountDeletedEmail } = require('../utils/emailTemplates');
+const { getLocationFromIP, formatLocation } = require('../utils/geoLocation');
 
 const getDeviceInfo = (userAgent) => {
   if (!userAgent) return 'Unknown Device';
@@ -230,30 +231,37 @@ exports.verifyLogin = async (req, res) => {
 
     const ip = getClientIp(req);
     const device = getDeviceInfo(req.headers['user-agent']);
+    const timestamp = new Date();
 
-    // Send login notification
+    // Fetch geolocation from IP
+    const location = await getLocationFromIP(ip);
+    const locationStr = formatLocation(location);
+
+    // Send login notification email
     if (user.preferences.emailNotifications) {
       await sendEmail({
         to: user.email,
         subject: '🔔 VauraPlay - New Login Detected',
-        html: loginNotificationEmail(user.username, ip, device, new Date()),
+        html: loginNotificationEmail(user.username, ip, device, timestamp, location),
       });
     }
 
-    // Create notification
+    // Create notification with location metadata
     await Notification.create({
       user: user._id,
       type: 'login',
       title: 'New Login',
-      message: `Login from ${req.ip} at ${new Date().toLocaleString()}`,
+      message: `Login from ${ip} · ${locationStr}`,
+      metadata: { ip, device, location, timestamp },
     });
 
     await ActivityLog.create({
       user: user._id,
       action: 'login',
-      details: 'Login successful',
-      ip: getClientIp(req),
+      details: `Login from ${locationStr}`,
+      ip,
       userAgent: req.headers['user-agent'],
+      metadata: { location, device },
     });
 
     const token = user.generateToken();

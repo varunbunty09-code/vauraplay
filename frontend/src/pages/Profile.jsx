@@ -19,7 +19,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [watchlist, setWatchlist] = useState([]);
   const [activityLogs, setActivityLogs] = useState([]);
-  
+
   // OTP States
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpPurpose, setOtpPurpose] = useState('');
@@ -168,7 +168,7 @@ const Profile = () => {
         }
         payload.phone = `${formData.countryCode}${formData.phoneNumber}`;
       }
-      
+
       const { data } = await axios.put(`${API_URL}/users/profile`, payload);
       setUser(data.user);
       toast.success(`${field.charAt(0).toUpperCase() + field.slice(1)} updated!`);
@@ -266,7 +266,7 @@ const Profile = () => {
 
   return (
     <div className="profile-page container">
-      <motion.div 
+      <motion.div
         className="profile-layout"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -286,7 +286,7 @@ const Profile = () => {
             <h3 className="text-glow">{user?.username}</h3>
             <p>{user?.email}</p>
           </div>
-          
+
           <nav className="profile-nav">
             <button className={activeTab === 'general' ? 'active' : ''} onClick={() => setActiveTab('general')}>
               <User size={18} /> General
@@ -310,223 +310,223 @@ const Profile = () => {
 
         {/* Main Content */}
         <main className="profile-main glass">
-           <AnimatePresence mode="wait">
-             {activeTab === 'general' && (
-                <motion.section key="general" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
-                  <h2>Account Settings</h2>
-                     <div className="form-group">
-                       <label>Username</label>
-                       <div className="field-update-wrapper">
-                         <input 
-                           type="text" 
-                           placeholder="New Username" 
-                           value={formData.username} 
-                           onChange={(e) => setFormData({...formData, username: e.target.value})}
-                         />
-                         <button type="button" className="btn-small" onClick={() => handleUpdateProfile('username')}>Update Username</button>
-                       </div>
-                       <small>Current: {user?.username}</small>
-                     </div>
-
-                     <div className="form-group">
-                       <label>Phone Number</label>
-                       <div className="phone-update-wrapper field-update-wrapper">
-                          <div className="country-code-select">
-                            {(() => {
-                              const country = countryCodes.find(c => c.code === formData.countryCode);
-                              return country ? (
-                                <img 
-                                  src={`https://flagcdn.com/w40/${country.country.toLowerCase()}.png`} 
-                                  alt={country.name}
-                                  className="selected-flag"
-                                />
-                              ) : <Globe size={14} className="globe-icon" />;
-                            })()}
-                            <select 
-                              value={formData.countryCode} 
-                              onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
-                            >
-                              {countryCodes.map(c => (
-                                <option key={c.code + c.country} value={c.code}>
-                                  {c.code} ({c.name})
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                         <input 
-                           type="tel" 
-                           placeholder="New Phone Number"
-                           value={formData.phoneNumber} 
-                           onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
-                         />
-                         <button type="button" className="btn-small" onClick={() => handleUpdateProfile('phone')}>Update Phone</button>
-                       </div>
-                       <small>Current: {user?.phone || 'Not set'}</small>
-                     </div>
-
-                     <div className="form-group">
-                       <label>Email Address</label>
-                       <div className="email-change-wrapper field-update-wrapper">
-                         <input type="email" placeholder="New Email" value={newEmail} onChange={e => setNewEmail(e.target.value)} />
-                         <button type="button" className="btn-small" onClick={handleRequestEmailChange}>Update Email</button>
-                       </div>
-                       <small>Current: {user?.email}</small>
-                     </div>
-                </motion.section>
-             )}
-
-             {activeTab === 'watchlist' && (
-               <motion.section key="watchlist" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
-                 <h2>My Watchlist</h2>
-                 {loading && watchlist.length === 0 ? <Loader2 className="spin" /> : (
-                   <div className="browse-grid">
-                      {watchlist.length > 0 ? watchlist.map(item => (
-                        <MovieCard 
-                          key={item._id}
-                          item={{
-                            id: item.tmdbId,
-                            title: item.title,
-                            name: item.title,
-                            poster_path: item.posterPath,
-                            backdrop_path: item.backdropPath,
-                            overview: item.overview,
-                            vote_average: item.voteAverage || 0,
-                          }}
-                          type={item.mediaType}
-                          showBadge={true}
-                        />
-                      )) : (
-                        <div className="empty-state">
-                          <Bookmark size={48} />
-                          <p>Your watchlist is empty.</p>
-                          <Link to="/browse" className="btn-primary">Browse Content</Link>
-                        </div>
-                      )}
-                   </div>
-                 )}
-               </motion.section>
-             )}
-
-             {activeTab === 'activity' && (
-               <motion.section key="activity" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
-                 <h2>Activity Log</h2>
-                 {loading && activityLogs.length === 0 ? <Loader2 className="spin" /> : (
-                   <div className="activity-list">
-                     {activityLogs.length > 0 ? activityLogs.map((log, i) => (
-                       <div key={i} className="activity-item glass">
-                         <History size={18} />
-                         <div className="activity-info">
-                           <p className="activity-action">{log.action}</p>
-                           <p className="activity-detail">{log.details || ''}</p>
-                           <span className="activity-time">{new Date(log.createdAt).toLocaleString()}</span>
-                         </div>
-                       </div>
-                     )) : (
-                       <div className="empty-state">
-                         <History size={48} />
-                         <p>No activity yet.</p>
-                       </div>
-                     )}
-                   </div>
-                 )}
-               </motion.section>
-             )}
-
-             {activeTab === 'preferences' && (
-               <motion.section key="pref" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
-                  <h2>Player Preferences</h2>
-                  <div className="pref-item">
-                     <div className="pref-text">
-                        <h4>Auto-Play</h4>
-                        <p>Start next episode or movie automatically</p>
-                     </div>
-                     <label className="switch">
-                        <input 
-                          type="checkbox" 
-                          checked={formData.autoPlay}
-                          onChange={(e) => setFormData({...formData, autoPlay: e.target.checked})}
-                        />
-                        <span className="slider round"></span>
-                     </label>
+          <AnimatePresence mode="wait">
+            {activeTab === 'general' && (
+              <motion.section key="general" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                <h2>Account Details</h2>
+                <div className="form-group">
+                  <label>Username</label>
+                  <div className="field-update-wrapper">
+                    <input
+                      type="text"
+                      placeholder="New Username"
+                      value={formData.username}
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    />
+                    <button type="button" className="btn-small" onClick={() => handleUpdateProfile('username')}>Update Username</button>
                   </div>
+                  <small>Current: {user?.username}</small>
+                </div>
 
-                  <div className="pref-item">
-                     <div className="pref-text">
-                        <h4>Player Color Theme</h4>
-                        <p>Customize the UI color of your video player</p>
-                     </div>
-                     <div className="color-grid">
-                        {colors.map(c => (
-                          <div 
-                             key={c.hex} 
-                             className={`color-box ${formData.playerColor === c.hex ? 'active' : ''}`}
-                             style={{ backgroundColor: `#${c.hex}` }}
-                             onClick={() => setFormData({...formData, playerColor: c.hex})}
-                          ></div>
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <div className="phone-update-wrapper field-update-wrapper">
+                    <div className="country-code-select">
+                      {(() => {
+                        const country = countryCodes.find(c => c.code === formData.countryCode);
+                        return country ? (
+                          <img
+                            src={`https://flagcdn.com/w40/${country.country.toLowerCase()}.png`}
+                            alt={country.name}
+                            className="selected-flag"
+                          />
+                        ) : <Globe size={14} className="globe-icon" />;
+                      })()}
+                      <select
+                        value={formData.countryCode}
+                        onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
+                      >
+                        {countryCodes.map(c => (
+                          <option key={c.code + c.country} value={c.code}>
+                            {c.code} ({c.name})
+                          </option>
                         ))}
-                     </div>
+                      </select>
+                    </div>
+                    <input
+                      type="tel"
+                      placeholder="New Phone Number"
+                      value={formData.phoneNumber}
+                      onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                    />
+                    <button type="button" className="btn-small" onClick={() => handleUpdateProfile('phone')}>Update Phone</button>
                   </div>
+                  <small>Current: {user?.phone || 'Not set'}</small>
+                </div>
 
-                  <button className="btn-primary" onClick={handleSavePreferences}>Save Preferences</button>
-               </motion.section>
-             )}
+                <div className="form-group">
+                  <label>Email Address</label>
+                  <div className="email-change-wrapper field-update-wrapper">
+                    <input type="email" placeholder="New Email" value={newEmail} onChange={e => setNewEmail(e.target.value)} />
+                    <button type="button" className="btn-small" onClick={handleRequestEmailChange}>Update Email</button>
+                  </div>
+                  <small>Current: {user?.email}</small>
+                </div>
+              </motion.section>
+            )}
 
-             {activeTab === 'security' && (
-               <motion.section key="security" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
-                  <h2>Security & Danger Zone</h2>
-                  <div className="security-info glass">
-                    <h4><Lock size={18} /> Change Password</h4>
-                    <p style={{marginBottom:'1.5rem', fontSize:'0.85rem'}}>Choose a strong password you haven't used before.</p>
-                    <form onSubmit={async (e) => {
-                      e.preventDefault();
-                      const form = e.target;
-                      const currentPassword = form.currentPassword.value;
-                      const newPassword = form.newPassword.value;
-                      const confirmPassword = form.confirmPassword.value;
-                      if (newPassword.length < 6) return toast.error('Password must be at least 6 characters');
-                      if (newPassword !== confirmPassword) return toast.error('Passwords do not match');
-                      setLoading(true);
-                      try {
-                        await axios.put(`${API_URL}/users/change-password`, { currentPassword, newPassword });
-                        toast.success('Password changed successfully');
-                        form.reset();
-                      } catch (err) {
-                        toast.error(err.response?.data?.message || 'Failed to change password');
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}>
-                      <div className="security-field">
-                        <label>Current Password</label>
-                        <input type="password" name="currentPassword" required placeholder="••••••••" />
+            {activeTab === 'watchlist' && (
+              <motion.section key="watchlist" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                <h2>My Watchlist</h2>
+                {loading && watchlist.length === 0 ? <Loader2 className="spin" /> : (
+                  <div className="browse-grid">
+                    {watchlist.length > 0 ? watchlist.map(item => (
+                      <MovieCard
+                        key={item._id}
+                        item={{
+                          id: item.tmdbId,
+                          title: item.title,
+                          name: item.title,
+                          poster_path: item.posterPath,
+                          backdrop_path: item.backdropPath,
+                          overview: item.overview,
+                          vote_average: item.voteAverage || 0,
+                        }}
+                        type={item.mediaType}
+                        showBadge={true}
+                      />
+                    )) : (
+                      <div className="empty-state">
+                        <Bookmark size={48} />
+                        <p>Your watchlist is empty.</p>
+                        <Link to="/browse" className="btn-primary">Browse Content</Link>
                       </div>
-                      <div className="security-field">
-                        <label>New Password</label>
-                        <input type="password" name="newPassword" required placeholder="Min. 6 characters" minLength={6} />
-                      </div>
-                      <div className="security-field">
-                        <label>Confirm New Password</label>
-                        <input type="password" name="confirmPassword" required placeholder="Re-enter new password" />
-                      </div>
-                      <button type="submit" className="btn-primary" disabled={loading} style={{marginTop:'1rem'}}>
-                        {loading ? <Loader2 className="spin" size={18} /> : <><Lock size={16} /> Update Password</>}
-                      </button>
-                    </form>
+                    )}
                   </div>
-                  <div className="danger-zone">
-                     <h3>Delete Account</h3>
-                     <p>Once you delete your account, there is no going back. All your data will be permanently removed.</p>
-                     <textarea 
-                        placeholder="Reason for leaving (Optional)" 
-                        value={deleteReason}
-                        onChange={e => setDeleteReason(e.target.value)}
-                        className="delete-reason"
-                     />
-                     <button className="btn-outline delete-btn" onClick={handleRequestDelete}><Trash2 size={18} /> Request Deletion</button>
+                )}
+              </motion.section>
+            )}
+
+            {activeTab === 'activity' && (
+              <motion.section key="activity" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                <h2>Activity Log</h2>
+                {loading && activityLogs.length === 0 ? <Loader2 className="spin" /> : (
+                  <div className="activity-list">
+                    {activityLogs.length > 0 ? activityLogs.map((log, i) => (
+                      <div key={i} className="activity-item glass">
+                        <History size={18} />
+                        <div className="activity-info">
+                          <p className="activity-action">{log.action}</p>
+                          <p className="activity-detail">{log.details || ''}</p>
+                          <span className="activity-time">{new Date(log.createdAt).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="empty-state">
+                        <History size={48} />
+                        <p>No activity yet.</p>
+                      </div>
+                    )}
                   </div>
-               </motion.section>
-             )}
-           </AnimatePresence>
+                )}
+              </motion.section>
+            )}
+
+            {activeTab === 'preferences' && (
+              <motion.section key="pref" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                <h2>Player Preferences</h2>
+                <div className="pref-item">
+                  <div className="pref-text">
+                    <h4>Auto-Play</h4>
+                    <p>Start next episode or movie automatically</p>
+                  </div>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={formData.autoPlay}
+                      onChange={(e) => setFormData({ ...formData, autoPlay: e.target.checked })}
+                    />
+                    <span className="slider round"></span>
+                  </label>
+                </div>
+
+                <div className="pref-item">
+                  <div className="pref-text">
+                    <h4>Player Color Theme</h4>
+                    <p>Customize the UI color of your video player</p>
+                  </div>
+                  <div className="color-grid">
+                    {colors.map(c => (
+                      <div
+                        key={c.hex}
+                        className={`color-box ${formData.playerColor === c.hex ? 'active' : ''}`}
+                        style={{ backgroundColor: `#${c.hex}` }}
+                        onClick={() => setFormData({ ...formData, playerColor: c.hex })}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+
+                <button className="btn-primary" onClick={handleSavePreferences}>Save Preferences</button>
+              </motion.section>
+            )}
+
+            {activeTab === 'security' && (
+              <motion.section key="security" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                <h2>Security & Danger Zone</h2>
+                <div className="security-info glass">
+                  <h4><Lock size={18} /> Change Password</h4>
+                  <p style={{ marginBottom: '1.5rem', fontSize: '0.85rem' }}>Choose a strong password you haven't used before.</p>
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    const form = e.target;
+                    const currentPassword = form.currentPassword.value;
+                    const newPassword = form.newPassword.value;
+                    const confirmPassword = form.confirmPassword.value;
+                    if (newPassword.length < 6) return toast.error('Password must be at least 6 characters');
+                    if (newPassword !== confirmPassword) return toast.error('Passwords do not match');
+                    setLoading(true);
+                    try {
+                      await axios.put(`${API_URL}/users/change-password`, { currentPassword, newPassword });
+                      toast.success('Password changed successfully');
+                      form.reset();
+                    } catch (err) {
+                      toast.error(err.response?.data?.message || 'Failed to change password');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}>
+                    <div className="security-field">
+                      <label>Current Password</label>
+                      <input type="password" name="currentPassword" required placeholder="Enter Current Login Password" />
+                    </div>
+                    <div className="security-field">
+                      <label>New Password</label>
+                      <input type="password" name="newPassword" required placeholder="Min. 6 characters" minLength={6} />
+                    </div>
+                    <div className="security-field">
+                      <label>Confirm New Password</label>
+                      <input type="password" name="confirmPassword" required placeholder="Re-enter new password" />
+                    </div>
+                    <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop: '1rem' }}>
+                      {loading ? <Loader2 className="spin" size={18} /> : <><Lock size={16} /> Update Password</>}
+                    </button>
+                  </form>
+                </div>
+                <div className="danger-zone">
+                  <h3>Delete Account</h3>
+                  <p>Once you delete your account, there is no going back. All your data will be permanently removed.</p>
+                  <textarea
+                    placeholder="Reason for leaving (Optional)"
+                    value={deleteReason}
+                    onChange={e => setDeleteReason(e.target.value)}
+                    className="delete-reason"
+                  />
+                  <button className="btn-outline delete-btn" onClick={handleRequestDelete}><Trash2 size={18} /> Request Deletion</button>
+                </div>
+              </motion.section>
+            )}
+          </AnimatePresence>
         </main>
       </motion.div>
 
@@ -596,7 +596,7 @@ const Profile = () => {
       <AnimatePresence>
         {showOtpModal && (
           <div className="otp-modal-overlay">
-            <motion.div 
+            <motion.div
               className="otp-modal glass"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -604,11 +604,11 @@ const Profile = () => {
             >
               <h3>Verification Required</h3>
               <p>Enter the code sent to your email to confirm this action.</p>
-              <input 
-                type="text" 
-                maxLength={6} 
-                className="otp-input-field" 
-                placeholder="123456" 
+              <input
+                type="text"
+                maxLength={6}
+                className="otp-input-field"
+                placeholder="123456"
                 value={otpCode}
                 onChange={e => setOtpCode(e.target.value)}
               />

@@ -201,14 +201,33 @@ exports.deleteAccount = async (req, res) => {
   }
 };
 
-// @desc    Get activity logs
+// @desc    Get activity logs (paginated, critical only)
 // @route   GET /api/users/activity
 exports.getActivity = async (req, res) => {
   try {
-    const activity = await ActivityLog.find({ user: req.user._id })
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Only return security-critical actions
+    const criticalActions = ['login', 'password_reset', 'email_changed', 'account_verified', 'signup'];
+
+    const filter = {
+      user: req.user._id,
+      action: { $in: criticalActions },
+    };
+
+    const total = await ActivityLog.countDocuments(filter);
+    const activity = await ActivityLog.find(filter)
       .sort({ createdAt: -1 })
-      .limit(50);
-    res.json({ activity });
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.json({
+      activity,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }

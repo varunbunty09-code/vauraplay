@@ -7,6 +7,7 @@ import MovieRow from '../components/MovieRow';
 import { DetailSkeleton } from '../components/skeleton/MovieSkeleton';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -17,6 +18,7 @@ const FacebookIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill=
 
 const MovieDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inWatchlist, setInWatchlist] = useState(false);
@@ -28,6 +30,7 @@ const MovieDetail = () => {
   const [userRating, setUserRating] = useState(null); // 'loved', 'liked', 'disliked'
   const [ratingFeedback, setRatingFeedback] = useState('');
   const [selectedLang, setSelectedLang] = useState('en');
+  const [watchProgress, setWatchProgress] = useState(null);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -45,6 +48,22 @@ const MovieDetail = () => {
     fetchMovie();
     window.scrollTo(0, 0);
   }, [id]);
+
+  // Fetch watch progress for this movie
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (!user) return;
+      try {
+        const { data } = await axios.get(`${API_URL}/progress/${id}/movie`);
+        if (data && data.progress > 0) {
+          setWatchProgress(data);
+        }
+      } catch (err) {
+        // Silently fail
+      }
+    };
+    fetchProgress();
+  }, [id, user]);
 
   const matchPercentage = movie ? Math.floor(movie.vote_average * 8 + 20) : 0;
 
@@ -152,10 +171,21 @@ const MovieDetail = () => {
                   ))}
                 </div>
 
-                <div className="detail-actions">
-                  <Link to={`/watch/movie/${movie.id}?lang=${selectedLang}`} className="btn-primary">
-                    <Play size={20} fill="currentColor" /> Play Now
-                  </Link>
+                <div className="detail-actions-wrapper">
+                  {watchProgress && watchProgress.progress > 0 && watchProgress.progress < 95 && (
+                    <div className="movie-progress-bar-wrapper">
+                      <div className="movie-progress-track">
+                        <div className="movie-progress-fill" style={{ width: `${watchProgress.progress}%` }} />
+                      </div>
+                      <span className="movie-progress-text">
+                        {Math.floor(watchProgress.currentTime / 60)} of {Math.floor(watchProgress.duration / 60)}m
+                      </span>
+                    </div>
+                  )}
+                  <div className="detail-actions">
+                    <Link to={`/watch/movie/${movie.id}?lang=${selectedLang}`} className="btn-primary">
+                      <Play size={20} fill="currentColor" /> {watchProgress && watchProgress.progress > 0 && watchProgress.progress < 95 ? 'Resume' : 'Play Now'}
+                    </Link>
 
                   <motion.button
                     className={`btn-outline watchlist-toggle ${inWatchlist ? 'active' : ''}`}
@@ -196,9 +226,10 @@ const MovieDetail = () => {
                     </AnimatePresence>
                   </div>
 
-                  <button className="btn-outline btn-icon" onClick={() => setShowShare(true)} title="Share">
-                    <Share2 size={20} />
-                  </button>
+                    <button className="btn-outline btn-icon" onClick={() => setShowShare(true)} title="Share">
+                      <Share2 size={20} />
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             </div>
@@ -351,6 +382,11 @@ const MovieDetail = () => {
 
       <style>{`
         .detail-page { padding-bottom: 5rem; }
+        .detail-actions-wrapper { display: flex; flex-direction: column; gap: 0.5rem; }
+        .movie-progress-bar-wrapper { display: flex; align-items: center; gap: 1rem; max-width: 400px; }
+        .movie-progress-track { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; }
+        .movie-progress-fill { height: 100%; background: #e50914; border-radius: 4px; transition: width 0.3s ease; }
+        .movie-progress-text { font-size: 0.85rem; color: var(--text-dim); white-space: nowrap; font-weight: 500; }
         .detail-hero { height: auto; min-height: 85vh; display: flex; align-items: flex-end; padding: 6rem 0; position: relative; }
         .backdrop-wrapper { position: absolute; inset: 0; z-index: 0; }
         .backdrop-wrapper img { width: 100%; height: 100%; object-fit: cover; }

@@ -76,6 +76,12 @@ exports.getProgress = async (req, res) => {
     if (req.query.season) filter.season = req.query.season;
     if (req.query.episode) filter.episode = req.query.episode;
 
+    // For TV shows without a specific episode, return all episode progress for that season
+    if (req.params.mediaType === 'tv' && !req.query.episode) {
+      const progressList = await WatchProgress.find(filter).sort({ episode: 1 });
+      return res.json(progressList);
+    }
+
     const progress = await WatchProgress.findOne(filter);
     res.json(progress || { progress: 0, currentTime: 0 });
   } catch (error) {

@@ -87,18 +87,20 @@ const welcomeEmail = (username) => {
 };
 
 // Login Notification Email
-const loginNotificationEmail = (username, ip, userAgent, timestamp) => {
+const loginNotificationEmail = (username, ip, userAgent, timestamp, location) => {
+  const locationStr = location ? [location.city, location.region, location.country].filter(Boolean).join(', ') : 'Unknown';
   return baseTemplate(`
     <p style="font-size: 18px; font-weight: 600; color: #1a1a2e; margin: 0 0 16px;">New Login Detected 🔔</p>
     <p style="color: #444444; line-height: 1.6; margin: 0 0 12px;">Hey ${username}, we noticed a new login to your VauraPlay account.</p>
     <div style="background-color: #f3f0ff; border-left: 4px solid #8b5cf6; padding: 16px; border-radius: 0 8px 8px 0; margin: 16px 0;">
       <p style="color: #4a4a6a; line-height: 1.8; margin: 0 0 8px;">📅 <strong>Time:</strong> ${new Date(timestamp).toLocaleString()}</p>
+      <p style="color: #4a4a6a; line-height: 1.8; margin: 0 0 8px;">📍 <strong>Location:</strong> ${locationStr}</p>
       <p style="color: #4a4a6a; line-height: 1.8; margin: 0 0 8px;">🌐 <strong>IP Address:</strong> ${ip}</p>
       <p style="color: #4a4a6a; line-height: 1.8; margin: 0;">💻 <strong>Device:</strong> ${userAgent}</p>
     </div>
     <p style="color: #444444; line-height: 1.6; margin: 0 0 12px;">If this wasn't you, please change your password immediately.</p>
     <p style="text-align: center; margin: 24px 0;">
-      <a href="${process.env.FRONTEND_URL}/profile" style="display: inline-block; background: linear-gradient(135deg, #6d28d9, #8b5cf6); color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Review Account →</a>
+      <a href="${process.env.FRONTEND_URL}/profile?tab=activity" style="display: inline-block; background: linear-gradient(135deg, #6d28d9, #8b5cf6); color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Review Account →</a>
     </p>
   `);
 };
@@ -127,8 +129,8 @@ const accountStatusEmail = (username, status, reason) => {
     <p style="font-size: 18px; font-weight: 600; color: #1a1a2e; margin: 0 0 16px;">Account ${isActive ? 'Activated' : 'Suspended'} ${isActive ? '✅' : '⚠️'}</p>
     <p style="color: #444444; line-height: 1.6; margin: 0 0 12px;">Hey ${username}, your VauraPlay account has been <strong>${isActive ? 'activated' : 'suspended'}</strong>.</p>
     ${reason ? `<div style="background-color: #f3f0ff; border-left: 4px solid #8b5cf6; padding: 16px; border-radius: 0 8px 8px 0; margin: 16px 0;"><p style="color: #4a4a6a; margin: 0;"><strong>Reason:</strong> ${reason}</p></div>` : ''}
-    ${isActive 
-      ? `<p style="text-align: center; margin: 24px 0;"><a href="${process.env.FRONTEND_URL}" style="display: inline-block; background: linear-gradient(135deg, #6d28d9, #8b5cf6); color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Continue Watching →</a></p>` 
+    ${isActive
+      ? `<p style="text-align: center; margin: 24px 0;"><a href="${process.env.FRONTEND_URL}" style="display: inline-block; background: linear-gradient(135deg, #6d28d9, #8b5cf6); color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">Continue Watching →</a></p>`
       : '<p style="color: #444444; line-height: 1.6; margin: 0;">If you believe this is a mistake, please contact our support team.</p>'}
   `);
 };
