@@ -25,11 +25,13 @@ const Navbar = () => {
   // Fetch notifications
   useEffect(() => {
     if (!user) return;
+    const criticalTypes = ['login', 'security', 'welcome'];
     const fetchNotifications = async () => {
       try {
         const { data } = await axios.get(`${API_URL}/users/notifications`);
-        setNotifications(data.notifications || []);
-        setUnreadCount((data.notifications || []).filter(n => !n.read).length);
+        const filtered = (data.notifications || []).filter(n => criticalTypes.includes(n.type));
+        setNotifications(filtered);
+        setUnreadCount(filtered.filter(n => !n.read).length);
       } catch (e) {}
     };
     fetchNotifications();
@@ -152,6 +154,12 @@ const Navbar = () => {
                               <div className="notif-content">
                                 <p className="notif-title">{notif.title}</p>
                                 <p className="notif-msg">{notif.message}</p>
+                                {notif.metadata?.location && (
+                                  <p className="notif-location">📍 {[notif.metadata.location.city, notif.metadata.location.region, notif.metadata.location.country].filter(Boolean).join(', ')}</p>
+                                )}
+                                {notif.metadata?.device && (
+                                  <p className="notif-device">💻 {notif.metadata.device}</p>
+                                )}
                                 <p className="notif-time">{new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                               </div>
                               {!notif.read && <span className="unread-dot"></span>}
@@ -456,6 +464,8 @@ const Navbar = () => {
 
         .notif-title { font-weight: 700; color: white; font-size: 0.9rem; margin-bottom: 0.2rem; }
         .notif-msg { font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; }
+        .notif-location { font-size: 0.75rem; color: rgba(139, 92, 246, 0.9); margin-top: 0.3rem; }
+        .notif-device { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.1rem; }
         .notif-time { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem; }
 
         .unread-dot {

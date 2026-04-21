@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Camera, Lock, Bell, Palette, Settings, History, Trash2, LogOut, Loader2, Bookmark, ShieldCheck, Mail, X, Check, Dices, Sparkles, PlayCircle, Globe } from 'lucide-react';
+import { User, Camera, Lock, Bell, Palette, Settings, History, Trash2, LogOut, Loader2, Bookmark, ShieldCheck, Mail, X, Check, Dices, Sparkles, PlayCircle, Globe, ChevronLeft, ChevronRight, MapPin, Monitor } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -19,6 +19,9 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [watchlist, setWatchlist] = useState([]);
   const [activityLogs, setActivityLogs] = useState([]);
+  const [activityPage, setActivityPage] = useState(1);
+  const [activityPages, setActivityPages] = useState(1);
+  const [activityTotal, setActivityTotal] = useState(0);
 
   // OTP States
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -76,11 +79,14 @@ const Profile = () => {
     }
   };
 
-  const fetchActivityLogs = async () => {
+  const fetchActivityLogs = async (page = 1) => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${API_URL}/users/activity`);
+      const { data } = await axios.get(`${API_URL}/users/activity?page=${page}&limit=10`);
       setActivityLogs(data.activity || []);
+      setActivityPage(data.page || 1);
+      setActivityPages(data.pages || 1);
+      setActivityTotal(data.total || 0);
     } catch (err) {
       toast.error('Failed to load activity logs');
     } finally {
@@ -411,23 +417,73 @@ const Profile = () => {
               <motion.section key="activity" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
                 <h2>Activity Log</h2>
                 {loading && activityLogs.length === 0 ? <Loader2 className="spin" /> : (
-                  <div className="activity-list">
-                    {activityLogs.length > 0 ? activityLogs.map((log, i) => (
-                      <div key={i} className="activity-item glass">
-                        <History size={18} />
-                        <div className="activity-info">
-                          <p className="activity-action">{log.action}</p>
-                          <p className="activity-detail">{log.details || ''}</p>
-                          <span className="activity-time">{new Date(log.createdAt).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    )) : (
-                      <div className="empty-state">
-                        <History size={48} />
-                        <p>No activity yet.</p>
+                  <>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={activityPage}
+                        className="activity-list"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {activityLogs.length > 0 ? activityLogs.map((log, i) => (
+                          <div key={log._id || i} className="activity-item glass">
+                            <div className="activity-icon-wrap">
+                              {log.action === 'login' ? <ShieldCheck size={18} /> : log.action === 'password_reset' ? <Lock size={18} /> : log.action === 'email_changed' ? <Mail size={18} /> : <History size={18} />}
+                            </div>
+                            <div className="activity-info">
+                              <p className="activity-action">{log.action === 'login' ? 'New Login' : log.action === 'password_reset' ? 'Password Reset' : log.action === 'email_changed' ? 'Email Changed' : log.action === 'account_verified' ? 'Account Verified' : log.action === 'signup' ? 'Account Created' : log.action}</p>
+                              <p className="activity-detail">{log.details || ''}</p>
+                              {log.metadata?.location && (
+                                <div className="activity-location">
+                                  <MapPin size={13} />
+                                  <span>{[log.metadata.location.city, log.metadata.location.region, log.metadata.location.country].filter(Boolean).join(', ')}</span>
+                                </div>
+                              )}
+                              {log.metadata?.device && (
+                                <div className="activity-device">
+                                  <Monitor size={13} />
+                                  <span>{log.metadata.device}</span>
+                                </div>
+                              )}
+                              {log.ip && (
+                                <div className="activity-ip">
+                                  <Globe size={13} />
+                                  <span>{log.ip}</span>
+                                </div>
+                              )}
+                              <span className="activity-time">{new Date(log.createdAt).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        )) : (
+                          <div className="empty-state">
+                            <History size={48} />
+                            <p>No activity yet.</p>
+                          </div>
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
+                    {activityPages > 1 && (
+                      <div className="pagination-controls">
+                        <button
+                          className="pagination-btn"
+                          disabled={activityPage <= 1 || loading}
+                          onClick={() => fetchActivityLogs(activityPage - 1)}
+                        >
+                          <ChevronLeft size={18} /> Prev
+                        </button>
+                        <span className="pagination-info">Page {activityPage} of {activityPages}</span>
+                        <button
+                          className="pagination-btn"
+                          disabled={activityPage >= activityPages || loading}
+                          onClick={() => fetchActivityLogs(activityPage + 1)}
+                        >
+                          Next <ChevronRight size={18} />
+                        </button>
                       </div>
                     )}
-                  </div>
+                  </>
                 )}
               </motion.section>
             )}
@@ -806,14 +862,38 @@ const Profile = () => {
         .activity-list { display: flex; flex-direction: column; gap: 1rem; }
         .activity-item {
           display: flex; align-items: flex-start; gap: 1rem;
-          padding: 1rem 1.2rem; border-radius: var(--radius-md);
-          border: 1px solid var(--border-light);
+          padding: 1.2rem 1.4rem; border-radius: var(--radius-md);
+          border: 1px solid var(--border-light); transition: 0.2s;
         }
-        .activity-item svg { color: var(--primary); flex-shrink: 0; margin-top: 3px; }
+        .activity-item:hover { border-color: rgba(13, 202, 240, 0.2); background: rgba(255,255,255,0.02); }
+        .activity-icon-wrap {
+          width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+          background: rgba(13, 202, 240, 0.1); color: var(--primary); flex-shrink: 0; margin-top: 2px;
+        }
         .activity-info { flex: 1; }
-        .activity-action { font-weight: 600; color: white; margin-bottom: 0.2rem; }
-        .activity-detail { font-size: 0.85rem; color: var(--text-dim); }
-        .activity-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; display: block; }
+        .activity-action { font-weight: 700; color: white; margin-bottom: 0.3rem; font-size: 0.95rem; }
+        .activity-detail { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.4rem; }
+        .activity-location, .activity-device, .activity-ip {
+          display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem;
+          color: var(--text-muted); margin-bottom: 0.15rem;
+        }
+        .activity-location svg, .activity-device svg, .activity-ip svg { flex-shrink: 0; }
+        .activity-location { color: rgba(139, 92, 246, 0.9); }
+        .activity-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; display: block; }
+
+        .pagination-controls {
+          display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+          margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light);
+        }
+        .pagination-btn {
+          display: flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.2rem;
+          background: rgba(255,255,255,0.05); border: 1px solid var(--border-light);
+          color: var(--text-dim); border-radius: 8px; cursor: pointer; font-weight: 600;
+          font-size: 0.85rem; transition: 0.2s;
+        }
+        .pagination-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: rgba(13, 202, 240, 0.08); }
+        .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .pagination-info { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
         @media (max-width: 900px) {
           .profile-layout { grid-template-columns: 1fr; }
