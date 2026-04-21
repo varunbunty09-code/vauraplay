@@ -1,11 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Camera, Lock, Bell, Palette, Settings, History, Trash2, LogOut, Loader2, Bookmark, ShieldCheck, Mail, X, Check, Dices, Sparkles, PlayCircle } from 'lucide-react';
+import { User, Camera, Lock, Bell, Palette, Settings, History, Trash2, LogOut, Loader2, Bookmark, ShieldCheck, Mail, X, Check, Dices, Sparkles, PlayCircle, Globe } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
+
+const countryCodes = [
+    { code: '+91', country: 'IN', name: 'India' },
+    { code: '+1', country: 'US', name: 'USA' },
+    { code: '+44', country: 'GB', name: 'UK' },
+    { code: '+61', country: 'AU', name: 'Australia' },
+    { code: '+49', country: 'DE', name: 'Germany' },
+    { code: '+33', country: 'FR', name: 'France' },
+    { code: '+81', country: 'JP', name: 'Japan' },
+    { code: '+86', country: 'CN', name: 'China' },
+    { code: '+971', country: 'AE', name: 'UAE' },
+    { code: '+966', country: 'SA', name: 'Saudi Arabia' },
+];
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -43,7 +56,8 @@ const Profile = () => {
 
   const [formData, setFormData] = useState({
     username: user?.username || '',
-    phone: user?.phone || '',
+    countryCode: user?.phone?.match(/^\+\d+/)?.[0] || '+91',
+    phoneNumber: user?.phone?.replace(/^\+\d+/, '') || '',
     autoPlay: user?.preferences?.autoPlay ?? true,
     playerColor: user?.preferences?.playerColor || '0dcaf0',
     emailNotifications: user?.preferences?.emailNotifications ?? true,
@@ -146,13 +160,28 @@ const Profile = () => {
     }
   };
 
-  const handleSaveProfile = async (e) => {
+  const handleUpdateProfile = async (field) => {
+    setLoading(true);
+    try {
+      const payload = {};
+      if (field === 'username') payload.username = formData.username;
+      if (field === 'phone') payload.phone = `${formData.countryCode}${formData.phoneNumber}`;
+      
+      const { data } = await axios.put(`${API_URL}/users/profile`, payload);
+      setUser(data.user);
+      toast.success(`${field.charAt(0).toUpperCase() + field.slice(1)} updated!`);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Update failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSavePreferences = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const { data } = await axios.put(`${API_URL}/users/profile`, {
-        username: formData.username,
-        phone: formData.phone,
         preferences: {
           autoPlay: formData.autoPlay,
           playerColor: formData.playerColor,
@@ -160,7 +189,7 @@ const Profile = () => {
         }
       });
       setUser(data.user);
-      toast.success('Profile updated!');
+      toast.success('Preferences updated!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Update failed');
     } finally {
@@ -279,43 +308,55 @@ const Profile = () => {
 
         {/* Main Content */}
         <main className="profile-main glass">
-           <AnimatePresence mode="wait">
-             {activeTab === 'general' && (
-               <motion.section key="general" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
-                 <h2>Account Settings</h2>
-                 <form onSubmit={handleSaveProfile}>
-                    <div className="form-group">
-                      <label>Username</label>
-                      <input 
-                        type="text" 
-                        value={formData.username} 
-                        onChange={(e) => setFormData({...formData, username: e.target.value})}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Phone Number</label>
-                      <div className="phone-change-wrapper">
-                        <input 
-                          type="tel" 
-                          placeholder="e.g. +1 234 567 8900"
-                          value={formData.phone} 
-                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                        />
-                        <button type="button" className="btn-small" onClick={handleSaveProfile}>Update Phone</button>
-                      </div>
-                      <small>Current: {user?.phone || 'Not set'} • Use international format (e.g. +1...)</small>
-                    </div>
-                    <div className="form-group">
-                      <label>Email Address</label>
-                      <div className="email-change-wrapper">
-                        <input type="email" placeholder="New Email" value={newEmail} onChange={e => setNewEmail(e.target.value)} />
-                        <button type="button" className="btn-small" onClick={handleRequestEmailChange}>Update Email</button>
-                      </div>
-                      <small>Current: {user?.email}</small>
-                    </div>
-                    <button className="btn-primary" disabled={loading}>Save Changes</button>
-                 </form>
-               </motion.section>
+                <motion.section key="general" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                  <h2>Account Settings</h2>
+                     <div className="form-group">
+                       <label>Username</label>
+                       <div className="field-update-wrapper">
+                         <input 
+                           type="text" 
+                           value={formData.username} 
+                           onChange={(e) => setFormData({...formData, username: e.target.value})}
+                         />
+                         <button type="button" className="btn-small" onClick={() => handleUpdateProfile('username')}>Update Username</button>
+                       </div>
+                       <small>Current: {user?.username}</small>
+                     </div>
+
+                     <div className="form-group">
+                       <label>Phone Number</label>
+                       <div className="phone-update-wrapper field-update-wrapper">
+                         <div className="country-code-select">
+                           <Globe size={14} className="globe-icon" />
+                           <select 
+                             value={formData.countryCode} 
+                             onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
+                           >
+                             {countryCodes.map(c => (
+                               <option key={c.code + c.country} value={c.code}>{c.code} ({c.country})</option>
+                             ))}
+                           </select>
+                         </div>
+                         <input 
+                           type="tel" 
+                           placeholder="9876543210"
+                           value={formData.phoneNumber} 
+                           onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+                         />
+                         <button type="button" className="btn-small" onClick={() => handleUpdateProfile('phone')}>Update Phone</button>
+                       </div>
+                       <small>Current: {user?.phone || 'Not set'}</small>
+                     </div>
+
+                     <div className="form-group">
+                       <label>Email Address</label>
+                       <div className="email-change-wrapper field-update-wrapper">
+                         <input type="email" placeholder="New Email" value={newEmail} onChange={e => setNewEmail(e.target.value)} />
+                         <button type="button" className="btn-small" onClick={handleRequestEmailChange}>Update Email</button>
+                       </div>
+                       <small>Current: {user?.email}</small>
+                     </div>
+                </motion.section>
              )}
 
              {activeTab === 'watchlist' && (
@@ -410,7 +451,7 @@ const Profile = () => {
                      </div>
                   </div>
 
-                  <button className="btn-primary" onClick={handleSaveProfile}>Save Preferences</button>
+                  <button className="btn-primary" onClick={handleSavePreferences}>Save Preferences</button>
                </motion.section>
              )}
 
@@ -633,8 +674,20 @@ const Profile = () => {
           background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); color: white; 
         }
         
-        .email-change-wrapper, .phone-change-wrapper { display: flex; gap: 1rem; max-width: 550px; margin-bottom: 0.5rem; }
-        .email-change-wrapper input, .phone-change-wrapper input { flex: 1; }
+        .field-update-wrapper { display: flex; gap: 1rem; max-width: 600px; margin-bottom: 0.5rem; align-items: center; }
+        .field-update-wrapper input { flex: 1; }
+        
+        .country-code-select {
+          display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.05); 
+          border: 1px solid var(--border-light); border-radius: 10px; padding: 0 0.8rem;
+          height: 48px; min-width: 120px;
+        }
+        .country-code-select select {
+          background: transparent; border: none; color: white; outline: none; width: 100%; cursor: pointer;
+          font-weight: 600;
+        }
+        .globe-icon { color: var(--text-muted); }
+
         .btn-small { padding: 0.5rem 1.2rem; border-radius: 8px; background: var(--primary); color: black; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 700; white-space: nowrap; transition: 0.3s; }
         .btn-small:hover { transform: translateY(-2px); box-shadow: 0 5px 15px var(--primary-glow); }
 

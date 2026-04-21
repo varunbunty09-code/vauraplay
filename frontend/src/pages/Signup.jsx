@@ -19,11 +19,25 @@ const Signup = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    countryCode: '+91',
     phone: '',
     password: '',
     confirmPassword: '',
     otp: ''
   });
+
+  const countryCodes = [
+    { code: '+91', country: 'IN', name: 'India' },
+    { code: '+1', country: 'US', name: 'USA' },
+    { code: '+44', country: 'GB', name: 'UK' },
+    { code: '+61', country: 'AU', name: 'Australia' },
+    { code: '+49', country: 'DE', name: 'Germany' },
+    { code: '+33', country: 'FR', name: 'France' },
+    { code: '+81', country: 'JP', name: 'Japan' },
+    { code: '+86', country: 'CN', name: 'China' },
+    { code: '+971', country: 'AE', name: 'UAE' },
+    { code: '+966', country: 'SA', name: 'Saudi Arabia' },
+  ];
 
   useEffect(() => {
     let interval;
@@ -49,7 +63,8 @@ const Signup = () => {
     }
     setLoading(true);
     try {
-      const res = await signup(formData.username, formData.email, formData.password, formData.phone);
+      const fullPhone = formData.phone ? `${formData.countryCode}${formData.phone}` : '';
+      const res = await signup(formData.username, formData.email, formData.password, fullPhone);
       setUserId(res.userId);
       setStep(2);
       setTimer(60);
@@ -160,15 +175,27 @@ const Signup = () => {
                 />
               </div>
 
-              <div className="input-group">
+               <div className="input-group">
                 <label><Phone size={16} /> Phone Number <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>(optional)</span></label>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="e.g. +1 234 567 8900"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                />
+                <div className="phone-input-container">
+                  <select 
+                    name="countryCode" 
+                    value={formData.countryCode} 
+                    onChange={handleInputChange}
+                    className="country-select"
+                  >
+                    {countryCodes.map(c => (
+                      <option key={c.code + c.country} value={c.code}>{c.code} ({c.country})</option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    name="phone"
+                    placeholder="9876543210"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
 
               <button type="submit" className="btn-primary auth-btn" disabled={loading}>
@@ -236,6 +263,9 @@ const Signup = () => {
         .auth-footer { margin-top: 2rem; text-align: center; font-size: 0.9rem; color: var(--text-muted); }
         .auth-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
         .otp-input { text-align: center; letter-spacing: 12px; font-size: 1.5rem !important; font-weight: 700; }
+        .phone-input-container { display: flex; gap: 0.8rem; }
+        .country-select { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-light); padding: 1rem; border-radius: var(--radius-sm); color: white; cursor: pointer; font-weight: 600; min-width: 110px; }
+        .country-select:focus { border-color: var(--primary); outline: none; }
         .text-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 600; transition: var(--transition-fast); }
         .text-btn:disabled { color: var(--text-muted); cursor: not-allowed; opacity: 0.8; }
         .spin { animation: spin 1s linear infinite; }
