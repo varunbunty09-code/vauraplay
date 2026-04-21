@@ -78,7 +78,7 @@ function App() {
                 <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
                 <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
                 <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
-                <Route path="/reset-password/:token" element={<GuestRoute><ResetPassword /></GuestRoute>} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
 
                 {/* ── Public Routes (accessible by everyone) ── */}
                 <Route path="/help" element={<HelpCenter />} />

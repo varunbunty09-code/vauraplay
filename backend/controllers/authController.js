@@ -36,7 +36,7 @@ const getClientIp = (req) => {
 // @route   POST /api/auth/signup
 exports.signup = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, phone } = req.body;
 
     // Check existing user
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -46,7 +46,7 @@ exports.signup = async (req, res) => {
     }
 
     // Create unverified user
-    const user = await User.create({ username, email, password, isVerified: false });
+    const user = await User.create({ username, email, password, phone: phone || '', isVerified: false });
 
     // Generate and send OTP
     const otp = user.generateOTP('signup');
@@ -351,6 +351,29 @@ exports.resetPassword = async (req, res) => {
     res.json({ message: 'Password reset successful. Please login.' });
   } catch (error) {
     console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Verify reset token & return masked email
+// @route   GET /api/auth/verify-reset-token/:token
+exports.verifyResetToken = async (req, res) => {
+  try {
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: new Date() },
+    });
+    if (!user) return res.status(400).json({ message: 'Invalid or expired reset token' });
+
+    // Return masked email (e.g. m***h@gmail.com)
+    const email = user.email;
+    const [local, domain] = email.split('@');
+    const masked = local[0] + '***' + local[local.length - 1] + '@' + domain;
+
+    res.json({ email: masked, fullEmail: email });
+  } catch (error) {
+    console.error('Verify reset token error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

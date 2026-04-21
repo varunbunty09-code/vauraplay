@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, ShieldCheck, Play, RefreshCw } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, ShieldCheck, Play, RefreshCw, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
 
@@ -19,7 +19,9 @@ const Signup = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    phone: '',
     password: '',
+    confirmPassword: '',
     otp: ''
   });
 
@@ -39,9 +41,15 @@ const Signup = () => {
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      return toast.error('Passwords do not match');
+    }
+    if (formData.password.length < 6) {
+      return toast.error('Password must be at least 6 characters');
+    }
     setLoading(true);
     try {
-      const res = await signup(formData.username, formData.email, formData.password);
+      const res = await signup(formData.username, formData.email, formData.password, formData.phone);
       setUserId(res.userId);
       setStep(2);
       setTimer(60);
@@ -136,6 +144,29 @@ const Signup = () => {
                   required
                   placeholder="Min. 6 characters"
                   value={formData.password}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="input-group">
+                <label><Lock size={16} /> Confirm Password</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  required
+                  placeholder="Re-enter your password"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="input-group">
+                <label><Phone size={16} /> Phone Number <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>(optional)</span></label>
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="+91 9876543210"
+                  value={formData.phone}
                   onChange={handleInputChange}
                 />
               </div>

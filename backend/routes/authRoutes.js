@@ -7,6 +7,7 @@ const {
   verifyLogin,
   forgotPassword,
   resetPassword,
+  verifyResetToken,
   resendOTP,
   getMe,
   requestEmailChange,
@@ -22,6 +23,7 @@ router.post('/login', login);
 router.post('/verify-login', verifyLogin);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
+router.get('/verify-reset-token/:token', verifyResetToken);
 router.post('/resend-otp', resendOTP);
 router.get('/me', protect, getMe);
 

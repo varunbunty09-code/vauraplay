@@ -61,9 +61,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (username, email, password) => {
+  const signup = async (username, email, password, phone) => {
     try {
-      const { data } = await axios.post(`${API_URL}/auth/signup`, { username, email, password });
+      const { data } = await axios.post(`${API_URL}/auth/signup`, { username, email, password, phone });
       return data; // Should return userId for verification step
     } catch (error) {
       toast.error(error.response?.data?.message || 'Signup failed');

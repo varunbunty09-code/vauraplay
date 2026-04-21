@@ -43,6 +43,7 @@ const Profile = () => {
 
   const [formData, setFormData] = useState({
     username: user?.username || '',
+    phone: user?.phone || '',
     autoPlay: user?.preferences?.autoPlay ?? true,
     playerColor: user?.preferences?.playerColor || '0dcaf0',
     emailNotifications: user?.preferences?.emailNotifications ?? true,
@@ -288,6 +289,15 @@ const Profile = () => {
                         type="text" 
                         value={formData.username} 
                         onChange={(e) => setFormData({...formData, username: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Phone Number</label>
+                      <input 
+                        type="tel" 
+                        placeholder="+91 9876543210"
+                        value={formData.phone} 
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       />
                     </div>
                     <div className="form-group">
