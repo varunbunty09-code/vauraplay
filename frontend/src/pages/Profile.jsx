@@ -316,17 +316,28 @@ const Profile = () => {
                      <div className="form-group">
                        <label>Phone Number</label>
                        <div className="phone-update-wrapper field-update-wrapper">
-                         <div className="country-code-select">
-                           <Globe size={14} className="globe-icon" />
-                           <select 
-                             value={formData.countryCode} 
-                             onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
-                           >
-                             {countryCodes.map(c => (
-                               <option key={c.code + c.country} value={c.code}>{c.code} ({c.country})</option>
-                             ))}
-                           </select>
-                         </div>
+                          <div className="country-code-select">
+                            {(() => {
+                              const country = countryCodes.find(c => c.code === formData.countryCode);
+                              return country ? (
+                                <img 
+                                  src={`https://flagcdn.com/w40/${country.country.toLowerCase()}.png`} 
+                                  alt={country.name}
+                                  className="selected-flag"
+                                />
+                              ) : <Globe size={14} className="globe-icon" />;
+                            })()}
+                            <select 
+                              value={formData.countryCode} 
+                              onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
+                            >
+                              {countryCodes.map(c => (
+                                <option key={c.code + c.country} value={c.code}>
+                                  {c.flag} {c.code} ({c.country})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                          <input 
                            type="tel" 
                            placeholder="9876543210"
@@ -679,6 +690,12 @@ const Profile = () => {
         .country-code-select select option {
           background: #121214;
           color: white;
+        }
+        .selected-flag {
+          width: 20px;
+          height: auto;
+          border-radius: 2px;
+          object-fit: cover;
         }
         .globe-icon { color: var(--text-muted); }
 

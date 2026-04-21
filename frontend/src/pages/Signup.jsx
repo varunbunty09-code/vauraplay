@@ -167,7 +167,16 @@ const Signup = () => {
                 <label><Phone size={16} /> Phone Number</label>
                 <div className="phone-input-container" style={{ display: 'flex', gap: '0.8rem' }}>
                   <div className="country-code-select">
-                    <Globe size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                    {(() => {
+                      const country = countryCodes.find(c => c.code === formData.countryCode);
+                      return country ? (
+                        <img 
+                          src={`https://flagcdn.com/w40/${country.country.toLowerCase()}.png`} 
+                          alt={country.name}
+                          className="selected-flag"
+                        />
+                      ) : <Globe size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />;
+                    })()}
                     <select
                       name="countryCode"
                       value={formData.countryCode}
@@ -176,7 +185,9 @@ const Signup = () => {
                       required
                     >
                       {countryCodes.map(c => (
-                        <option key={c.code + c.country} value={c.code}>{c.code} ({c.country})</option>
+                        <option key={c.code + c.country} value={c.code}>
+                          {c.flag} {c.code} ({c.country})
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -262,6 +273,12 @@ const Signup = () => {
           display: flex; align-items: center; gap: 0.6rem; background: rgba(255, 255, 255, 0.05); 
           border: 1px solid var(--border-light); padding: 0 1rem; border-radius: var(--radius-sm);
           min-width: 140px;
+        }
+        .selected-flag {
+          width: 20px;
+          height: auto;
+          border-radius: 2px;
+          object-fit: cover;
         }
         .globe-icon { color: var(--text-muted); }
         .text-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 600; transition: var(--transition-fast); }
