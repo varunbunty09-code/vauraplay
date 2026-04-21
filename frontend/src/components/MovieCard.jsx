@@ -34,21 +34,31 @@ const MovieCard = ({ item, type, showBadge = false }) => {
     try {
       if (previousState) {
         const { data } = await axios.get(`${API_URL}/watchlist/check/${item.id}/${mediaType}`);
-        await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
-        toast.success('Removed from watchlist');
+        if (data.item?._id) {
+          await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
+          toast.success('Removed from watchlist');
+        } else {
+          // Item wasn't in watchlist server-side
+          setInWatchlist(false);
+        }
       } else {
-        await axios.post(`${API_URL}/watchlist`, {
+        const { data } = await axios.post(`${API_URL}/watchlist`, {
           tmdbId: item.id, mediaType,
           title, posterPath: item.poster_path,
           backdropPath: item.backdrop_path,
           overview: item.overview,
           voteAverage: item.vote_average
         });
-        toast.success('Added to watchlist');
+        if (data.alreadyExists) {
+          toast.success('Already in watchlist');
+        } else {
+          toast.success('Added to watchlist');
+        }
+        setInWatchlist(true);
       }
     } catch (err) {
       setInWatchlist(previousState);
-      toast.error('Watchlist Error');
+      toast.error(previousState ? 'Failed to remove' : 'Failed to add');
     }
   };
 

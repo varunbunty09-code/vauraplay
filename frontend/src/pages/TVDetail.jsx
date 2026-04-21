@@ -128,10 +128,14 @@ const TVDetail = () => {
         try {
             if (prev) {
                 const { data } = await axios.get(`${API_URL}/watchlist/check/${show.id}/tv`);
-                await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
-                toast.success('Removed from watchlist');
+                if (data.item?._id) {
+                    await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
+                    toast.success('Removed from watchlist');
+                } else {
+                    setInWatchlist(false);
+                }
             } else {
-                await axios.post(`${API_URL}/watchlist`, {
+                const { data } = await axios.post(`${API_URL}/watchlist`, {
                     tmdbId: show.id,
                     mediaType: 'tv',
                     title: show.name,
@@ -140,11 +144,16 @@ const TVDetail = () => {
                     overview: show.overview,
                     voteAverage: show.vote_average,
                 });
-                toast.success('Added to watchlist');
+                if (data.alreadyExists) {
+                    toast.success('Already in watchlist');
+                } else {
+                    toast.success('Added to watchlist');
+                }
+                setInWatchlist(true);
             }
         } catch (err) {
             setInWatchlist(prev);
-            toast.error('Failed to update watchlist');
+            toast.error(prev ? 'Failed to remove' : 'Failed to add');
         }
     };
 

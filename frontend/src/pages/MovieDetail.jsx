@@ -80,19 +80,28 @@ const MovieDetail = () => {
     try {
       if (previousState) {
         const { data } = await axios.get(`${API_URL}/watchlist/check/${id}/movie`);
-        await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
-        toast.success('Removed from watchlist');
+        if (data.item?._id) {
+          await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
+          toast.success('Removed from watchlist');
+        } else {
+          setInWatchlist(false);
+        }
       } else {
-        await axios.post(`${API_URL}/watchlist`, {
+        const { data } = await axios.post(`${API_URL}/watchlist`, {
           tmdbId: id, mediaType: 'movie', title: movie.title,
           posterPath: movie.poster_path, backdropPath: movie.backdrop_path,
           overview: movie.overview, voteAverage: movie.vote_average
         });
-        toast.success('Added to watchlist');
+        if (data.alreadyExists) {
+          toast.success('Already in watchlist');
+        } else {
+          toast.success('Added to watchlist');
+        }
+        setInWatchlist(true);
       }
     } catch (err) {
       setInWatchlist(previousState);
-      toast.error('Watchlist Error');
+      toast.error(previousState ? 'Failed to remove' : 'Failed to add');
     }
   };
 

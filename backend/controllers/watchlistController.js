@@ -32,7 +32,10 @@ exports.addToWatchlist = async (req, res) => {
     const { tmdbId, mediaType, title, posterPath, backdropPath, overview, releaseDate, voteAverage, genres } = req.body;
 
     const existing = await Watchlist.findOne({ user: req.user._id, tmdbId, mediaType });
-    if (existing) return res.status(400).json({ message: 'Already in watchlist' });
+    if (existing) {
+      // Already in watchlist — return it as success (idempotent)
+      return res.status(200).json({ ...existing.toObject(), alreadyExists: true });
+    }
 
     const item = await Watchlist.create({
       user: req.user._id,

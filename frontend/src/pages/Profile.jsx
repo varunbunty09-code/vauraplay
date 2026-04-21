@@ -6,6 +6,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
+import { GridSkeleton } from '../components/skeleton/MovieSkeleton';
 import { countryCodes } from '../constants/countries';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -384,7 +385,7 @@ const Profile = () => {
             {activeTab === 'watchlist' && (
               <motion.section key="watchlist" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
                 <h2>My Watchlist</h2>
-                {loading && watchlist.length === 0 ? <Loader2 className="spin" /> : (
+                {loading && watchlist.length === 0 ? <GridSkeleton /> : (
                   <div className="browse-grid">
                     {watchlist.length > 0 ? watchlist.map(item => (
                       <MovieCard
