@@ -319,6 +319,7 @@ const Profile = () => {
                        <div className="field-update-wrapper">
                          <input 
                            type="text" 
+                           placeholder="New Username" 
                            value={formData.username} 
                            onChange={(e) => setFormData({...formData, username: e.target.value})}
                          />
@@ -354,7 +355,7 @@ const Profile = () => {
                           </div>
                          <input 
                            type="tel" 
-                           placeholder="9876543210"
+                           placeholder="New Phone Number"
                            value={formData.phoneNumber} 
                            onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
                          />

@@ -124,7 +124,7 @@ const Signup = () => {
                   type="text"
                   name="username"
                   required
-                  placeholder="johndoe"
+                  placeholder="Enter Username"
                   value={formData.username}
                   onChange={handleInputChange}
                 />
@@ -136,7 +136,7 @@ const Signup = () => {
                   type="email"
                   name="email"
                   required
-                  placeholder="name@example.com"
+                  placeholder="Enter Email"
                   value={formData.email}
                   onChange={handleInputChange}
                 />
