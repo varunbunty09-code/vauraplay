@@ -325,13 +325,14 @@ const TVDetail = () => {
                             <div className="sidebar-group">
                                 <span className="label">Cast:</span>
                                 <p className="sidebar-val">
-                                    {show.credits?.cast?.slice(0, 5).map(c => c.name).join(', ')}
-                                    {show.credits?.cast?.length > 5 && '...'}
+                                    {show.credits?.cast?.length > 0
+                                        ? show.credits.cast.slice(0, 5).map(c => c.name).join(', ') + (show.credits.cast.length > 5 ? '...' : '')
+                                        : 'Not available'}
                                 </p>
                             </div>
                             <div className="sidebar-group">
                                 <span className="label">Genres:</span>
-                                <p className="sidebar-val">{show.genres?.map(g => g.name).join(', ')}</p>
+                                <p className="sidebar-val">{show.genres?.length > 0 ? show.genres.map(g => g.name).join(', ') : 'Not available'}</p>
                             </div>
                             <div className="sidebar-group">
                                 <span className="label">Maturity:</span>
@@ -344,25 +345,29 @@ const TVDetail = () => {
 
             <div className="container cast-section-v2">
                 <h3>Top Cast</h3>
-                <div className="cast-scroll-area">
-                    {show.credits?.cast?.slice(0, 15).map(person => (
-                        <div key={person.id} className="cast-card-v2" onClick={() => openCastModal(person)}>
-                            <div className="cast-img-wrapper">
-                                {person.profile_path ? (
-                                    <img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} />
-                                ) : (
-                                    <div className="cast-placeholder">
-                                        <Bookmark size={30} color="var(--text-muted)" />
-                                    </div>
-                                )}
+                {show.credits?.cast?.length > 0 ? (
+                    <div className="cast-scroll-area">
+                        {show.credits.cast.slice(0, 15).map(person => (
+                            <div key={person.id} className="cast-card-v2" onClick={() => openCastModal(person)}>
+                                <div className="cast-img-wrapper">
+                                    {person.profile_path ? (
+                                        <img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} />
+                                    ) : (
+                                        <div className="cast-placeholder">
+                                            <Bookmark size={30} color="var(--text-muted)" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="cast-info-v2">
+                                    <p className="name">{person.name}</p>
+                                    <p className="char">{person.character}</p>
+                                </div>
                             </div>
-                            <div className="cast-info-v2">
-                                <p className="name">{person.name}</p>
-                                <p className="char">{person.character}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', padding: '1rem 0' }}>Cast information is not available for this title.</p>
+                )}
             </div>
 
             <div className="container season-section">
