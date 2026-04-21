@@ -176,13 +176,14 @@ const Signup = () => {
               </div>
 
                <div className="input-group">
-                <label><Phone size={16} /> Phone Number <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>(optional)</span></label>
+                <label><Phone size={16} /> Phone Number</label>
                 <div className="phone-input-container">
                   <select 
                     name="countryCode" 
                     value={formData.countryCode} 
                     onChange={handleInputChange}
                     className="country-select"
+                    required
                   >
                     {countryCodes.map(c => (
                       <option key={c.code + c.country} value={c.code}>{c.code} ({c.country})</option>
@@ -191,6 +192,7 @@ const Signup = () => {
                   <input
                     type="tel"
                     name="phone"
+                    required
                     placeholder="9876543210"
                     value={formData.phone}
                     onChange={handleInputChange}
