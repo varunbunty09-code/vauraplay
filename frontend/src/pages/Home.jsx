@@ -164,28 +164,29 @@ const Home = () => {
 
       <style>{`
         .home-page { padding-bottom: 5rem; }
-        .home-hero { height: 90vh; position: relative; display: flex; align-items: flex-end; margin-bottom: -50px; }
+        .home-hero { height: 92vh; position: relative; display: flex; align-items: flex-end; margin-bottom: -60px; overflow: hidden; }
         .hero-backdrop { position: absolute; inset: 0; z-index: 0; }
         .hero-backdrop img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
-        .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to right, #0a0a0c 25%, transparent 75%), linear-gradient(to top, #0a0a0c 15%, transparent 60%); }
-        .hero-info.container { margin: 0; max-width: 650px; padding-bottom: 8rem; position: relative; z-index: 10; padding-left: 4%; }
-        .hero-info h1 { font-size: clamp(2.8rem, 6vw, 4.5rem); margin-bottom: 1.2rem; text-shadow: 0 4px 30px rgba(0,0,0,0.7); line-height: 1.05; font-weight: 900; }
-        .hero-info p { font-size: 1.1rem; margin-bottom: 2rem; color: rgba(255,255,255,0.85); line-height: 1.7; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .hero-actions { display: flex; gap: 1.2rem; align-items: center; }
-        .btn-primary { padding: 1rem 2.5rem; font-size: 1.1rem; }
-        .btn-outline { padding: 1rem 2.5rem; font-size: 1.1rem; }
-        .add-list { width: 56px; height: 56px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s ease; overflow: hidden; }
+        .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to right, #0a0a0c 30%, transparent 80%), linear-gradient(to top, #0a0a0c 15%, transparent 50%); }
+        .hero-info.container { margin: 0 0 0 0 !important; max-width: 800px; padding-bottom: 10rem; position: relative; z-index: 10; padding-left: 5%; text-align: left; }
+        .hero-info h1 { font-size: clamp(3rem, 7vw, 5rem); margin-bottom: 1.2rem; text-shadow: 0 4px 30px rgba(0,0,0,0.8); line-height: 1; font-weight: 900; color: #fff; }
+        .hero-info p { font-size: 1.15rem; margin-bottom: 2.5rem; color: rgba(255,255,255,0.9); line-height: 1.6; text-shadow: 0 2px 10px rgba(0,0,0,0.5); max-width: 600px; }
+        .hero-actions { display: flex; gap: 1.2rem; align-items: center; justify-content: flex-start; }
+        .btn-primary { padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 8px; }
+        .btn-outline { padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 8px; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); }
+        .add-list { width: 56px; height: 56px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50% !important; transition: all 0.3s ease; }
         .add-list span { display: flex; align-items: center; justify-content: center; }
         .add-list.added { border-color: var(--primary); color: var(--primary); background: rgba(13, 202, 240, 0.15); }
-        .rows-container { position: relative; z-index: 20; margin-top: -120px; }
+        .rows-container { position: relative; z-index: 20; padding-top: 2rem; }
 
         @media (max-width: 768px) {
-          .home-hero { height: 70vh; align-items: flex-end; }
-          .hero-info.container { padding-bottom: 5rem; padding-left: 1.25rem; }
-          .hero-info h1 { font-size: 2.2rem; }
-          .hero-info p { font-size: 1rem; }
-          .hero-actions { flex-wrap: wrap; }
-          .rows-container { margin-top: 0; }
+          .home-hero { height: 75vh; }
+          .hero-info.container { padding-bottom: 6rem; padding-left: 1.5rem; max-width: 100%; }
+          .hero-info h1 { font-size: 2.5rem; }
+          .hero-info p { font-size: 1rem; margin-bottom: 1.5rem; }
+          .hero-actions { gap: 0.8rem; }
+          .btn-primary, .btn-outline { padding: 0.8rem 1.5rem; font-size: 1rem; }
+          .add-list { width: 48px; height: 48px; }
         }
       `}</style>
     </div>
