@@ -12,6 +12,8 @@ const Landing = () => {
   const [activeFaq, setActiveFaq] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [ctaEmail, setCtaEmail] = useState('');
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const trendingRef = useRef(null);
@@ -31,6 +33,23 @@ const Landing = () => {
   const handleImageError = (e) => {
     e.target.src = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop';
   };
+
+  const handleScroll = () => {
+    if (trendingRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = trendingRef.current;
+      setCanScrollLeft(scrollLeft > 10);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    const ref = trendingRef.current;
+    if (ref) {
+      ref.addEventListener('scroll', handleScroll);
+      handleScroll();
+    }
+    return () => ref?.removeEventListener('scroll', handleScroll);
+  }, [trending]);
 
   const scrollTrending = (dir) => {
     if (trendingRef.current) {
@@ -118,7 +137,7 @@ const Landing = () => {
             <h2>Trending Now</h2>
           </div>
           <div className="trending-wrapper">
-            <button className="trending-arrow left" onClick={() => scrollTrending('left')}><ChevronRight style={{ transform: 'rotate(180deg)' }} /></button>
+            {canScrollLeft && <button className="trending-arrow left" onClick={() => scrollTrending('left')}><ChevronRight style={{ transform: 'rotate(180deg)' }} /></button>}
             <div className="trending-scroll" ref={trendingRef}>
               {trending.map((item, index) => (
                 <motion.div 
@@ -145,7 +164,7 @@ const Landing = () => {
                 </motion.div>
               ))}
             </div>
-            <button className="trending-arrow right" onClick={() => scrollTrending('right')}><ChevronRight /></button>
+            {canScrollRight && <button className="trending-arrow right" onClick={() => scrollTrending('right')}><ChevronRight /></button>}
           </div>
         </div>
       </section>

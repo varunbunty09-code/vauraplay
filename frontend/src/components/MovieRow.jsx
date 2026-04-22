@@ -103,6 +103,25 @@ const MovieCard = ({ item, type }) => {
 
 const MovieRow = ({ title, items, type = 'movie' }) => {
   const rowRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const handleScroll = () => {
+    if (rowRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = rowRef.current;
+      setCanScrollLeft(scrollLeft > 10);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    const ref = rowRef.current;
+    if (ref) {
+      ref.addEventListener('scroll', handleScroll);
+      handleScroll();
+    }
+    return () => ref?.removeEventListener('scroll', handleScroll);
+  }, [items]);
 
   const scroll = (direction) => {
     if (rowRef.current) {
@@ -117,7 +136,7 @@ const MovieRow = ({ title, items, type = 'movie' }) => {
       <h3 className="row-title">{title}</h3>
 
       <div className="row-wrapper">
-        <button className="row-arrow left" onClick={() => scroll('left')}><ChevronLeft /></button>
+        {canScrollLeft && <button className="row-arrow left" onClick={() => scroll('left')}><ChevronLeft /></button>}
 
         <div className="movie-row" ref={rowRef}>
           {items?.map((item) => (
@@ -125,7 +144,7 @@ const MovieRow = ({ title, items, type = 'movie' }) => {
           ))}
         </div>
 
-        <button className="row-arrow right" onClick={() => scroll('right')}><ChevronRight /></button>
+        {canScrollRight && <button className="row-arrow right" onClick={() => scroll('right')}><ChevronRight /></button>}
       </div>
 
       <style>{`
