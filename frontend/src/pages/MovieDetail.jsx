@@ -132,9 +132,13 @@ const MovieDetail = () => {
 
   const closeCastModal = () => { setSelectedCast(null); setCastDetails(null); };
 
+  const [isCopied, setIsCopied] = useState(false);
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(window.location.href);
+    setIsCopied(true);
     toast.success('Link copied to clipboard!');
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const handleRate = (rating) => {
@@ -336,7 +340,15 @@ const MovieDetail = () => {
               </div>
               <div className="copy-link">
                 <input type="text" readOnly value={window.location.href} />
-                <button onClick={copyToClipboard}><Copy size={18} /></button>
+                <button onClick={copyToClipboard} className="copy-btn-animated">
+                  <AnimatePresence mode="wait">
+                    {isCopied ? (
+                      <motion.div key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}><Check size={18} /></motion.div>
+                    ) : (
+                      <motion.div key="copy" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}><Copy size={18} /></motion.div>
+                    )}
+                  </AnimatePresence>
+                </button>
               </div>
               <button className="close-share" onClick={() => setShowShare(false)}><X size={20} /></button>
             </motion.div>
