@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 
 // Context
 import { AuthProvider } from './context/AuthContext';
+import { WatchlistProvider } from './context/WatchlistContext';
 
 // Components
 import Navbar from './components/Navbar';
@@ -68,6 +69,7 @@ function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
+      <WatchlistProvider>
         <Router>
           <div className="app-container">
             <Navbar />
@@ -111,6 +113,7 @@ function App() {
             }} />
           </div>
         </Router>
+      </WatchlistProvider>
       </AuthProvider>
     </HelmetProvider>
   );

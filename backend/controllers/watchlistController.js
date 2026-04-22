@@ -98,3 +98,18 @@ exports.checkWatchlist = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// @desc    Get all watchlist tmdbIds for current user (for batch sync)
+// @route   GET /api/watchlist/ids
+exports.getWatchlistIds = async (req, res) => {
+  try {
+    const items = await Watchlist.find({ user: req.user._id }).select('tmdbId mediaType _id');
+    const map = {};
+    items.forEach(item => {
+      map[`${item.tmdbId}_${item.mediaType}`] = item._id;
+    });
+    res.json({ watchlistMap: map });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};

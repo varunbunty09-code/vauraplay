@@ -4,42 +4,29 @@ import { Star, Play, Plus, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useWatchlist } from '../context/WatchlistContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const MovieCard = ({ item, type, showBadge = false }) => {
   const navigate = useNavigate();
-  const [inWatchlist, setInWatchlist] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const { isInWatchlist, getWatchlistItemId, addToMap, removeFromMap } = useWatchlist();
 
   const mediaType = item.media_type || type;
   const title = item.title || item.name;
-
-  const handleMouseEnter = async () => {
-    if (checked) return;
-    try {
-      const { data } = await axios.get(`${API_URL}/watchlist/check/${item.id}/${mediaType}`);
-      setInWatchlist(data.inWatchlist);
-    } catch (e) {}
-    setChecked(true);
-  };
+  const inWatchlist = isInWatchlist(item.id, mediaType);
 
   const toggleWatchlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    const previousState = inWatchlist;
-    setInWatchlist(!previousState);
 
     try {
-      if (previousState) {
-        const { data } = await axios.get(`${API_URL}/watchlist/check/${item.id}/${mediaType}`);
-        if (data.item?._id) {
-          await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
+      if (inWatchlist) {
+        const itemId = getWatchlistItemId(item.id, mediaType);
+        if (itemId) {
+          await axios.delete(`${API_URL}/watchlist/${itemId}`);
+          removeFromMap(item.id, mediaType);
           toast.success('Removed from watchlist');
-        } else {
-          // Item wasn't in watchlist server-side
-          setInWatchlist(false);
         }
       } else {
         const { data } = await axios.post(`${API_URL}/watchlist`, {
@@ -49,16 +36,15 @@ const MovieCard = ({ item, type, showBadge = false }) => {
           overview: item.overview,
           voteAverage: item.vote_average
         });
+        addToMap(item.id, mediaType, data._id || data.item?._id);
         if (data.alreadyExists) {
           toast.success('Already in watchlist');
         } else {
           toast.success('Added to watchlist');
         }
-        setInWatchlist(true);
       }
     } catch (err) {
-      setInWatchlist(previousState);
-      toast.error(previousState ? 'Failed to remove' : 'Failed to add');
+      toast.error(inWatchlist ? 'Failed to remove' : 'Failed to add');
     }
   };
 
@@ -80,7 +66,6 @@ const MovieCard = ({ item, type, showBadge = false }) => {
       className="browse-movie-card"
       whileHover={{ scale: 1.05, zIndex: 10 }}
       transition={{ duration: 0.3 }}
-      onMouseEnter={handleMouseEnter}
     >
       <Link to={`/${mediaType}/${item.id}`}>
         <div className="browse-card-image">

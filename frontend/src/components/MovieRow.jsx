@@ -4,52 +4,42 @@ import { ChevronLeft, ChevronRight, Star, Play, Plus, Check } from 'lucide-react
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useWatchlist } from '../context/WatchlistContext';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const MovieCard = ({ item, type }) => {
   const navigate = useNavigate();
-  const [inWatchlist, setInWatchlist] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const { isInWatchlist, getWatchlistItemId, addToMap, removeFromMap } = useWatchlist();
 
   const mediaType = item.media_type || type;
   const title = item.title || item.name;
-
-  // Check watchlist status on first hover
-  const handleMouseEnter = async () => {
-    if (checked) return;
-    try {
-      const { data } = await axios.get(`${API_URL}/watchlist/check/${item.id}/${mediaType}`);
-      setInWatchlist(data.inWatchlist);
-    } catch (e) { }
-    setChecked(true);
-  };
+  const inWatchlist = isInWatchlist(item.id, mediaType);
+  const [imgError, setImgError] = useState(false);
 
   const toggleWatchlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Optimistic Update
-    const previousState = inWatchlist;
-    setInWatchlist(!previousState);
-
     try {
-      if (previousState) {
-        const { data } = await axios.get(`${API_URL}/watchlist/check/${item.id}/${mediaType}`);
-        await axios.delete(`${API_URL}/watchlist/${data.item._id}`);
-        toast.success('Removed from watchlist');
+      if (inWatchlist) {
+        const itemId = getWatchlistItemId(item.id, mediaType);
+        if (itemId) {
+          await axios.delete(`${API_URL}/watchlist/${itemId}`);
+          removeFromMap(item.id, mediaType);
+          toast.success('Removed from watchlist');
+        }
       } else {
-        await axios.post(`${API_URL}/watchlist`, {
+        const { data } = await axios.post(`${API_URL}/watchlist`, {
           tmdbId: item.id, mediaType,
           title, posterPath: item.poster_path,
           backdropPath: item.backdrop_path,
           overview: item.overview,
           voteAverage: item.vote_average
         });
+        addToMap(item.id, mediaType, data._id || data.item?._id);
         toast.success('Added to watchlist');
       }
     } catch (err) {
-      // Rollback on error
-      setInWatchlist(previousState);
       toast.error('Watchlist Error');
     }
   };
@@ -60,18 +50,27 @@ const MovieCard = ({ item, type }) => {
     navigate(`/watch/${mediaType}/${item.id}`);
   };
 
-  const getImageUrl = (path) => path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/500x750?text=No+Image';
+  const getImageUrl = (path) => {
+    if (imgError || !path) return null;
+    return `https://image.tmdb.org/t/p/w500${path}`;
+  };
 
   return (
     <motion.div
       className="movie-card"
       whileHover={{ scale: 1.05, zIndex: 10 }}
       transition={{ duration: 0.3 }}
-      onMouseEnter={handleMouseEnter}
     >
       <Link to={`/${mediaType}/${item.id}`}>
         <div className="card-image">
-          <img src={getImageUrl(item.poster_path)} alt={title} loading="lazy" />
+          {getImageUrl(item.poster_path) ? (
+            <img src={getImageUrl(item.poster_path)} alt={title} loading="lazy" onError={() => setImgError(true)} />
+          ) : (
+            <div className="browse-card-placeholder">
+              <span className="placeholder-title">{title}</span>
+              <div className="placeholder-icon">🎬</div>
+            </div>
+          )}
           <div className="card-overlay">
             <div className="card-overlay-top">
               <div className="rating"><Star size={12} fill="var(--primary)" /> {item.vote_average?.toFixed(1)}</div>

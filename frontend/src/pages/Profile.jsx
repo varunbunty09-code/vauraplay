@@ -405,7 +405,7 @@ const Profile = () => {
                     ))}
                   </div>
                   <div className="gender-action-row">
-                    {user?.gender && <small>Current: {user.gender === 'prefer_not_to_say' ? 'Prefer not to say' : user.gender.charAt(0).toUpperCase() + user.gender.slice(1)}</small>}
+                    <small>Current: {user?.gender ? (user.gender === 'prefer_not_to_say' ? 'Prefer not to say' : user.gender.charAt(0).toUpperCase() + user.gender.slice(1)) : 'Not provided'}</small>
                     <button 
                       type="button" 
                       className="btn-small" 
