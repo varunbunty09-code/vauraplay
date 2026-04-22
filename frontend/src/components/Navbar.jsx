@@ -18,6 +18,18 @@ const Navbar = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState([]);
+
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
   const [unreadCount, setUnreadCount] = useState(0);
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
@@ -606,14 +618,19 @@ const Navbar = () => {
         /* Mobile Overlay Styles */
         .mobile-overlay {
           position: fixed;
-          inset: 0;
-          background: rgba(10, 10, 12, 0.92);
-          backdrop-filter: blur(25px);
-          -webkit-backdrop-filter: blur(25px);
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: #0a0a0c; /* Solid fallback */
+          background: rgba(10, 10, 12, 0.98);
+          backdrop-filter: blur(30px);
+          -webkit-backdrop-filter: blur(30px);
           z-index: 1500;
-          padding: 6rem 2rem 2rem;
+          padding: 7rem 2rem 2rem;
           display: flex;
           flex-direction: column;
+          overflow-y: auto;
         }
         
         .mobile-header {
