@@ -10,6 +10,7 @@ import { WatchlistProvider } from './context/WatchlistContext';
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import CookieBanner from './components/CookieBanner';
 
 // Pages
 import Landing from './pages/Landing';
@@ -131,6 +132,7 @@ function App() {
                 border: '1px solid rgba(255,255,255,0.1)',
               }
             }} />
+            <CookieBanner />
           </div>
         </Router>
       </WatchlistProvider>
