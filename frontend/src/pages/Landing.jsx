@@ -121,7 +121,19 @@ const Landing = () => {
             <button className="trending-arrow left" onClick={() => scrollTrending('left')}><ChevronRight style={{ transform: 'rotate(180deg)' }} /></button>
             <div className="trending-scroll" ref={trendingRef}>
               {trending.map((item, index) => (
-                <div key={item.id} className="trending-item" onClick={() => setSelectedItem(item)}>
+                <motion.div 
+                  key={item.id} 
+                  className="trending-item" 
+                  onClick={() => setSelectedItem(item)}
+                  initial={{ opacity: 0, x: -100 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ 
+                    duration: 0.8, 
+                    delay: index * 0.1,
+                    ease: [0.22, 1, 0.36, 1] 
+                  }}
+                >
                   <div className="rank-number">{index + 1}</div>
                   <div className="trending-card">
                     <img 
@@ -130,7 +142,7 @@ const Landing = () => {
                       onError={handleImageError}
                     />
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
             <button className="trending-arrow right" onClick={() => scrollTrending('right')}><ChevronRight /></button>
