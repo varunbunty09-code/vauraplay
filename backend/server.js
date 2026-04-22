@@ -12,6 +12,7 @@ const tmdbRoutes = require('./routes/tmdbRoutes');
 const watchlistRoutes = require('./routes/watchlistRoutes');
 const progressRoutes = require('./routes/progressRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const reactionRoutes = require('./routes/reactionRoutes');
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use('/api/tmdb', tmdbRoutes);
 app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/reactions', reactionRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -82,6 +84,7 @@ app.get('/api', (req, res) => {
       progress: '/api/progress',
       tmdb: '/api/tmdb',
       admin: '/api/admin',
+      reactions: '/api/reactions',
     },
     documentation: 'All endpoints require authentication via Bearer token unless specified otherwise.',
   });

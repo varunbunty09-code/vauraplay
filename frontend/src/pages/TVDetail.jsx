@@ -37,11 +37,31 @@ const TVDetail = () => {
     const [episodeProgressMap, setEpisodeProgressMap] = useState({});
     const [lastResumeEp, setLastResumeEp] = useState(null);
 
-    const handleRate = (rating) => {
+    const handleRate = async (rating) => {
+        const previousRating = userRating;
         setUserRating(rating);
-        if (rating === 'loved') setRatingFeedback("Great choice! We'll recommend more like this.");
-        else if (rating === 'liked') setRatingFeedback("Thanks! We'll fine-tune your recommendations.");
-        else setRatingFeedback("Got it — we'll show fewer titles like this.");
+
+        try {
+            if (rating === previousRating) {
+                // Toggle off if same emoji clicked
+                await axios.delete(`${API_URL}/reactions/${id}/tv`);
+                setUserRating(null);
+            } else {
+                await axios.post(`${API_URL}/reactions`, {
+                    tmdbId: id,
+                    mediaType: 'tv',
+                    reaction: rating
+                });
+
+                if (rating === 'loved') setRatingFeedback("Great choice! We'll recommend more like this.");
+                else if (rating === 'liked') setRatingFeedback("Thanks! We'll fine-tune your recommendations.");
+                else setRatingFeedback("Got it — we'll show fewer titles like this.");
+            }
+        } catch (err) {
+            setUserRating(previousRating);
+            toast.error('Failed to save reaction');
+        }
+
         setTimeout(() => { setShowRating(false); setRatingFeedback(''); }, 2500);
     };
 
@@ -52,6 +72,7 @@ const TVDetail = () => {
                 const data = await tmdbService.getDetails(id, 'tv');
                 setShow(data);
                 setSeasons(data.seasons);
+                checkReaction();
 
                 // Find US rating if available
                 const usRating = data.content_ratings?.results?.find(r => r.iso_3166_1 === 'US')?.rating;
@@ -155,6 +176,13 @@ const TVDetail = () => {
         const s = Math.floor(secs % 60);
         if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         return `${m}:${String(s).padStart(2, '0')}`;
+    };
+
+    const checkReaction = async () => {
+        try {
+            const { data } = await axios.get(`${API_URL}/reactions/${id}/tv`);
+            setUserRating(data.reaction);
+        } catch (err) { }
     };
 
     const toggleWatchlist = async () => {

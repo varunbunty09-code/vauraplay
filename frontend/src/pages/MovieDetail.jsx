@@ -39,6 +39,7 @@ const MovieDetail = () => {
         const data = await tmdbService.getDetails(id, 'movie');
         setMovie(data);
         checkWatchlist();
+        checkReaction();
       } catch (err) {
         toast.error('Failed to load movie details');
       } finally {
@@ -82,6 +83,13 @@ const MovieDetail = () => {
     try {
       const { data } = await axios.get(`${API_URL}/watchlist/check/${id}/movie`);
       setInWatchlist(data.inWatchlist);
+    } catch (err) {}
+  };
+
+  const checkReaction = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/reactions/${id}/movie`);
+      setUserRating(data.reaction);
     } catch (err) {}
   };
 
@@ -141,11 +149,31 @@ const MovieDetail = () => {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleRate = (rating) => {
+  const handleRate = async (rating) => {
+    const previousRating = userRating;
     setUserRating(rating);
-    if (rating === 'loved') setRatingFeedback("Great choice! We'll recommend more like this.");
-    else if (rating === 'liked') setRatingFeedback("Thanks! We'll fine-tune your recommendations.");
-    else setRatingFeedback("Got it — we'll show fewer titles like this.");
+    
+    try {
+      if (rating === previousRating) {
+        // Toggle off if same emoji clicked
+        await axios.delete(`${API_URL}/reactions/${id}/movie`);
+        setUserRating(null);
+      } else {
+        await axios.post(`${API_URL}/reactions`, {
+          tmdbId: id,
+          mediaType: 'movie',
+          reaction: rating
+        });
+        
+        if (rating === 'loved') setRatingFeedback("Great choice! We'll recommend more like this.");
+        else if (rating === 'liked') setRatingFeedback("Thanks! We'll fine-tune your recommendations.");
+        else setRatingFeedback("Got it — we'll show fewer titles like this.");
+      }
+    } catch (err) {
+      setUserRating(previousRating);
+      toast.error('Failed to save reaction');
+    }
+
     setTimeout(() => { setShowRating(false); setRatingFeedback(''); }, 2500);
   };
 
