@@ -115,21 +115,28 @@ const Browse = () => {
                             <AnimatePresence>
                                 {showFilters && (
                                     <motion.div 
-                                        className="genre-dropdown"
-                                        style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.1)' }}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 10 }}
+                                        className="genre-panel"
+                                        style={{ background: '#121214' }}
+                                        initial={{ x: '100%' }}
+                                        animate={{ x: 0 }}
+                                        exit={{ x: '100%' }}
+                                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                                     >
-                                        <div className="genre-grid">
+                                        <div className="panel-header">
+                                            <h3>Filter by Genre</h3>
+                                            <button className="close-panel" onClick={() => setShowFilters(false)}>
+                                                <X size={20} />
+                                            </button>
+                                        </div>
+                                        <div className="genre-grid-vertical">
                                             <button 
-                                                className={!selectedGenre ? 'active' : ''} 
+                                                className={`genre-btn ${!selectedGenre ? 'active' : ''}`} 
                                                 onClick={() => handleGenreSelect('')}
                                             >All Genres</button>
                                             {genres.map(genre => (
                                                 <button 
                                                     key={genre.id}
-                                                    className={selectedGenre == genre.id ? 'active' : ''}
+                                                    className={`genre-btn ${selectedGenre == genre.id ? 'active' : ''}`}
                                                     onClick={() => handleGenreSelect(genre.id)}
                                                 >
                                                     {genre.name}
@@ -241,40 +248,67 @@ const Browse = () => {
                     color: var(--primary);
                 }
                 
-                .genre-dropdown {
-                    position: absolute;
-                    top: 100%;
+                .genre-panel {
+                    position: fixed;
+                    top: 0;
                     right: 0;
-                    margin-top: 1rem;
-                    padding: 1.5rem;
-                    width: 400px;
-                    z-index: 100;
-                    border-radius: var(--radius-md);
-                    box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+                    width: 320px;
+                    height: 100vh;
+                    z-index: 10000;
+                    padding: 2rem;
+                    box-shadow: -10px 0 50px rgba(0,0,0,0.8);
+                    border-left: 1px solid var(--border-light);
+                    display: flex;
+                    flex-direction: column;
                 }
                 
-                .genre-grid {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 0.8rem;
+                .panel-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 2.5rem;
                 }
                 
-                .genre-grid button {
-                    background: rgba(255,255,255,0.05);
+                .panel-header h3 { font-size: 1.2rem; color: white; }
+                .close-panel { background: none; border: none; color: var(--text-dim); cursor: pointer; }
+                .close-panel:hover { color: var(--primary); }
+                
+                .genre-grid-vertical {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.6rem;
+                    overflow-y: auto;
+                    padding-right: 0.5rem;
+                }
+                
+                .genre-btn {
+                    background: rgba(255,255,255,0.03);
                     border: 1px solid transparent;
-                    padding: 0.6rem;
-                    border-radius: 8px;
+                    padding: 1rem 1.2rem;
+                    border-radius: 12px;
                     color: var(--text-dim);
                     cursor: pointer;
-                    font-size: 0.85rem;
+                    font-size: 0.95rem;
                     text-align: left;
                     transition: var(--transition-fast);
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
                 }
                 
-                .genre-grid button:hover, .genre-grid button.active {
+                .genre-btn:hover, .genre-btn.active {
                     background: rgba(13, 202, 240, 0.1);
                     color: var(--primary);
                     border-color: var(--primary);
+                }
+
+                .genre-btn.active::after {
+                    content: '';
+                    width: 8px;
+                    height: 8px;
+                    background: var(--primary);
+                    border-radius: 50%;
+                    box-shadow: 0 0 10px var(--primary);
                 }
                 
                 .results-grid-container { margin-top: 3rem; }
@@ -322,7 +356,7 @@ const Browse = () => {
                     .browse-header { flex-direction: column; align-items: flex-start; }
                     .browse-controls { width: 100%; flex-wrap: wrap; }
                     .search-box-large { max-width: none; width: 100%; }
-                    .genre-dropdown { width: 100vw; left: -1.25rem; right: -1.25rem; position: fixed; bottom: 0; top: auto; border-radius: 20px 20px 0 0; }
+                    .genre-panel { width: 100vw; }
                 }
             `}</style>
         </div>

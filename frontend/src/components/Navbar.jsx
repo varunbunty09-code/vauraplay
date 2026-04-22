@@ -157,7 +157,11 @@ const Navbar = () => {
                     >
                       <div className="dropdown-header">
                         <h3>Notifications</h3>
-                        <button className="mark-read-btn" onClick={handleMarkAllRead}><Check size={14} /> Mark all read</button>
+                        {unreadCount > 0 && (
+                          <button className="mark-read-btn" onClick={handleMarkAllRead}>
+                            <Check size={14} /> Mark all read
+                          </button>
+                        )}
                       </div>
                       <div className="notification-list">
                         {notifications.length > 0 ? (
@@ -199,22 +203,30 @@ const Navbar = () => {
                     <motion.div
                       className="profile-dropdown"
                       style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.1)' }}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
                     >
-                      <div className="dropdown-header">
-                        <p className="username">{user?.username || 'User'}</p>
-                        <p className="email">{user?.email}</p>
+                      <div className="dropdown-header-premium">
+                        <div className="user-info-main">
+                          <p className="username">{user?.username || 'User'}</p>
+                          <p className="email">{user?.email}</p>
+                        </div>
                       </div>
-                      <ul>
-                        <li onClick={() => { navigate('/profile'); setProfileMenuOpen(false); }}><User size={16} /> Profile</li>
+                      <div className="dropdown-menu-list">
+                        <div className="menu-item" onClick={() => { navigate('/profile'); setProfileMenuOpen(false); }}>
+                          <User size={16} /> <span>Profile</span>
+                        </div>
                         {user?.role === 'admin' && (
-                          <li onClick={() => { navigate('/admin'); setProfileMenuOpen(false); }}><LayoutDashboard size={16} /> Admin Panel</li>
+                          <div className="menu-item" onClick={() => { navigate('/admin'); setProfileMenuOpen(false); }}>
+                            <LayoutDashboard size={16} /> <span>Admin Panel</span>
+                          </div>
                         )}
-                        <li className="divider"></li>
-                        <li onClick={handleLogout} className="logout"><LogOut size={16} /> Sign Out</li>
-                      </ul>
+                        <div className="menu-divider"></div>
+                        <div className="menu-item logout-item" onClick={handleLogout}>
+                          <LogOut size={16} /> <span>Sign Out</span>
+                        </div>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -264,6 +276,24 @@ const Navbar = () => {
           >
             <div className="mobile-header">
               <Logo to="/" onClick={() => setMobileMenuOpen(false)} />
+            </div>
+
+            <div className="mobile-search-container">
+              <div className="search-bar glass">
+                <Search size={18} />
+                <input
+                  type="text"
+                  placeholder="Search movies, TV shows..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearchCommit(e);
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                />
+              </div>
             </div>
 
             <ul className="mobile-links">
@@ -524,64 +554,55 @@ const Navbar = () => {
           font-style: italic;
         }
         
-        .profile-dropdown .dropdown-header {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 0.2rem;
+        .profile-dropdown .dropdown-header-premium {
+          padding: 1rem;
+          border-bottom: 1px solid var(--border-light);
+          background: rgba(255,255,255,0.02);
         }
 
-        .dropdown-header .username {
+        .user-info-main .username {
           font-weight: 700;
           color: white;
-          font-size: 1rem;
+          font-size: 0.95rem;
+          margin-bottom: 0.1rem;
         }
         
-        .dropdown-header .email {
-          font-size: 0.75rem;
+        .user-info-main .email {
+          font-size: 0.7rem;
           color: var(--text-muted);
           word-break: break-all;
         }
         
-        .profile-dropdown ul {
-          list-style: none;
-          padding: 0.5rem 0;
+        .dropdown-menu-list {
+          padding: 0.4rem;
         }
         
-        .profile-dropdown li {
-          padding: 0.7rem 1rem;
+        .menu-item {
+          padding: 0.7rem 0.8rem;
           display: flex;
           align-items: center;
           gap: 0.8rem;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           color: var(--text-dim);
           cursor: pointer;
           transition: var(--transition-fast);
-          border-radius: 8px;
+          border-radius: 6px;
         }
         
-        .profile-dropdown li a {
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            align-items: center;
-            gap: inherit;
-            width: 100%;
-        }
-
-        .profile-dropdown li:hover {
-          background: rgba(255,255,255,0.05);
+        .menu-item:hover {
+          background: rgba(13, 202, 240, 0.08);
           color: var(--primary);
         }
         
-        .profile-dropdown li.logout:hover {
+        .logout-item:hover {
+          background: rgba(244, 63, 94, 0.08);
           color: var(--accent);
         }
         
-        .divider {
+        .menu-divider {
           height: 1px;
           background: var(--border-light);
-          margin: 0.5rem 0;
-          padding: 0 !important;
+          margin: 0.4rem 0;
         }
         
         .mobile-toggle {
@@ -647,11 +668,22 @@ const Navbar = () => {
           display: none;
         }
         
+        .mobile-search-container {
+          padding: 0 0 2rem 0;
+        }
+        
+        .mobile-search-container .search-bar {
+          width: 100%;
+          background: rgba(255,255,255,0.05);
+          padding: 0.8rem 1.2rem;
+          border-radius: 12px;
+        }
+
         .mobile-links {
           list-style: none;
           display: flex;
           flex-direction: column;
-          gap: 2rem;
+          gap: 1.8rem;
         }
         
         .mobile-links a, .logout-mobile {
