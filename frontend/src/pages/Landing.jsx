@@ -337,25 +337,20 @@ const Landing = () => {
         .section-header-v2 h2 { font-size: 2.5rem; font-weight: 800; }
 
         .trending-section { 
-          padding: 12rem 0 6rem; 
+          padding: 3rem 0 4rem; 
           position: relative; 
           background: #000;
-          overflow: visible;
+          margin-top: -45px;
+          border-radius: 50% 50% 0 0 / 40px 40px 0 0;
+          border-top: 1px solid rgba(13, 202, 240, 0.3);
+          box-shadow: 0 -20px 50px rgba(0,0,0,0.5);
         }
         .trending-dome { 
-          position: absolute; top: -100px; left: 50%; transform: translateX(-50%); 
-          width: 80%; height: 200px; 
-          background: #000;
-          border-radius: 100% 100% 0 0;
-          box-shadow: 0 -20px 50px rgba(13, 202, 240, 0.15), inset 0 20px 40px rgba(0,0,0,0.8);
-          z-index: 1;
-          border: 1px solid rgba(13, 202, 240, 0.1);
-          border-bottom: none;
-        }
-        .trending-dome::after {
-          content: ''; position: absolute; inset: 0;
-          background: radial-gradient(circle at top, rgba(13, 202, 240, 0.1) 0%, transparent 70%);
-          border-radius: 100% 100% 0 0;
+          position: absolute; top: 0; left: 50%; transform: translateX(-50%); 
+          width: 60%; height: 100px; 
+          background: radial-gradient(circle at center, rgba(13, 202, 240, 0.2) 0%, transparent 70%); 
+          filter: blur(30px);
+          z-index: 0; pointer-events: none;
         }
         .trending-wrapper { position: relative; margin-top: 1rem; }
         .trending-scroll {
