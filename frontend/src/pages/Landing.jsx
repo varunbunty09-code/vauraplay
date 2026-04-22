@@ -108,6 +108,7 @@ const Landing = () => {
 
       {/* Trending Now Carousel */}
       <section className="trending-section">
+        <div className="trending-dome"></div>
         <div className="container">
           <div className="section-header-v2">
             <h2>Trending Now</h2>
@@ -322,7 +323,16 @@ const Landing = () => {
         .section-header-v2 { margin-bottom: 2rem; }
         .section-header-v2 h2 { font-size: 2.5rem; font-weight: 800; }
 
-        .trending-section { padding: 4rem 0; overflow: hidden; }
+        .trending-section { padding: 8rem 0; overflow: hidden; position: relative; background: #000; }
+        .trending-dome { 
+          position: absolute; top: 0; left: 50%; transform: translate(-50%, -70%); 
+          width: 140%; height: 500px; background: radial-gradient(50% 50% at 50% 50%, rgba(13, 202, 240, 0.1) 0%, transparent 100%); 
+          border-radius: 50%; filter: blur(60px); z-index: 0; pointer-events: none;
+        }
+        .trending-section::before {
+          content: ''; position: absolute; top: -2px; left: 0; width: 100%; height: 100px;
+          background: linear-gradient(to bottom, #000, transparent); z-index: 1;
+        }
         .trending-wrapper { position: relative; margin-top: 1rem; }
         .trending-scroll {
           display: flex; gap: 2.5rem; overflow-x: auto; scroll-behavior: smooth;
