@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Search, Bell, User, Play, LogOut, Menu, X, LayoutDashboard, Check } from 'lucide-react';
+import { Search, Bell, User, Play, LogOut, LayoutDashboard, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import Logo from './Logo';
@@ -216,8 +216,25 @@ const Navbar = () => {
           )}
 
           {user && (
-            <button className="mobile-toggle" onClick={() => setMobileMenuOpen(true)}>
-              <Menu size={24} />
+            <button 
+              className={`mobile-toggle ${mobileMenuOpen ? 'open' : ''}`} 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle Menu"
+            >
+              <div className="hamburger-box">
+                <motion.span 
+                  animate={mobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+                  className="hamburger-line"
+                />
+                <motion.span 
+                  animate={mobileMenuOpen ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
+                  className="hamburger-line"
+                />
+                <motion.span 
+                  animate={mobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+                  className="hamburger-line"
+                />
+              </div>
             </button>
           )}
         </div>
@@ -235,9 +252,6 @@ const Navbar = () => {
           >
             <div className="mobile-header">
               <Logo to="/" onClick={() => setMobileMenuOpen(false)} />
-              <button className="close-btn" onClick={() => setMobileMenuOpen(false)}>
-                <X size={28} />
-              </button>
             </div>
 
             <ul className="mobile-links">
@@ -565,15 +579,39 @@ const Navbar = () => {
           color: white;
           padding: 0.5rem;
           cursor: pointer;
+          z-index: 2100;
+          position: relative;
+        }
+
+        .hamburger-box {
+          width: 24px;
+          height: 18px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        .hamburger-line {
+          width: 100%;
+          height: 2px;
+          background-color: white;
+          border-radius: 4px;
+          display: block;
+        }
+        
+        .mobile-toggle.open .hamburger-line {
+          background-color: var(--primary);
         }
         
         /* Mobile Overlay Styles */
         .mobile-overlay {
           position: fixed;
           inset: 0;
-          background: var(--bg-main);
-          z-index: 2000;
-          padding: 2rem;
+          background: rgba(10, 10, 12, 0.92);
+          backdrop-filter: blur(25px);
+          -webkit-backdrop-filter: blur(25px);
+          z-index: 1500;
+          padding: 6rem 2rem 2rem;
           display: flex;
           flex-direction: column;
         }
@@ -583,13 +621,13 @@ const Navbar = () => {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 3rem;
+          position: absolute;
+          top: 25px;
+          left: 2rem;
         }
         
         .close-btn {
-          background: none;
-          border: none;
-          color: white;
-          cursor: pointer;
+          display: none;
         }
         
         .mobile-links {
