@@ -31,6 +31,12 @@ const Signup = () => {
   const recaptchaRef = React.useRef();
 
   useEffect(() => {
+    if (location.state?.email && !formData.email) {
+      setFormData(prev => ({ ...prev, email: location.state.email }));
+    }
+  }, [location.state]);
+
+  useEffect(() => {
     let interval;
     if (timer > 0) {
       interval = setInterval(() => {

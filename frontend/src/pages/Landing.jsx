@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Shield, Zap, Palette, ArrowRight, Star, X, Plus, ChevronRight, Monitor, Download, Users, Tv } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -10,7 +10,9 @@ const Landing = () => {
   const [trending, setTrending] = useState([]);
   const [activeFaq, setActiveFaq] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [ctaEmail, setCtaEmail] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
   const trendingRef = useRef(null);
 
   useEffect(() => {
@@ -31,6 +33,18 @@ const Landing = () => {
       const scrollTo = dir === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
       trendingRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
     }
+  };
+
+  const handleGetStarted = (e) => {
+    e.preventDefault();
+    if (!ctaEmail) {
+      return alert('Please enter your email address to get started.');
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(ctaEmail)) {
+      return alert('Please enter a valid email address.');
+    }
+    navigate('/signup', { state: { email: ctaEmail } });
   };
 
   const faqs = [
@@ -167,10 +181,16 @@ const Landing = () => {
 
           <div className="faq-cta">
             <p>Ready to experience cinematics? Enter your email to join VauraPlay today.</p>
-            <div className="cta-form">
-              <input type="email" placeholder="Email address" />
-              <Link to="/signup" className="btn-primary-large">Get Started Free <ChevronRight /></Link>
-            </div>
+            <form className="cta-form" onSubmit={handleGetStarted}>
+              <input 
+                type="email" 
+                placeholder="Email address" 
+                value={ctaEmail}
+                onChange={(e) => setCtaEmail(e.target.value)}
+                required
+              />
+              <button type="submit" className="btn-primary-large">Get Started Free <ChevronRight /></button>
+            </form>
           </div>
         </div>
       </section>
