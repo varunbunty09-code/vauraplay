@@ -257,7 +257,7 @@ const Landing = () => {
         .item-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 11000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .item-modal { background: #141414; width: 100%; max-width: 850px; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1); }
         .close-item-modal { position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(0,0,0,0.5); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; transition: 0.3s; }
-        .close-item-modal:hover { background: #e50914; transform: rotate(90deg); }
+        .close-item-modal:hover { background: var(--primary); color: #000; transform: rotate(90deg); }
         
         .item-modal-banner { height: 400px; background-size: cover; background-position: center; position: relative; }
         .item-modal-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #141414, transparent); }
