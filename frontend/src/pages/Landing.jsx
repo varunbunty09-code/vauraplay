@@ -9,6 +9,7 @@ const Landing = () => {
   const [showDemo, setShowDemo] = useState(false);
   const [trending, setTrending] = useState([]);
   const [activeFaq, setActiveFaq] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
   const location = useLocation();
   const trendingRef = useRef(null);
 
@@ -97,7 +98,7 @@ const Landing = () => {
             <button className="trending-arrow left" onClick={() => scrollTrending('left')}><ChevronRight style={{ transform: 'rotate(180deg)' }} /></button>
             <div className="trending-scroll" ref={trendingRef}>
               {trending.map((item, index) => (
-                <div key={item.id} className="trending-item">
+                <div key={item.id} className="trending-item" onClick={() => setSelectedItem(item)}>
                   <div className="rank-number">{index + 1}</div>
                   <div className="trending-card">
                     <img src={`https://image.tmdb.org/t/p/w500${item.poster_path}`} alt={item.title} />
@@ -212,7 +213,62 @@ const Landing = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {selectedItem && (
+          <motion.div
+            className="item-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedItem(null)}
+          >
+            <motion.div
+              className="item-modal glass"
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button className="close-item-modal" onClick={() => setSelectedItem(null)}><X size={24} /></button>
+              <div className="item-modal-banner" style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original${selectedItem.backdrop_path})` }}>
+                <div className="item-modal-gradient"></div>
+              </div>
+              <div className="item-modal-body">
+                <div className="item-modal-info">
+                  <h2>{selectedItem.title || selectedItem.name}</h2>
+                  <div className="item-meta">
+                    <span className="meta-tag">{selectedItem.release_date?.split('-')[0] || selectedItem.first_air_date?.split('-')[0]}</span>
+                    <span className="meta-tag">U/A 13+</span>
+                    <span className="meta-tag">{selectedItem.media_type === 'tv' ? 'TV Show' : 'Movie'}</span>
+                    <span className="meta-tag">Action</span>
+                  </div>
+                  <p className="item-desc">{selectedItem.overview}</p>
+                  <Link to="/signup" className="btn-primary modal-cta">Get Started <ChevronRight size={18} /></Link>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <style>{`
+        .item-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 11000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .item-modal { background: #141414; width: 100%; max-width: 850px; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1); }
+        .close-item-modal { position: absolute; top: 1.5rem; right: 1.5rem; background: rgba(0,0,0,0.5); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; transition: 0.3s; }
+        .close-item-modal:hover { background: #e50914; transform: rotate(90deg); }
+        
+        .item-modal-banner { height: 400px; background-size: cover; background-position: center; position: relative; }
+        .item-modal-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #141414, transparent); }
+        
+        .item-modal-body { padding: 3rem; margin-top: -80px; position: relative; z-index: 10; }
+        .item-modal-info h2 { font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; line-height: 1.1; }
+        .item-meta { display: flex; gap: 0.8rem; margin-bottom: 1.5rem; }
+        .meta-tag { background: rgba(255,255,255,0.1); padding: 0.3rem 0.8rem; border-radius: 4px; font-size: 0.9rem; font-weight: 600; color: #ccc; border: 1px solid rgba(255,255,255,0.1); }
+        .item-desc { font-size: 1.1rem; line-height: 1.6; color: #bbb; margin-bottom: 2.5rem; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .modal-cta { padding: 1.2rem 2.5rem; font-size: 1.2rem; font-weight: 700; width: fit-content; border-radius: 8px; }
         .landing-page { padding-top: 0; position: relative; background: #000; color: #fff; overflow-x: hidden; }
         
         .hero {
