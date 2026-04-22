@@ -337,22 +337,25 @@ const Landing = () => {
         .section-header-v2 h2 { font-size: 2.5rem; font-weight: 800; }
 
         .trending-section { 
-          padding: 10rem 0 6rem; 
+          padding: 12rem 0 6rem; 
           position: relative; 
           background: #000;
-          margin-top: -80px;
-          border-radius: 100% 100% 0 0 / 40px 40px 0 0;
-          border-top: 1px solid rgba(13, 202, 240, 0.2);
+          overflow: visible;
         }
         .trending-dome { 
-          position: absolute; top: 0; left: 50%; transform: translateX(-50%); 
-          width: 100%; height: 400px; 
-          background: radial-gradient(ellipse at top, rgba(13, 202, 240, 0.15) 0%, transparent 70%); 
-          z-index: 0; pointer-events: none;
+          position: absolute; top: -100px; left: 50%; transform: translateX(-50%); 
+          width: 80%; height: 200px; 
+          background: #000;
+          border-radius: 100% 100% 0 0;
+          box-shadow: 0 -20px 50px rgba(13, 202, 240, 0.15), inset 0 20px 40px rgba(0,0,0,0.8);
+          z-index: 1;
+          border: 1px solid rgba(13, 202, 240, 0.1);
+          border-bottom: none;
         }
-        .trending-section::before {
-          content: ''; position: absolute; top: -100px; left: 0; width: 100%; height: 100px;
-          background: linear-gradient(to top, #000, transparent); z-index: 1;
+        .trending-dome::after {
+          content: ''; position: absolute; inset: 0;
+          background: radial-gradient(circle at top, rgba(13, 202, 240, 0.1) 0%, transparent 70%);
+          border-radius: 100% 100% 0 0;
         }
         .trending-wrapper { position: relative; margin-top: 1rem; }
         .trending-scroll {
