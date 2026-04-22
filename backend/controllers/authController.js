@@ -301,7 +301,14 @@ exports.verifyLogin = async (req, res) => {
 // @route   POST /api/auth/forgot-password
 exports.forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const isHuman = await verifyRecaptcha(recaptchaToken);
+    if (!isHuman) {
+      return res.status(400).json({ message: 'reCAPTCHA verification failed. Please try again.' });
+    }
+
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'No account with that email' });
 
@@ -345,7 +352,13 @@ exports.resetPassword = async (req, res) => {
 
     if (!user) return res.status(400).json({ message: 'Invalid or expired reset token' });
 
-    const { password } = req.body;
+    const { password, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const isHuman = await verifyRecaptcha(recaptchaToken);
+    if (!isHuman) {
+      return res.status(400).json({ message: 'reCAPTCHA verification failed. Please try again.' });
+    }
 
     // Check if same as current password
     const isSameAsCurrent = await user.comparePassword(password);

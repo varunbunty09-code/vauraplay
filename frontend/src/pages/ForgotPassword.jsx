@@ -5,6 +5,7 @@ import { Mail, ArrowRight, ShieldCheck, Play, Loader2, ChevronLeft } from 'lucid
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -12,14 +13,18 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSent, setIsSent] = useState(false);
+    const [recaptchaToken, setRecaptchaToken] = useState('');
+    const recaptchaRef = React.useRef();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!email) return toast.error('Please enter your email');
+        if (!recaptchaToken) {
+            return toast.error('Please complete the reCAPTCHA');
+        }
 
         setIsLoading(true);
         try {
-            await axios.post(`${API_URL}/auth/forgot-password`, { email });
+            await axios.post(`${API_URL}/auth/forgot-password`, { email, recaptchaToken });
             setIsSent(true);
             toast.success('Reset link sent to your email');
         } catch (error) {
@@ -76,6 +81,15 @@ const ForgotPassword = () => {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
+                                    />
+                                </div>
+
+                                <div className="recaptcha-container" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                                    <ReCAPTCHA
+                                        ref={recaptchaRef}
+                                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                                        onChange={(token) => setRecaptchaToken(token)}
+                                        theme="dark"
                                     />
                                 </div>
 

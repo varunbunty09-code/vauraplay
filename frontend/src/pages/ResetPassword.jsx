@@ -5,6 +5,7 @@ import { Lock, ArrowRight, Play, Loader2, ArrowLeft, Mail } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -16,6 +17,8 @@ const ResetPassword = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [isVerifying, setIsVerifying] = useState(true);
+    const [recaptchaToken, setRecaptchaToken] = useState('');
+    const recaptchaRef = React.useRef();
 
     React.useEffect(() => {
         const verifyToken = async () => {
@@ -43,9 +46,13 @@ const ResetPassword = () => {
             return toast.error('Password must be at least 6 characters');
         }
 
+        if (!recaptchaToken) {
+            return toast.error('Please complete the reCAPTCHA');
+        }
+
         setIsLoading(true);
         try {
-            await axios.post(`${API_URL}/auth/reset-password/${token}`, { password });
+            await axios.post(`${API_URL}/auth/reset-password/${token}`, { password, recaptchaToken });
             toast.success('Password reset successful! Please login.');
             navigate('/login');
         } catch (error) {
@@ -98,6 +105,15 @@ const ResetPassword = () => {
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
+                            />
+                        </div>
+ 
+                        <div className="recaptcha-container" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                            <ReCAPTCHA
+                                ref={recaptchaRef}
+                                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                                onChange={(token) => setRecaptchaToken(token)}
+                                theme="dark"
                             />
                         </div>
 
