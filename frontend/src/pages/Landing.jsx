@@ -28,6 +28,10 @@ const Landing = () => {
     fetchTrending();
   }, []);
 
+  const handleImageError = (e) => {
+    e.target.src = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop';
+  };
+
   const scrollTrending = (dir) => {
     if (trendingRef.current) {
       const { scrollLeft, clientWidth } = trendingRef.current;
@@ -120,7 +124,11 @@ const Landing = () => {
                 <div key={item.id} className="trending-item" onClick={() => setSelectedItem(item)}>
                   <div className="rank-number">{index + 1}</div>
                   <div className="trending-card">
-                    <img src={`https://image.tmdb.org/t/p/w500${item.poster_path}`} alt={item.title} />
+                    <img 
+                      src={item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop'} 
+                      alt={item.title} 
+                      onError={handleImageError}
+                    />
                   </div>
                 </div>
               ))}
@@ -257,7 +265,12 @@ const Landing = () => {
               onClick={e => e.stopPropagation()}
             >
               <button className="close-item-modal" onClick={() => setSelectedItem(null)}><X size={24} /></button>
-              <div className="item-modal-banner" style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original${selectedItem.backdrop_path})` }}>
+              <div 
+                className="item-modal-banner" 
+                style={{ 
+                  backgroundImage: `url(${selectedItem.backdrop_path ? `https://image.tmdb.org/t/p/original${selectedItem.backdrop_path}` : 'https://images.unsplash.com/photo-1594908900066-3f47337549d8?q=80&w=2070&auto=format&fit=crop'})` 
+                }}
+              >
                 <div className="item-modal-gradient"></div>
               </div>
               <div className="item-modal-body">
