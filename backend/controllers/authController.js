@@ -5,7 +5,7 @@ const ActivityLog = require('../models/ActivityLog');
 const sendEmail = require('../utils/sendEmail');
 const { otpEmail, welcomeEmail, loginNotificationEmail, forgotPasswordEmail, emailChangeOtpEmail, deleteAccountOtpEmail, accountDeletedEmail } = require('../utils/emailTemplates');
 const { getLocationFromIP, formatLocation } = require('../utils/geoLocation');
-const verifyRecaptcha = require('../utils/recaptcha');
+const { verifyRecaptcha } = require('../utils/recaptcha');
 
 const getDeviceInfo = (userAgent) => {
   if (!userAgent) return 'Unknown Device';

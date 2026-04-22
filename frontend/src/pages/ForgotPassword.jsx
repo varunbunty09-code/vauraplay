@@ -48,13 +48,16 @@ const ForgotPassword = () => {
                 .circle { position: absolute; border-radius: 50%; filter: blur(100px); }
                 .circle-1 { width: 400px; height: 400px; top: -200px; left: -100px; background: rgba(13, 202, 240, 0.15); }
                 .circle-2 { width: 500px; height: 500px; bottom: -200px; right: -100px; background: rgba(99, 102, 241, 0.15); }
-                .auth-container { z-index: 10; position: relative; }
-                .success-icon { margin-bottom: 1.5rem; display: flex; justify-content: center; }
-                .success-state h3 { margin-bottom: 0.5rem; }
-                .success-state p { margin-bottom: 2rem; font-size: 0.9rem; }
-                .recaptcha-disclosure { font-size: 0.75rem; color: #555; margin-bottom: 1rem; text-align: center; line-height: 1.4; }
-                .auth-footer { text-align: center; margin-top: 2rem; }
-                .auth-btn { width: 100%; justify-content: center; display: flex; align-items: center; gap: 0.8rem; padding: 1.1rem; }
+                .auth-container { z-index: 10; position: relative; width: 100%; max-width: 480px; padding: 20px; }
+                .auth-card { padding: 3.5rem; border-radius: 12px; }
+                .success-icon { margin-bottom: 2rem; display: flex; justify-content: center; }
+                .success-state h3 { font-size: 2rem; margin-bottom: 1rem; }
+                .success-state p { margin-bottom: 2.5rem; font-size: 1rem; color: #aaa; }
+                .recaptcha-disclosure { font-size: 0.8rem; color: #555; margin-bottom: 1.5rem; text-align: center; line-height: 1.5; }
+                .auth-footer { text-align: center; margin-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem; }
+                .auth-btn { width: 100%; justify-content: center; display: flex; align-items: center; gap: 0.8rem; padding: 1.2rem; font-weight: 700; font-size: 1.1rem; }
+                .form-group label { margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; color: #888; }
+                .form-group input { padding: 1.2rem; background: rgba(255,255,255,0.05); }
             `}</style>
                 <motion.div
                     className="auth-card glass"

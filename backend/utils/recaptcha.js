@@ -26,4 +26,4 @@ const verifyRecaptcha = async (token) => {
     }
 };
 
-module.exports = verifyRecaptcha;
+module.exports = { verifyRecaptcha };
