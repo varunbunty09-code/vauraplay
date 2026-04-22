@@ -119,6 +119,7 @@ const ForgotPassword = () => {
                     </AnimatePresence>
 
                     <div className="auth-footer">
+                        <p className="recaptcha-disclosure">This page is protected by Google reCAPTCHA to ensure you're not a bot.</p>
                         <Link to="/login" className="back-link">
                             <ChevronLeft size={16} /> Back to login
                         </Link>

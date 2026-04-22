@@ -121,6 +121,12 @@ const ResetPassword = () => {
                             {isLoading ? <Loader2 className="spin" /> : <>Reset Password <ArrowRight size={18} /></>}
                         </button>
                     </form>
+                    <div className="auth-footer" style={{ marginTop: '2rem', textAlign: 'center' }}>
+                        <p className="recaptcha-disclosure">This page is protected by Google reCAPTCHA to ensure you're not a bot.</p>
+                        <Link to="/login" className="back-link" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.9rem', marginTop: '1rem' }}>
+                            <ArrowLeft size={16} /> Back to login
+                        </Link>
+                    </div>
                 </motion.div>
             </div>
             <style>{`
@@ -131,6 +137,7 @@ const ResetPassword = () => {
                 .account-indicator { display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(13, 202, 240, 0.1); padding: 0.5rem 1rem; border-radius: 30px; margin: 1rem 0; font-size: 0.85rem; color: var(--primary); border: 1px solid rgba(13, 202, 240, 0.2); width: fit-content; margin-left: auto; margin-right: auto; }
                 .account-indicator strong { color: white; }
                 form { margin-top: 1.5rem; }
+                .recaptcha-disclosure { font-size: 0.75rem; color: #555; margin-bottom: 1rem; text-align: center; line-height: 1.4; }
             `}</style>
         </div>
     );
