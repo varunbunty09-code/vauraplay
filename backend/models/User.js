@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  gender: {
+    type: String,
+    enum: ['', 'male', 'female', 'other', 'prefer_not_to_say'],
+    default: '',
+  },
   isVerified: {
     type: Boolean,
     default: false,

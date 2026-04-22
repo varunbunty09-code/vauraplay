@@ -7,7 +7,7 @@ const { cloudinary } = require('../config/cloudinary');
 // @route   PUT /api/users/profile
 exports.updateProfile = async (req, res) => {
   try {
-    const { username, preferences, avatar, phone } = req.body;
+    const { username, preferences, avatar, phone, gender } = req.body;
     const user = await User.findById(req.user._id);
 
     if (phone !== undefined) {
@@ -35,6 +35,10 @@ exports.updateProfile = async (req, res) => {
       user.avatar = avatar;
     }
 
+    if (gender !== undefined) {
+      user.gender = gender;
+    }
+
     if (preferences) {
       user.preferences = { ...user.preferences, ...preferences };
     }
@@ -55,6 +59,7 @@ exports.updateProfile = async (req, res) => {
         email: user.email,
         avatar: user.avatar,
         role: user.role,
+        gender: user.gender || '',
         preferences: user.preferences,
         phone: user.phone || '',
       },

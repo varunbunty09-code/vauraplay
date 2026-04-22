@@ -50,6 +50,7 @@ const Profile = () => {
     username: user?.username || '',
     countryCode: user?.phone?.match(/^\+\d+/)?.[0] || '+91',
     phoneNumber: user?.phone?.replace(/^\+\d+/, '') || '',
+    gender: user?.gender || '',
     autoPlay: user?.preferences?.autoPlay ?? true,
     playerColor: user?.preferences?.playerColor || '0dcaf0',
     emailNotifications: user?.preferences?.emailNotifications ?? true,
@@ -174,6 +175,9 @@ const Profile = () => {
           return;
         }
         payload.phone = `${formData.countryCode}${formData.phoneNumber}`;
+      }
+      if (field === 'gender') {
+        payload.gender = formData.gender;
       }
 
       const { data } = await axios.put(`${API_URL}/users/profile`, payload);
@@ -379,6 +383,36 @@ const Profile = () => {
                     <button type="button" className="btn-small" onClick={handleRequestEmailChange}>Update Email</button>
                   </div>
                   <small>Current: {user?.email}</small>
+                </div>
+
+                <div className="form-group">
+                  <label>Gender</label>
+                  <div className="gender-selector">
+                    {[
+                      { value: 'male', label: 'Male' },
+                      { value: 'female', label: 'Female' },
+                      { value: 'other', label: 'Other' },
+                      { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+                    ].map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className={`gender-option ${formData.gender === opt.value ? 'active' : ''}`}
+                        onClick={() => setFormData({ ...formData, gender: opt.value })}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="gender-action-row">
+                    {user?.gender && <small>Current: {user.gender === 'prefer_not_to_say' ? 'Prefer not to say' : user.gender.charAt(0).toUpperCase() + user.gender.slice(1)}</small>}
+                    <button 
+                      type="button" 
+                      className="btn-small" 
+                      onClick={() => handleUpdateProfile('gender')}
+                      disabled={!formData.gender}
+                    >Update Gender</button>
+                  </div>
                 </div>
               </motion.section>
             )}
@@ -765,6 +799,20 @@ const Profile = () => {
         
         .field-update-wrapper { display: flex; gap: 1rem; max-width: 800px; margin-bottom: 0.5rem; align-items: center; }
         .field-update-wrapper input { flex: 1; }
+
+        .gender-selector { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+        .gender-option {
+          padding: 0.6rem 1.2rem; border-radius: 25px; border: 1px solid var(--border-light);
+          background: rgba(255,255,255,0.03); color: var(--text-dim); font-size: 0.85rem;
+          font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+        }
+        .gender-option:hover { border-color: var(--primary); color: var(--text-main); background: rgba(13, 202, 240, 0.05); }
+        .gender-option.active { 
+          border-color: var(--primary); color: var(--primary); 
+          background: rgba(13, 202, 240, 0.1); box-shadow: 0 0 15px rgba(13, 202, 240, 0.1); 
+        }
+        .gender-action-row { display: flex; justify-content: space-between; align-items: center; }
+        .gender-action-row small { color: var(--text-muted); }
         
         .country-code-select {
           display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.05); 

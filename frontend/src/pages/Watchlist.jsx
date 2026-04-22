@@ -6,10 +6,12 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { GridSkeleton } from '../components/skeleton/MovieSkeleton';
 import MovieCard from '../components/MovieCard';
+import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const Watchlist = () => {
+  const { user, loading: authLoading } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,8 +27,14 @@ const Watchlist = () => {
   };
 
   useEffect(() => {
+    // Wait for auth to finish loading before fetching
+    if (authLoading) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     fetchWatchlist();
-  }, []);
+  }, [authLoading, user]);
 
   if (loading) return (
     <div className="watchlist-page container">

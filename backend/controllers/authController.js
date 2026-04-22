@@ -426,6 +426,7 @@ exports.getMe = async (req, res) => {
         email: user.email,
         avatar: user.avatar,
         role: user.role,
+        gender: user.gender || '',
         preferences: user.preferences,
         isVerified: user.isVerified,
         isActive: user.isActive,
