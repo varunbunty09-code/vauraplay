@@ -308,10 +308,9 @@ const Landing = () => {
         }
         
         .hero-content { position: relative; z-index: 10; max-width: 850px; margin-left: 8%; }
-        .badge { display: inline-flex; align-items: center; gap: 0.8rem; padding: 0.6rem 1.2rem; border-radius: 50px; font-size: 0.9rem; color: var(--primary); margin-bottom: 2rem; border: 1px solid rgba(13, 202, 240, 0.3); font-weight: 500; }
+        .badge { display: inline-flex; align-items: center; gap: 1rem; padding: 0.6rem 1.4rem; border-radius: 50px; font-size: 0.9rem; margin-bottom: 2rem; border: 1px solid rgba(13, 202, 240, 0.3); }
         .glass-v2 { background: rgba(13, 202, 240, 0.1); backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 0 10px rgba(13, 202, 240, 0.1); }
-        .badge-icon { filter: drop-shadow(0 0 5px var(--primary)); }
-        .badge strong { color: white; margin: 0 0.2rem; }
+        .badge-promo { color: #aaa; font-weight: 400; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 1rem; }
         .hero-title { font-size: 4.5rem; line-height: 1.1; margin-bottom: 2rem; font-weight: 900; letter-spacing: -2px; }
         .hero-title span { background: linear-gradient(to right, #0dcaf0, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .hero-subtitle { font-size: 1.4rem; margin-bottom: 3rem; color: #ccc; max-width: 650px; line-height: 1.5; }
