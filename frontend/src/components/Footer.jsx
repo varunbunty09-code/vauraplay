@@ -26,7 +26,7 @@ const Footer = () => {
       <footer className="main-footer">
          <div className="container">
             <div className="footer-top-cta">
-               <p>Questions? Call <a href="tel:000-800-919-1743">000-800-919-1743</a></p>
+               <p>Questions? Call <a href="tel:+917995901099">Coming Soon</a></p>
             </div>
 
             <div className="footer-grid-premium">

@@ -1,5 +1,5 @@
 # 🎬 VauraPlay — Premium Full-Stack Streaming Ecosystem
-
+> (Note: This is only for educational purposes & to check my coding skills , not to stream any copyrighted content , i respect copy right laws.)
 
 🌐 **Live**: [vauraplay.vercel.app](https://vauraplay.vercel.app)  
 🔗 **API**: [vauraplay.onrender.com](https://vauraplay.onrender.com/api/health)
