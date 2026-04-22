@@ -46,11 +46,11 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: 'reCAPTCHA verification failed. Please try again.' });
     }
 
-    // Check existing user
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    // Check existing user (Email or Phone)
+    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
       if (existingUser.email === email) return res.status(400).json({ message: 'Email already registered' });
-      return res.status(400).json({ message: 'Username already taken' });
+      if (existingUser.phone === phone) return res.status(400).json({ message: 'Mobile number already in use' });
     }
 
     if (!phone || phone.length < 10) {

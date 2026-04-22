@@ -130,13 +130,15 @@ const ResetPassword = () => {
                 </motion.div>
             </div>
             <style>{`
-                .auth-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #050507; }
+                .auth-container { width: 100%; max-width: 480px; padding: 20px; }
+                .auth-card { padding: 3.5rem; border-radius: 12px; }
                 .auth-header { position: relative; }
                 .back-btn { position: absolute; left: 0; top: 0; background: none; border: none; color: var(--text-dim); cursor: pointer; transition: 0.3s; }
                 .back-btn:hover { color: var(--primary); transform: translateX(-5px); }
                 .account-indicator { display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(13, 202, 240, 0.1); padding: 0.5rem 1rem; border-radius: 30px; margin: 1rem 0; font-size: 0.85rem; color: var(--primary); border: 1px solid rgba(13, 202, 240, 0.2); width: fit-content; margin-left: auto; margin-right: auto; }
                 .account-indicator strong { color: white; }
                 form { margin-top: 1.5rem; }
+                .auth-btn { width: 100%; justify-content: center; display: flex; align-items: center; gap: 0.8rem; padding: 1.1rem; font-weight: 700; }
                 .recaptcha-disclosure { font-size: 0.75rem; color: #555; margin-bottom: 1rem; text-align: center; line-height: 1.4; }
             `}</style>
         </div>
