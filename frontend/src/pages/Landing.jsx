@@ -336,15 +336,23 @@ const Landing = () => {
         .section-header-v2 { margin-bottom: 2rem; }
         .section-header-v2 h2 { font-size: 2.5rem; font-weight: 800; }
 
-        .trending-section { padding: 8rem 0; overflow: hidden; position: relative; background: #000; }
+        .trending-section { 
+          padding: 10rem 0 6rem; 
+          position: relative; 
+          background: #000;
+          margin-top: -80px;
+          border-radius: 100% 100% 0 0 / 40px 40px 0 0;
+          border-top: 1px solid rgba(13, 202, 240, 0.2);
+        }
         .trending-dome { 
-          position: absolute; top: 0; left: 50%; transform: translate(-50%, -70%); 
-          width: 140%; height: 500px; background: radial-gradient(50% 50% at 50% 50%, rgba(13, 202, 240, 0.1) 0%, transparent 100%); 
-          border-radius: 50%; filter: blur(60px); z-index: 0; pointer-events: none;
+          position: absolute; top: 0; left: 50%; transform: translateX(-50%); 
+          width: 100%; height: 400px; 
+          background: radial-gradient(ellipse at top, rgba(13, 202, 240, 0.15) 0%, transparent 70%); 
+          z-index: 0; pointer-events: none;
         }
         .trending-section::before {
-          content: ''; position: absolute; top: -2px; left: 0; width: 100%; height: 100px;
-          background: linear-gradient(to bottom, #000, transparent); z-index: 1;
+          content: ''; position: absolute; top: -100px; left: 0; width: 100%; height: 100px;
+          background: linear-gradient(to top, #000, transparent); z-index: 1;
         }
         .trending-wrapper { position: relative; margin-top: 1rem; }
         .trending-scroll {
