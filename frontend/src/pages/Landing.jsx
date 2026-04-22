@@ -342,8 +342,8 @@ const Landing = () => {
           background: #000;
           margin-top: -45px;
           border-radius: 50% 50% 0 0 / 40px 40px 0 0;
-          border-top: 1px solid rgba(13, 202, 240, 0.3);
-          box-shadow: 0 -20px 50px rgba(0,0,0,0.5);
+          border-top: 2px solid rgba(13, 202, 240, 0.4);
+          box-shadow: 0 -25px 60px rgba(0,0,0,0.8);
         }
         .trending-dome { 
           position: absolute; top: 0; left: 50%; transform: translateX(-50%); 
