@@ -28,6 +28,16 @@ import ResetPassword from './pages/ResetPassword';
 import HelpCenter from './pages/HelpCenter';
 import TermsOfUse from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import InvestorRelations from './pages/InvestorRelations';
+import SpeedTest from './pages/SpeedTest';
+import Jobs from './pages/Jobs';
+import CookiePreferences from './pages/CookiePreferences';
+import LegalNotices from './pages/LegalNotices';
+import WaysToWatch from './pages/WaysToWatch';
+import CorporateInfo from './pages/CorporateInfo';
+import OriginalsInfo from './pages/OriginalsInfo';
+import MediaCentre from './pages/MediaCentre';
+import ContactUs from './pages/ContactUs';
 import NotFound from './pages/NotFound';
 
 // ─── Route Guards ──────────────────────────────────────────────
@@ -86,6 +96,16 @@ function App() {
                 <Route path="/help" element={<HelpCenter />} />
                 <Route path="/terms" element={<TermsOfUse />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/investors" element={<InvestorRelations />} />
+                <Route path="/speedtest" element={<SpeedTest />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/cookies" element={<CookiePreferences />} />
+                <Route path="/legal" element={<LegalNotices />} />
+                <Route path="/ways-to-watch" element={<WaysToWatch />} />
+                <Route path="/corporate" element={<CorporateInfo />} />
+                <Route path="/originals" element={<OriginalsInfo />} />
+                <Route path="/media" element={<MediaCentre />} />
+                <Route path="/contact" element={<ContactUs />} />
                 
                 {/* ── Private Routes (redirects to Landing if logged out) ── */}
                 <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
