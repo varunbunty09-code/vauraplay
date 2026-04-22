@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, ArrowRight, ShieldCheck, Play, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const Login = () => {
   const { login, verifyLogin, resendOTP } = useAuth();
@@ -19,8 +20,10 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    otp: ''
+    otp: '',
+    recaptchaToken: ''
   });
+  const recaptchaRef = React.useRef();
 
   useEffect(() => {
     let interval;
@@ -42,12 +45,15 @@ const Login = () => {
     }
     setFormData({ ...formData, [name]: value });
   };
-
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.recaptchaToken) {
+      setLoading(false);
+      return toast.error('Please complete the reCAPTCHA');
+    }
     setLoading(true);
     try {
-      const res = await login(formData.email, formData.password);
+      const res = await login(formData.email, formData.password, formData.recaptchaToken);
       if (res.requiresOTP) {
         setUserId(res.userId);
         setStep(2);
@@ -139,6 +145,15 @@ const Login = () => {
                   placeholder="Enter Password"
                   value={formData.password}
                   onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="recaptcha-container">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                  onChange={(token) => setFormData({ ...formData, recaptchaToken: token })}
+                  theme="dark"
                 />
               </div>
 
@@ -349,6 +364,12 @@ const Login = () => {
           animation: spin 1s linear infinite;
         }
         
+        .recaptcha-container {
+          margin-bottom: 1.5rem;
+          display: flex;
+          justify-content: center;
+        }
+
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }

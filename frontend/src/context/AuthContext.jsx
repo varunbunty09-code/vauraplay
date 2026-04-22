@@ -32,9 +32,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (email, password, recaptchaToken) => {
     try {
-      const { data } = await axios.post(`${API_URL}/auth/login`, { email, password });
+      const { data } = await axios.post(`${API_URL}/auth/login`, { email, password, recaptchaToken });
       if (data.requiresOTP) {
         return { requiresOTP: true, userId: data.userId };
       }
@@ -61,9 +61,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (username, email, password, phone) => {
+  const signup = async (username, email, password, phone, recaptchaToken) => {
     try {
-      const { data } = await axios.post(`${API_URL}/auth/signup`, { username, email, password, phone });
+      const { data } = await axios.post(`${API_URL}/auth/signup`, { username, email, password, phone, recaptchaToken });
       return data; // Should return userId for verification step
     } catch (error) {
       toast.error(error.response?.data?.message || 'Signup failed');

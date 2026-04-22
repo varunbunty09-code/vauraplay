@@ -83,8 +83,18 @@ const SpeedTest = () => {
                 
                 .meter-ring {
                     width: 250px; height: 250px; border-radius: 50%; border: 8px solid #222;
-                    border-top-color: var(--primary); display: flex; align-items: center; justify-content: center;
-                    position: relative; animation: ${testing ? 'spin 2s linear infinite' : 'none'};
+                    display: flex; align-items: center; justify-content: center;
+                    position: relative;
+                }
+                
+                .meter-ring::after {
+                    content: '';
+                    position: absolute;
+                    inset: -8px;
+                    border-radius: 50%;
+                    border: 8px solid transparent;
+                    border-top-color: var(--primary);
+                    animation: ${testing ? 'spin 2s linear infinite' : 'none'};
                 }
                 
                 @keyframes spin { 100% { transform: rotate(360deg); } }

@@ -5,6 +5,7 @@ const ActivityLog = require('../models/ActivityLog');
 const sendEmail = require('../utils/sendEmail');
 const { otpEmail, welcomeEmail, loginNotificationEmail, forgotPasswordEmail, emailChangeOtpEmail, deleteAccountOtpEmail, accountDeletedEmail } = require('../utils/emailTemplates');
 const { getLocationFromIP, formatLocation } = require('../utils/geoLocation');
+const verifyRecaptcha = require('../utils/recaptcha');
 
 const getDeviceInfo = (userAgent) => {
   if (!userAgent) return 'Unknown Device';
@@ -37,7 +38,13 @@ const getClientIp = (req) => {
 // @route   POST /api/auth/signup
 exports.signup = async (req, res) => {
   try {
-    const { username, email, password, phone } = req.body;
+    const { username, email, password, phone, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const isHuman = await verifyRecaptcha(recaptchaToken);
+    if (!isHuman) {
+      return res.status(400).json({ message: 'reCAPTCHA verification failed. Please try again.' });
+    }
 
     // Check existing user
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -146,7 +153,13 @@ exports.verifySignup = async (req, res) => {
 // @route   POST /api/auth/login
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const isHuman = await verifyRecaptcha(recaptchaToken);
+    if (!isHuman) {
+      return res.status(400).json({ message: 'reCAPTCHA verification failed. Please try again.' });
+    }
 
     const user = await User.findOne({ email }).select('+password');
     if (!user) return res.status(401).json({ message: 'Invalid email or password' });

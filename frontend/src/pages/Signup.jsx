@@ -6,6 +6,7 @@ import { Mail, Lock, User, ArrowRight, ShieldCheck, Play, RefreshCw, Phone, Glob
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
 import { countryCodes } from '../constants/countries';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const Signup = () => {
   const { signup, verifySignup, resendOTP } = useAuth();
@@ -24,8 +25,10 @@ const Signup = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    otp: ''
+    otp: '',
+    recaptchaToken: ''
   });
+  const recaptchaRef = React.useRef();
 
   useEffect(() => {
     let interval;
@@ -59,10 +62,14 @@ const Signup = () => {
     if (!formData.phone || !formData.phone.trim()) {
       return toast.error('Please enter your phone number');
     }
+    if (!formData.recaptchaToken) {
+      setLoading(false);
+      return toast.error('Please complete the reCAPTCHA');
+    }
     setLoading(true);
     try {
       const fullPhone = `${formData.countryCode}${formData.phone.trim()}`;
-      const res = await signup(formData.username, formData.email, formData.password, fullPhone);
+      const res = await signup(formData.username, formData.email, formData.password, fullPhone, formData.recaptchaToken);
       setUserId(res.userId);
       setStep(2);
       setTimer(60);
@@ -213,6 +220,15 @@ const Signup = () => {
                 </div>
               </div>
 
+              <div className="recaptcha-container">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                  onChange={(token) => setFormData({ ...formData, recaptchaToken: token })}
+                  theme="dark"
+                />
+              </div>
+
               <button type="submit" className="btn-primary auth-btn" disabled={loading}>
                 {loading ? <RefreshCw className="spin" size={18} /> : <>Create Account <ArrowRight size={18} /></>}
               </button>
@@ -297,6 +313,12 @@ const Signup = () => {
         .globe-icon { color: var(--text-muted); }
         .text-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 600; transition: var(--transition-fast); }
         .text-btn:disabled { color: var(--text-muted); cursor: not-allowed; opacity: 0.8; }
+        .recaptcha-container {
+          margin-bottom: 1.5rem;
+          display: flex;
+          justify-content: center;
+        }
+
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
