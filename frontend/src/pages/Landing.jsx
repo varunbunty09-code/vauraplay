@@ -16,7 +16,7 @@ const Landing = () => {
     const fetchTrending = async () => {
       try {
         const data = await tmdbService.getTrending('movie', 'week');
-        setTrending(data.results?.slice(0, 10) || []);
+        setTrending(Array.isArray(data) ? data.slice(0, 10) : []);
       } catch (err) {
         console.error('Failed to fetch trending for landing');
       }
@@ -66,6 +66,7 @@ const Landing = () => {
             <div className="hero-btns">
               <Link to="/signup" state={{ from: location.state?.from }} className="btn-primary">Get Started Free <ArrowRight size={18} /></Link>
               <button onClick={() => setShowDemo(true)} className="btn-outline">Watch Demo</button>
+              <Link to="/login" className="btn-outline">Sign In</Link>
             </div>
 
             <div className="hero-stats">
@@ -149,7 +150,7 @@ const Landing = () => {
                 </div>
                 <AnimatePresence>
                   {activeFaq === i && (
-                    <motion.div 
+                    <motion.div
                       className="faq-answer"
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
@@ -164,10 +165,10 @@ const Landing = () => {
           </div>
 
           <div className="faq-cta">
-            <p>Ready to watch? Enter your email to create or restart your membership.</p>
+            <p>Ready to experience cinematics? Enter your email to join VauraPlay today.</p>
             <div className="cta-form">
               <input type="email" placeholder="Email address" />
-              <Link to="/signup" className="btn-primary-large">Get Started <ChevronRight /></Link>
+              <Link to="/signup" className="btn-primary-large">Get Started Free <ChevronRight /></Link>
             </div>
           </div>
         </div>
@@ -202,8 +203,8 @@ const Landing = () => {
               </div>
               <div className="demo-info">
                 <div className="demo-text-v2">
-                   <h3>VauraPlay Platform Showcase</h3>
-                   <p>Discover how VauraPlay empowers creators to build the next generation of streaming websites.</p>
+                  <h3>VauraPlay Platform Showcase</h3>
+                  <p>Discover how VauraPlay empowers creators to build the next generation of streaming websites.</p>
                 </div>
                 <Link to="/signup" state={{ from: location.state?.from }} className="btn-primary" onClick={() => setShowDemo(false)}>Join Now</Link>
               </div>
@@ -292,11 +293,11 @@ const Landing = () => {
         .faq-answer { overflow: hidden; padding: 0 2rem 2rem; font-size: 1.4rem; line-height: 1.5; color: white; border-top: 1px solid #000; padding-top: 2rem; }
 
         .faq-cta { text-align: center; margin-top: 5rem; }
-        .faq-cta p { font-size: 1.3rem; margin-bottom: 1.5rem; }
-        .cta-form { display: flex; gap: 0.5rem; justify-content: center; max-width: 800px; margin: 0 auto; }
-        .cta-form input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3); padding: 1.5rem; border-radius: 4px; color: white; font-size: 1.1rem; }
-        .btn-primary-large { background: #e50914; color: white; padding: 0 2.5rem; border-radius: 4px; display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem; font-weight: 600; text-decoration: none; transition: 0.2s; }
-        .btn-primary-large:hover { background: #f40612; }
+        .faq-cta p { font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--text-dim); }
+        .cta-form { display: flex; gap: 0.5rem; justify-content: center; max-width: 600px; margin: 0 auto; }
+        .cta-form input { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); padding: 1.2rem; border-radius: 4px; color: white; font-size: 1rem; outline: none; }
+        .btn-primary-large { background: var(--primary); color: black; padding: 0 1.8rem; border-radius: 4px; display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; font-weight: 700; text-decoration: none; transition: 0.2s; }
+        .btn-primary-large:hover { background: #0bb5d8; transform: translateY(-2px); }
 
         .demo-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .demo-modal { background: #141414; width: 100%; max-width: 1000px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
