@@ -199,6 +199,7 @@ const Login = () => {
         </AnimatePresence>
 
         <div className="auth-footer">
+          <p className="recaptcha-disclosure">This page is protected by Google reCAPTCHA to ensure you're not a bot.</p>
           Don't have an account? <Link to="/signup" state={{ from: location.state?.from }}>Join VauraPlay</Link>
         </div>
       </motion.div>
@@ -323,6 +324,13 @@ const Login = () => {
           text-align: center;
           font-size: 0.9rem;
           color: var(--text-muted);
+        }
+        
+        .recaptcha-disclosure {
+          font-size: 0.75rem;
+          color: #555;
+          margin-bottom: 1.2rem;
+          line-height: 1.4;
         }
         
         .auth-footer a {

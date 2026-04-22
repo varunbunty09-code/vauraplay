@@ -119,8 +119,8 @@ const Signup = () => {
       >
         <div className="auth-header">
           <Logo to="/landing" className="logo" />
-          <h2>{step === 1 ? 'Join the Future' : 'Verify Account'}</h2>
-          <p>{step === 1 ? 'Create your premium account today' : 'Check your inbox for the code'}</p>
+          <h2>{step === 1 ? 'Join VauraPlay' : 'Security Verification'}</h2>
+          <p>{step === 1 ? 'Create your account to start watching now.' : 'Check your inbox for the verification code.'}</p>
         </div>
 
         <AnimatePresence mode="wait">
@@ -271,6 +271,7 @@ const Signup = () => {
         </AnimatePresence>
 
         <div className="auth-footer">
+          <p className="recaptcha-disclosure">This page is protected by Google reCAPTCHA to ensure you're not a bot.</p>
           Already have an account? <Link to="/login" state={{ from: location.state?.from }}>Sign In</Link>
         </div>
       </motion.div>
@@ -293,7 +294,20 @@ const Signup = () => {
         .input-group input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-light); padding: 1rem 1.2rem; border-radius: var(--radius-sm); color: white; font-size: 1rem; transition: var(--transition-fast); }
         .input-group input:focus { border-color: var(--primary); background: rgba(255, 255, 255, 0.08); outline: none; box-shadow: 0 0 15px var(--primary-glow); }
         .auth-btn { width: 100%; justify-content: center; margin-top: 1rem; padding: 1.1rem; }
-        .auth-footer { margin-top: 2rem; text-align: center; font-size: 0.9rem; color: var(--text-muted); }
+        .auth-footer {
+          margin-top: 2rem;
+          text-align: center;
+          font-size: 0.9rem;
+          color: var(--text-muted);
+        }
+
+        .recaptcha-disclosure {
+          font-size: 0.75rem;
+          color: #555;
+          margin-bottom: 1.2rem;
+          line-height: 1.4;
+        }
+        
         .auth-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
         .otp-input { text-align: center; letter-spacing: 12px; font-size: 1.5rem !important; font-weight: 700; }
         .country-select { background: transparent; border: none; padding: 0; color: white; cursor: pointer; font-weight: 600; flex: 1; }

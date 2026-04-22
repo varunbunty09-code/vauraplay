@@ -52,6 +52,8 @@ const ForgotPassword = () => {
                 .success-icon { margin-bottom: 1.5rem; display: flex; justify-content: center; }
                 .success-state h3 { margin-bottom: 0.5rem; }
                 .success-state p { margin-bottom: 2rem; font-size: 0.9rem; }
+                .recaptcha-disclosure { font-size: 0.75rem; color: #555; margin-bottom: 1rem; text-align: center; line-height: 1.4; }
+                .auth-footer { text-align: center; margin-top: 2rem; }
             `}</style>
                 <motion.div
                     className="auth-card glass"

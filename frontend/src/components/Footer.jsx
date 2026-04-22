@@ -70,7 +70,7 @@ const Footer = () => {
             </div>
 
             <div className="footer-copyright">
-               <p>&copy; {new Date().getFullYear()} VauraPlay. All rights reserved. This site is protected by reCAPTCHA.</p>
+               <p>&copy; {new Date().getFullYear()} VauraPlay. All rights reserved. This site is protected by Google reCAPTCHA.</p>
             </div>
          </div>
 
